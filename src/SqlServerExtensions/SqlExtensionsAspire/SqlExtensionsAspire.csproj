@@ -5,10 +5,37 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <WarningsAsErrors>false</WarningsAsErrors>
+    
+    <!-- NuGet Package Properties -->
+    <PackageId>SqlExtensionsAspire</PackageId>
+    <Version>93.2025.208.1818</Version>
+    <Authors>Ignat Andrei</Authors>
+    <Product>SQL Extensions for .NET Aspire</Product>
+    <Description>Extension methods for .NET Aspire SQL Server hosting that add SQL command execution, script execution, and SQLPad integration capabilities.</Description>
+    <Summary>SQL Server extensions for .NET Aspire hosting with command execution and database management tools.</Summary>
+    <PackageTags>aspire;sqlserver;database;hosting;extensions;sqlpad;sql;netaspire</PackageTags>
+    <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Initial release with SQL command execution, script execution, and SQLPad integration for .NET Aspire.</PackageReleaseNotes>
+    <Copyright>Copyright © 2025</Copyright>
+    <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.2.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
