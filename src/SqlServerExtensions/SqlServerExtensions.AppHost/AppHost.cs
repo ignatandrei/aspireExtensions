@@ -22,7 +22,7 @@ var sqlserver = builder.AddSqlServer("sqlserver", paramPass, 1433)
     ;
 
 var db = sqlserver.AddDatabase("DepEmp")
-    .WithSqlPadViewerForDB(sqlserver)
+    .WithSqlPadViewerForDB(sqlserver)    
     .WithSqlCommand("delete","delete from Employee")
     .ExecuteSqlServerScripts(DBFiles.FilesToCreate);
 

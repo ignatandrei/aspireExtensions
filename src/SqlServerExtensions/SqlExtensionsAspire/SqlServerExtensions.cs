@@ -89,42 +89,38 @@ public  static partial class SqlServerExtensions
     public static IResourceBuilder<SqlServerDatabaseResource> WithSqlPadViewerForDB(this IResourceBuilder<SqlServerDatabaseResource> db, IResourceBuilder<SqlServerServerResource> sqlserver)
     {
         var builder = db.ApplicationBuilder;
-
+        var sqlServerName = sqlserver.Resource.Name;
+        // Use the ParameterResource directly for environment variables instead of .Value
+        var passwordParameter = sqlserver.Resource.PasswordParameter;
         // Create SQLPad container with pre-configured connections
         var sqlpad = builder
-    .AddContainer("sqlpad", "sqlpad/sqlpad:latest")
-    .WithEndpoint(5600, 3000, "http")
-    
-    // Disable authentication for development ease
-    .WithEnvironment("SQLPAD_AUTH_DISABLED", "true")
-    .WithEnvironment("SQLPAD_AUTH_DISABLED_DEFAULT_ROLE", "Admin")
-    .WithEnvironment("SQLPAD_ADMIN", "admin@sqlpad.com")
-
-    .WithEnvironment("SQLPAD_ADMIN_PASSWORD", "admin")
-    
-    // Configure connection to the target database
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__name", sqlserver.Resource.Name)
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__driver", "sqlserver")
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__host", sqlserver.Resource.Name)
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__database", db.Resource.Name)
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__username", "sa")
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__password", sqlserver.Resource.PasswordParameter.Value)
-
-    // Configure connection to the master database for server-level operations
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__name", "SqlMaster")
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__driver", "sqlserver")
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__host", sqlserver.Resource.Name)
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__database", "master")
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__username", "sa")
-    .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__password", sqlserver.Resource.PasswordParameter.Value)
-    
-    // Ensure SQLPad starts after the database and server are ready
-    .WithParentRelationship(db)
-    .WaitFor(db)
-    .WaitFor(sqlserver)
-    ;
+            .AddContainer("sqlpad", "sqlpad/sqlpad:latest")
+            .WithEndpoint(5600, 3000, "http")
+            // Disable authentication for development ease
+            .WithEnvironment("SQLPAD_AUTH_DISABLED", "true")
+            .WithEnvironment("SQLPAD_AUTH_DISABLED_DEFAULT_ROLE", "Admin")
+            .WithEnvironment("SQLPAD_ADMIN", "admin@sqlpad.com")
+            .WithEnvironment("SQLPAD_ADMIN_PASSWORD", "admin")
+            // Configure connection to the target database
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__name", sqlServerName)
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__driver", "sqlserver")
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__host", sqlServerName)
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__database", db.Resource.Name)
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__username", "sa")
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo__password", passwordParameter)
+            // Configure connection to the master database for server-level operations
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__name", "SqlMaster")
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__driver", "sqlserver")
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__host", sqlServerName)
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__database", "master")
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__username", "sa")
+            .WithEnvironment("SQLPAD_CONNECTIONS__sqlserverdemo1__password", passwordParameter)
+            // Ensure SQLPad starts after the database and server are ready
+            .WithParentRelationship(db)
+            .WaitFor(db)
+            .WaitFor(sqlserver)
+            ;
         return db;
-
     }
 
 
@@ -147,15 +143,10 @@ public  static partial class SqlServerExtensions
     public static IResourceBuilder<SqlServerDatabaseResource> ExecuteSqlServerScripts(this IResourceBuilder<SqlServerDatabaseResource> db, params IEnumerable<string> sqlScripts)
     {
         var builder = db.ApplicationBuilder;
-        
+
         // Subscribe to the resource ready event to execute scripts when database is available
-        builder.Eventing.Subscribe<ResourceReadyEvent>(async (ev, ct) =>
+        db.OnResourceReady(async (dbRes, ev, ct) =>
         {
-            // Only process events for SQL Server database resources
-            if (ev.Resource is not SqlServerDatabaseResource dbRes) return;
-            // Only process events for our specific database resource
-            if (db.Resource != dbRes) return;
-            
             // Get the database connection string
             var cn = await dbRes.ConnectionStringExpression.GetValueAsync(ct);
             if (cn == null) return;

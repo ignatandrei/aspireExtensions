@@ -4,11 +4,11 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <WarningsAsErrors>false</WarningsAsErrors>
+	  <WarningsAsErrors>true</WarningsAsErrors>
     
     <!-- NuGet Package Properties -->
     <PackageId>SqlExtensionsAspire</PackageId>
-    <Version>93.2025.208.1818</Version>
+    <Version>94.2025.802.1154</Version>
     <Authors>Ignat Andrei</Authors>
     <Product>SQL Extensions for .NET Aspire</Product>
     <Description>Extension methods for .NET Aspire SQL Server hosting that add SQL command execution, script execution, and SQLPad integration capabilities.</Description>
@@ -30,7 +30,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.2.0" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.4.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
   </ItemGroup>
 
