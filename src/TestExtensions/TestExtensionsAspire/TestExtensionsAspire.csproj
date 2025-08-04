@@ -4,12 +4,48 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	  <WarningsAsErrors>true</WarningsAsErrors>
+	  <IsPackable>true</IsPackable>
+    <!-- NuGet Package Properties -->
+    <PackageId>TestExtensionsAspire</PackageId>
+    <Version>94.2025.804.1054</Version>
+    <Title>Test Extensions for .NET Aspire</Title>
+	<Authors>Ignat Andrei</Authors>
+	<Description>Extension methods for .NET Aspire that add test project integration capabilities to your distributed applications. Provides easy integration of test projects as resources with command execution, logging, and explicit start control.</Description>
+    <PackageDescription>Extension methods for .NET Aspire that add test project integration capabilities to your distributed applications. Provides easy integration of test projects as resources with command execution, logging, and explicit start control.</PackageDescription>
+    <Copyright>Copyright (c) 2025 </Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>aspire;dotnet;testing;distributed-applications;test-integration;aspire-extensions</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Initial release with test project integration for .NET Aspire applications.</PackageReleaseNotes>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    
+    <!-- Documentation -->
+    <!--<GenerateDocumentationFile>true</GenerateDocumentationFile>-->
+    <!--<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>-->
+    
+    <!-- Source Link -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    
   </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0"  />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
 
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"  />
+    <!--<None Include="LICENSE.txt" Pack="true" PackagePath="\" />
+    <None Include="icon.png" Pack="true" PackagePath="\" Condition="Exists('icon.png')" />-->
+  </ItemGroup>
 
 </Project>

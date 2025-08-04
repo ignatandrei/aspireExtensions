@@ -2,8 +2,27 @@
 using Microsoft.Extensions.Logging;
 namespace TestExtensionsAspire;
 
+/// <summary>
+/// Extension methods for adding test projects to .NET Aspire distributed applications.
+/// </summary>
 public static class RunTests
 {
+    /// <summary>
+    /// Adds a test project as a resource to the distributed application builder with custom test commands.
+    /// The test project is configured with explicit start, meaning it won't run automatically when the application starts.
+    /// </summary>
+    /// <typeparam name="TProject">The project metadata type that implements <see cref="IProjectMetadata"/>.</typeparam>
+    /// <param name="builder">The distributed application builder.</param>
+    /// <param name="name">The name for the test resource.</param>
+    /// <param name="arguments">Array of test command arguments (e.g., "run --filter-trait 'Category=UnitTest'").</param>
+    /// <returns>An <see cref="IResourceBuilder{ProjectResource}"/> that can be further configured.</returns>
+    /// <example>
+    /// <code>
+    /// builder.AddTestProject&lt;Projects.MyApp_Tests&gt;("MyTests",
+    ///     "run --filter-trait 'Category=UnitTest'",
+    ///     "run --filter-trait 'Category=Integration'");
+    /// </code>
+    /// </example>
     public static IResourceBuilder<ProjectResource> AddTestProject<TProject>(this IDistributedApplicationBuilder builder, string name, params string[] arguments)
        where TProject : IProjectMetadata, new()
     {
@@ -57,6 +76,13 @@ public static class RunTests
 
         return testProject;
     }
+    
+    /// <summary>
+    /// Executes tests for a specific project with the given filter.
+    /// </summary>
+    /// <param name="pathProject">The path to the project file.</param>
+    /// <param name="filter">The test filter arguments to pass to dotnet test.</param>
+    /// <returns>A task that represents the asynchronous test execution operation. The task result contains the execution result.</returns>
     static async Task<ExecuteProcessResult> RunTestsForProject(string pathProject, string filter)
     {
         var folder = Path.GetDirectoryName(pathProject);
