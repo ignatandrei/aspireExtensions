@@ -1,5 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Aspire.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 namespace TestExtensionsAspire;
 
 /// <summary>
@@ -27,11 +28,24 @@ public static class RunTests
        where TProject : IProjectMetadata, new()
     {
         var testProject = builder
-            .AddProject<TProject>(name)
-            .WithExplicitStart()
+            .AddProject<TProject>(name, c =>
+            {
+                c.ExcludeLaunchProfile = true;
+            })
+            .WithExplicitStart() 
             ;
+        
         var pathProject = new TProject().ProjectPath;
 
+        //var y = ExecutableResourceBuilderExtensions.AddExecutable(builder, "andrei", "dotnet", Path.GetDirectoryName(pathProject)!, ["run" ,"--filter-trait","'Category=UnitTest'"]);
+        //y.WithParentRelationship(testProject);
+        //y.WithEnvironment("ASD", "ASDSSDA").WithExplicitStart();
+        //y.OnBeforeResourceStarted(async (res, bef,ct) => 
+        //{
+        //    await Task.Delay(100);
+        //    testProject.Resource.TryGetEnvironmentVariables
+
+        //});
         for (var i = 0; i < arguments.Length; i++)
         {
             var filter = arguments[i];
@@ -44,15 +58,26 @@ public static class RunTests
             displayName: testCommand,
             executeCommand: (async (ctx) =>
             {
+                var b= testProject.Resource.TryGetEnvironmentVariables(out var envCallback);
+                envCallback ??= [];
+                Dictionary<string, object> envDict = new();
+                EnvironmentCallbackContext environmentCallbackContext = new(builder.ExecutionContext, envDict);
+                foreach (var env in envCallback)
+                {
+                    await env.Callback(environmentCallbackContext);
+
+                }
+                var envs = environmentCallbackContext.EnvironmentVariables;
                 var loggerService = ctx.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
                 var logger = loggerService?.GetLogger(testProject.Resource);
-                if(logger == null)
+                
+                if (logger == null)
                 {
                     Console.WriteLine($"Logger not found for {testProject.Resource.Name}");
                     return new ExecuteCommandResult() { Success = false, ErrorMessage = "Logger not found" };
                 }
                 logger.LogInformation($"Start Running {testCommand} for  {pathProject}");
-                var data = await RunTestsForProject(pathProject, filter);
+                var data = await RunTestsForProject(pathProject, filter,envs);
                 logger.LogInformation(data.Output);
                 if (data.Success)
                 {
@@ -83,7 +108,7 @@ public static class RunTests
     /// <param name="pathProject">The path to the project file.</param>
     /// <param name="filter">The test filter arguments to pass to dotnet test.</param>
     /// <returns>A task that represents the asynchronous test execution operation. The task result contains the execution result.</returns>
-    static async Task<ExecuteProcessResult> RunTestsForProject(string pathProject, string filter)
+    static async Task<ExecuteProcessResult> RunTestsForProject(string pathProject, string filter, Dictionary<string, object> envs)
     {
         var folder = Path.GetDirectoryName(pathProject);
         var exportStartInfo = new ProcessStartInfo
@@ -96,8 +121,17 @@ public static class RunTests
             CreateNoWindow = true,
             WindowStyle = ProcessWindowStyle.Hidden,
             WorkingDirectory = folder,
+            
         };
-
+        foreach (var env in envs)
+        {
+            if (env.Value is EndpointReference ref1)
+            {
+                exportStartInfo.Environment.Add(env.Key, ref1.Url);
+                continue;
+            }
+            exportStartInfo.Environment.Add(env.Key, env.Value?.ToString());
+        }
         var exportProcess = new Process { StartInfo = exportStartInfo };
 
         Task? stdOutTask = null;

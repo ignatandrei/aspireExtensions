@@ -8,7 +8,7 @@
 	  <IsPackable>true</IsPackable>
     <!-- NuGet Package Properties -->
     <PackageId>TestExtensionsAspire</PackageId>
-    <Version>94.2025.804.1054</Version>
+    <Version>94.2025.805.2239</Version>
     <Title>Test Extensions for .NET Aspire</Title>
 	<Authors>Ignat Andrei</Authors>
 	<Description>Extension methods for .NET Aspire that add test project integration capabilities to your distributed applications. Provides easy integration of test projects as resources with command execution, logging, and explicit start control.</Description>
