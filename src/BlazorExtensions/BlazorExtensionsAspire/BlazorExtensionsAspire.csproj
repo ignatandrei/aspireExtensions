@@ -4,10 +4,31 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>BlazorExtensionsAspire</PackageId>
+    <Version>94.2025.817.1650</Version>
+    <Authors>Andrei Ignat</Authors>
+    <Company>AOM</Company>
+    <Description>Extension methods and helpers for integrating Blazor WebAssembly projects with .NET Aspire distributed applications.</Description>
+    <PackageTags>blazor;aspire;webassembly;extensions</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <IncludeSource>true</IncludeSource>
+    <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions</PackageProjectUrl>
+    <Copyright>Copyright (c) 2024</Copyright>
+    <Summary>Blazor WebAssembly and Aspire integration helpers.</Summary>
+    <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+	  <IsPackable>true</IsPackable>
   </PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="LICENSE" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
+  </ItemGroup>
 
-	</Project>
+  </Project>
