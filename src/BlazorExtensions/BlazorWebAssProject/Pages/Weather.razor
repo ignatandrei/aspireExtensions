@@ -1,0 +1,77 @@
+﻿@page "/weather"
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th aria-label="Temperature in Celsius">Temp. (C)</th>
+                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td> @((MarkupString)(forecast.Summary))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private WeatherForecast[]? forecasts;
+    [Inject(Key = "local_host")]
+    public HttpClient? httpClientLocal { get; set; }
+
+    [Inject(Key = "api")]
+    public HttpClient? httpClientAPI { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        ArgumentNullException.ThrowIfNull(httpClientLocal);
+        var forecastsLocal = await httpClientLocal.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        forecastsLocal ??= Array.Empty<WeatherForecast>();
+        foreach (var local in forecastsLocal)
+        {
+            local.Summary = "<i>From Local:</i>" + local.Summary;
+        }
+
+        ArgumentNullException.ThrowIfNull(httpClientAPI);
+        var forecastsAPI = await httpClientAPI.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+        forecastsAPI ??= Array.Empty<WeatherForecast>();
+        foreach (var api in forecastsAPI)
+        {
+            api.Summary = "<b>From API:</b>" + api.Summary;
+        }
+        forecasts = forecastsLocal.Concat(forecastsAPI).ToArray();
+
+
+    }
+
+    public class WeatherForecast
+    {
+        public DateOnly Date { get; set; }
+
+        public int TemperatureC { get; set; }
+
+        public string? Summary { get; set; }
+
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+}

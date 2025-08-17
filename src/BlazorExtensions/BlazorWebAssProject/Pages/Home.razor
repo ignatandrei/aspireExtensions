@@ -1,0 +1,17 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+ 
+<h1>API</h1>
+@httpClientAPI?.BaseAddress
+
+<h1>Local Host</h1>
+@httpClientLocal?.BaseAddress
+ 
+@code {
+    [Inject(Key = "local_host")]
+    public HttpClient? httpClientLocal { get; set; }
+
+    [Inject(Key = "api")]
+    public HttpClient? httpClientAPI { get; set; }
+}
