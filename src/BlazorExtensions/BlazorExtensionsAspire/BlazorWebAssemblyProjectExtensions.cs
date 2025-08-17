@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using k8s.Models;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace Blazor.Extension;
@@ -86,7 +87,9 @@ public static class BlazorWebAssemblyProjectExtensions
             ctx.EnvironmentVariables[nameOfParameter] = val;
 
         });
-        return projectBuilder.WaitFor(api);
+        return projectBuilder
+            .WithReference(api)
+            .WaitFor(api);
 
     }
 }
