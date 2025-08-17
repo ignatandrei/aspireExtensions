@@ -1,5 +1,7 @@
 # BlazorExtensionsAspire
 
+[![NuGet](https://img.shields.io/nuget/v/BlazorExtensionsAspire.svg)](https://www.nuget.org/packages/BlazorExtensionsAspire/)
+
 Extension methods and helpers for integrating Blazor WebAssembly projects with .NET Aspire distributed applications.
 
 ## Features

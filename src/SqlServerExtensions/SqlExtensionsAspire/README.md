@@ -1,5 +1,7 @@
 # SqlExtensionsAspire
 
+[![NuGet](https://img.shields.io/nuget/v/SqlExtensionsAspire.svg)](https://www.nuget.org/packages/SqlExtensionsAspire/)
+
 Extension methods for .NET Aspire SQL Server hosting that add SQL command execution, script execution, and SQLPad integration capabilities.
 
 ## Features

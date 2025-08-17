@@ -1,5 +1,7 @@
 # TestExtensionsAspire
 
+[![NuGet](https://img.shields.io/nuget/v/TestExtensionsAspire.svg)](https://www.nuget.org/packages/TestExtensionsAspire/)
+
 Extension methods for .NET Aspire that add test project integration capabilities to your distributed applications.
 
 ## Features
