@@ -12,18 +12,20 @@ A .NET Aspire extension for managing and integrating .NET global tools into your
 1. **Installation**
    - Add the `DotnetGlobalToolsExtensionAspire` package to your Aspire project.
 
+```bash
+dotnet add package SqlExtensionsAspire
+```
+
 2. **Usage**
    - Use the provided resource builder extensions to register and configure global tools in your Aspire application.
 
-3. **Configuration**
-   - Customize tool execution and resource management as needed for your solution.
+```csharp
+builder.AddDotnetGlobalTools("dotnet-ef", "dotnet-depends");
+```
 
-## Project Structure
-- `DotnetGlobalToolsExtensionAspire/` - Core extension logic and resource builders
-- `DotNetGlobalToolsExtensions.ApiService/` - Example API service for integration
-- `DotNetGlobalToolsExtensions.AppHost/` - Application host for running Aspire apps
-- `DotNetGlobalToolsExtensions.ServiceDefaults/` - Default service configurations
-- `DotNetGlobalToolsExtensions.Web/` - Example web client
+Now a Aspire resource will be created with a command to install the specified global tools.
+Also, a **All** command will be created to install all specified global tools.
+
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

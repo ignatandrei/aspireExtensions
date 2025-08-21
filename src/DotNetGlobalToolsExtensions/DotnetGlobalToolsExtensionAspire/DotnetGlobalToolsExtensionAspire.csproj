@@ -8,7 +8,7 @@
 	  
 	 <IsPackable>true</IsPackable>
     <PackageId>DotnetGlobalToolsExtensionAspire</PackageId>
-      <Version>940.2025.821.740</Version>
+      <Version>940.2025.821.800</Version>
       <Authors>Andrei Ignat</Authors>
     <Company>AOM</Company>
     <Description>Extension methods and helpers for integrating .NET global tools with Aspire distributed applications.</Description>
