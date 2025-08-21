@@ -5,24 +5,29 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- NuGet package metadata -->
+	  
+	 <IsPackable>true</IsPackable>
     <PackageId>DotnetGlobalToolsExtensionAspire</PackageId>
-    <Version>1.0.0</Version>
-    <Authors>YourName</Authors>
-    <Company>YourCompany</Company>
+      <Version>940.2025.821.740</Version>
+      <Authors>Andrei Ignat</Authors>
+    <Company>AOM</Company>
     <Description>Extension methods and helpers for integrating .NET global tools with Aspire distributed applications.</Description>
     <PackageTags>aspire;global-tools;dotnet;extensions</PackageTags>
     <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
     <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0" />
-    <PackageReference Include="NetEscapades.EnumGenerators" Version="1.0.0-beta14" />
+    <PackageReference Include="NetEscapades.EnumGenerators" Version="1.0.0-beta14" 
+					  PrivateAssets="all" ExcludeAssets="runtime"
+	/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
   </ItemGroup>
 
   <PropertyGroup>
@@ -31,8 +36,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="" />
-    <None Include="LICENSE" Pack="true" PackagePath="" />
+    <None Include="../README.md" Pack="true" PackagePath="" />
+    <None Include="../LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
