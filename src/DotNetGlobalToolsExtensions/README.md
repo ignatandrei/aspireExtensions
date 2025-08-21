@@ -26,6 +26,9 @@ builder.AddDotnetGlobalTools("dotnet-ef", "dotnet-depends");
 Now a Aspire resource will be created with a command to install the specified global tools.
 Also, a **All** command will be created to install all specified global tools.
 
+## Images
+
+![GlobalTool](https://raw.githubusercontent.com/ignatandrei/aspireExtensions/main/docs/images/Global/FirstPage.png)
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
