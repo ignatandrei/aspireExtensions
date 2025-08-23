@@ -11,7 +11,51 @@ internal static class WebAPIDocsExtensions
     {
         var name = "sdkgen";
         var resource = builder
-            .AddContainer(name, "openapitools/openapi-generator-online");
+            .AddContainer(name, "openapitools/openapi-generator-online")
+            .ExcludeFromManifest();
+        resource.OnResourceReady(async (res, evt, ct) =>
+        {
+#pragma warning disable ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            var interaction= evt.Services.GetService(typeof(IInteractionService)) as IInteractionService;
+            var log = evt.Services.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
+            var logger = log?.GetLogger(res);
+            logger?.LogInformation($"!!!!!!!!Container {name} is ready.");
+            await Task.Delay(5000);
+            var endpoints = res.GetEndpoints()?.ToArray();
+            endpoints?.ToList().ForEach(ep => logger?.LogInformation($"!!!Endpoint: {ep.Url}"));
+            if(endpoints == null || endpoints.Length == 0)
+            {
+                logger?.LogError($"!!!!!!!!Container {name} has no endpoints.");
+                return;
+            }
+            var first= endpoints.First().Url;   
+            logger?.LogInformation($"!!!!!!!!Container {name} first endpoint: {first}");
+            HttpClient client = new ();
+            client.BaseAddress = new Uri(first);
+            try
+            {
+                var response = await client.GetAsync("api/gen/clients");
+                response.EnsureSuccessStatusCode();
+                var text = await response.Content.ReadAsStringAsync();
+                logger?.LogInformation($"!!!Clients: {text}");
+                if(interaction?.IsAvailable??false)
+                    interaction?.PromptMessageBoxAsync($"SDK Generation Service is ready at {first}"
+                        , $"# Clients {Environment.NewLine} {text}"
+                        ,new MessageBoxInteractionOptions()
+                        {
+                             EnableMessageMarkdown = true,
+                             
+                        }
+                        );
+#pragma warning restore ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError($"Health check failed: {ex.Message}");
+            }
+
+        });
         resource
             .WithHttpEndpoint(port: 8888, targetPort: 8080)
             .WithHttpCommand("api/gen/clients", "Clients",
@@ -34,17 +78,14 @@ internal static class WebAPIDocsExtensions
                     return new ExecuteCommandResult() { Success = true };
                 },
             })
-            .WithHttpCommand("api/gen/clients/html2", "Html2",
+            //.WithHttpCommand("api/gen/clients/html2", "Html2",
+            .WithHttpCommand("api/gen/clients/csharp", "Html2",
             commandOptions: new HttpCommandOptions()
             {
                 Method = HttpMethod.Post,
                 PrepareRequest = (context) =>
                 {
-                    //var container = context.ServiceProvider.GetService(typeof(ContainerIDs)) as ContainerIDs;
-                    //ArgumentNullException.ThrowIfNull(container);
-                    //var containerId = container.GetContainerID(context.ResourceName);
-                    //var http = container.GetHttpUrl(context.ResourceName, nameAPI);
-                    //Console.WriteLine(containerId);
+                    
                     var endPoints = projects[0].Resource.GetEndpoints()?.ToArray() ?? [];
                     var first = endPoints.First(it => it.Url.Contains("http://")).Url.Replace("localhost", "host.docker.internal");
                     var http = first.EndsWith("/") ? first : first + "/";
@@ -71,7 +112,7 @@ internal static class WebAPIDocsExtensions
                     if (!resDict.TryGetValue("link", out var url))
                     {
 
-                        return new ExecuteCommandResult() { Success = false, ErrorMessage = "no link" };
+                        return new ExecuteCommandResult() { Success = false, ErrorMessage = $"no link in {text}" };
                     }
                     Process.Start(new ProcessStartInfo
                     {
