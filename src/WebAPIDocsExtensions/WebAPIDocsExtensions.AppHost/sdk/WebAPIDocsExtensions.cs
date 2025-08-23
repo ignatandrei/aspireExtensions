@@ -5,22 +5,37 @@ using System.Diagnostics;
 using System.Text;
 
 namespace WebAPIDocsExtensions.AppHost.sdk;
+internal class AnnotationClients:IResourceAnnotation
+{
+    public string Text { get; set; } = string.Empty;
+    public string[] Data { get; set; } =[];
+    public AnnotationClients(string text)
+    {
+        Text = text;
+    }
+}
+
 internal static class WebAPIDocsExtensions
 {
-    public static IResourceBuilder<ContainerResource> AddSDKGeneration(this IDistributedApplicationBuilder builder, params IResourceBuilder<IResourceWithServiceDiscovery>[] projects)
+    public static IResourceBuilder<ContainerResource> AddSDKGeneration(this IResourceBuilder<ProjectResource> project, string downloadFolder="wwwrrot/docs")
     {
-        var name = "sdkgen";
+        var builder=project.ApplicationBuilder;
+        var name = "sdkgen-"+ project.Resource.Name;
         var resource = builder
             .AddContainer(name, "openapitools/openapi-generator-online")
+            .WithReference(project)
+            .WithAnnotation(new AnnotationClients($"Clients{project.Resource.Name}"))
+            .WaitFor(project)
             .ExcludeFromManifest();
+        resource.WithParentRelationship(project);
         resource.OnResourceReady(async (res, evt, ct) =>
         {
-#pragma warning disable ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-            var interaction= evt.Services.GetService(typeof(IInteractionService)) as IInteractionService;
+//#pragma warning disable ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            //var interaction= evt.Services.GetService(typeof(IInteractionService)) as IInteractionService;
             var log = evt.Services.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
             var logger = log?.GetLogger(res);
             logger?.LogInformation($"!!!!!!!!Container {name} is ready.");
-            await Task.Delay(5000);
+            await Task.Delay(15000);
             var endpoints = res.GetEndpoints()?.ToArray();
             endpoints?.ToList().ForEach(ep => logger?.LogInformation($"!!!Endpoint: {ep.Url}"));
             if(endpoints == null || endpoints.Length == 0)
@@ -38,16 +53,22 @@ internal static class WebAPIDocsExtensions
                 response.EnsureSuccessStatusCode();
                 var text = await response.Content.ReadAsStringAsync();
                 logger?.LogInformation($"!!!Clients: {text}");
-                if(interaction?.IsAvailable??false)
-                    interaction?.PromptMessageBoxAsync($"SDK Generation Service is ready at {first}"
-                        , $"# Clients {Environment.NewLine} {text}"
-                        ,new MessageBoxInteractionOptions()
-                        {
-                             EnableMessageMarkdown = true,
+                var ann = res.Annotations.First(it => it is AnnotationClients) as AnnotationClients;
+                ann.Data = text
+                    .Replace("[","")
+                    .Replace("]","")
+                    .Replace("\"","")
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries);
+                //if(interaction?.IsAvailable??false)
+                //    interaction?.PromptMessageBoxAsync($"SDK Generation Service is ready at {first}"
+                //        , $"# Clients {Environment.NewLine} {text}"
+                //        ,new MessageBoxInteractionOptions()
+                //        {
+                //             EnableMessageMarkdown = true,
                              
-                        }
-                        );
-#pragma warning restore ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                //        }
+                //        );
+//#pragma warning restore ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             
             }
             catch (Exception ex)
@@ -56,6 +77,7 @@ internal static class WebAPIDocsExtensions
             }
 
         });
+
         resource
             .WithHttpEndpoint(port: 8888, targetPort: 8080)
             .WithHttpCommand("api/gen/clients", "Clients",
@@ -78,15 +100,39 @@ internal static class WebAPIDocsExtensions
                     return new ExecuteCommandResult() { Success = true };
                 },
             })
-            //.WithHttpCommand("api/gen/clients/html2", "Html2",
-            .WithHttpCommand("api/gen/clients/csharp", "Html2",
+            .WithCommand("genClients","genClients", async (ctx) =>
+            {
+                var log = ctx.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
+                var logger = log?.GetLogger(resource.Resource);
+                var ann = resource.Resource.Annotations.FirstOrDefault(it => it is AnnotationClients) as AnnotationClients;
+                if(ann == null)
+                {
+                    return new ExecuteCommandResult() { Success = false, ErrorMessage = "No annotation found" };
+                }
+                if (ann.Data.Length==0)
+                {
+                    return new ExecuteCommandResult() { Success = false, ErrorMessage = "No clients available" };
+                }
+                var sb = new StringBuilder();
+                sb.AppendLine("Available clients:");
+                foreach(var client in ann.Data)
+                {
+                    sb.AppendLine($"- {client}");
+                }
+                logger?.LogInformation(sb.ToString());
+                return new ExecuteCommandResult() { Success = true};
+            }, new CommandOptions()
+            {
+                Description = "List available SDK clients",
+            })
+            .WithHttpCommand("api/gen/clients/html2", "Html2",
             commandOptions: new HttpCommandOptions()
             {
                 Method = HttpMethod.Post,
                 PrepareRequest = (context) =>
                 {
                     
-                    var endPoints = projects[0].Resource.GetEndpoints()?.ToArray() ?? [];
+                    var endPoints = project.Resource.GetEndpoints()?.ToArray() ?? [];
                     var first = endPoints.First(it => it.Url.Contains("http://")).Url.Replace("localhost", "host.docker.internal");
                     var http = first.EndsWith("/") ? first : first + "/";
 
@@ -123,11 +169,11 @@ internal static class WebAPIDocsExtensions
                 }
             });
         
-        foreach (var proj in projects)
-        {
-            resource.WithReference(proj);
-            resource.WaitFor(proj);
-        };
+        //foreach (var proj in projects)
+        //{
+        //    resource.WithReference(proj);
+        //    resource.WaitFor(proj);
+        //};
         //var url = projects[0].Resource.GetEndpoints().FirstOrDefault();
         //resource.OnResourceEndpointsAllocated((res, evt, ct) =>
         //{

@@ -11,6 +11,6 @@ builder.AddProject<Projects.WebAPIDocsExtensions_Web>("webfrontend")
     .WithReference(apiService)
     .WaitFor(apiService);
 
-builder.AddSDKGeneration(apiService);
+apiService.AddSDKGeneration();
     
 builder.Build().Run();
