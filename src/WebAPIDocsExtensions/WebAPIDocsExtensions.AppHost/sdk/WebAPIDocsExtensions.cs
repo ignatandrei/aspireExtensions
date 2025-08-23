@@ -1,7 +1,10 @@
 ﻿
+using k8s.KubeConfigModels;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Text;
 
 namespace WebAPIDocsExtensions.AppHost.sdk;
@@ -9,6 +12,7 @@ internal class AnnotationClients:IResourceAnnotation
 {
     public string Text { get; set; } = string.Empty;
     public string[] Data { get; set; } =[];
+    public string Url { get; set; } = string.Empty;
     public AnnotationClients(string text)
     {
         Text = text;
@@ -17,20 +21,26 @@ internal class AnnotationClients:IResourceAnnotation
 
 internal static class WebAPIDocsExtensions
 {
-    public static IResourceBuilder<ContainerResource> AddSDKGeneration(this IResourceBuilder<ProjectResource> project, string downloadFolder="wwwrrot/docs")
+    public static IResourceBuilder<ContainerResource> AddSDKGeneration(this IResourceBuilder<ProjectResource> project, string downloadFolder = "wwwroot/docs")
     {
-        var builder=project.ApplicationBuilder;
-        var name = "sdkgen-"+ project.Resource.Name;
+        if (!Path.IsPathRooted(downloadFolder))
+        {
+            var pathProject = project.Resource.GetProjectMetadata()?.ProjectPath ?? "";
+            var dir = Path.GetDirectoryName(pathProject) ?? ".";
+            downloadFolder = Path.GetFullPath(Path.Combine(dir, downloadFolder));
+        }
+        var builder = project.ApplicationBuilder;
+        var name = "sdkgen-" + project.Resource.Name;
         var resource = builder
             .AddContainer(name, "openapitools/openapi-generator-online")
             .WithReference(project)
-            .WithAnnotation(new AnnotationClients($"Clients{project.Resource.Name}"))
+            .WithAnnotation(new AnnotationClients($"Clients{name}"))
             .WaitFor(project)
             .ExcludeFromManifest();
         resource.WithParentRelationship(project);
         resource.OnResourceReady(async (res, evt, ct) =>
         {
-//#pragma warning disable ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            //#pragma warning disable ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             //var interaction= evt.Services.GetService(typeof(IInteractionService)) as IInteractionService;
             var log = evt.Services.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
             var logger = log?.GetLogger(res);
@@ -38,14 +48,14 @@ internal static class WebAPIDocsExtensions
             await Task.Delay(15000);
             var endpoints = res.GetEndpoints()?.ToArray();
             endpoints?.ToList().ForEach(ep => logger?.LogInformation($"!!!Endpoint: {ep.Url}"));
-            if(endpoints == null || endpoints.Length == 0)
+            if (endpoints == null || endpoints.Length == 0)
             {
                 logger?.LogError($"!!!!!!!!Container {name} has no endpoints.");
                 return;
             }
-            var first= endpoints.First().Url;   
+            var first = endpoints.First().Url;
             logger?.LogInformation($"!!!!!!!!Container {name} first endpoint: {first}");
-            HttpClient client = new ();
+            HttpClient client = new();
             client.BaseAddress = new Uri(first);
             try
             {
@@ -54,22 +64,24 @@ internal static class WebAPIDocsExtensions
                 var text = await response.Content.ReadAsStringAsync();
                 logger?.LogInformation($"!!!Clients: {text}");
                 var ann = res.Annotations.First(it => it is AnnotationClients) as AnnotationClients;
+                ann.Url = first;
                 ann.Data = text
-                    .Replace("[","")
-                    .Replace("]","")
-                    .Replace("\"","")
+                    .Replace("[", "")
+                    .Replace("]", "")
+                    .Replace("\"", "")
                     .Split(',', StringSplitOptions.RemoveEmptyEntries);
+
                 //if(interaction?.IsAvailable??false)
                 //    interaction?.PromptMessageBoxAsync($"SDK Generation Service is ready at {first}"
                 //        , $"# Clients {Environment.NewLine} {text}"
                 //        ,new MessageBoxInteractionOptions()
                 //        {
                 //             EnableMessageMarkdown = true,
-                             
+
                 //        }
                 //        );
-//#pragma warning restore ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-            
+                //#pragma warning restore ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
             }
             catch (Exception ex)
             {
@@ -100,27 +112,46 @@ internal static class WebAPIDocsExtensions
                     return new ExecuteCommandResult() { Success = true };
                 },
             })
-            .WithCommand("genClients","genClients", async (ctx) =>
+            .WithCommand("genClients", "genClients", async (ctx) =>
             {
+                var endPoints = project.Resource.GetEndpoints()?.ToArray() ?? [];
+                var first = endPoints.First(it => it.Url.Contains("http://")).Url.Replace("localhost", "host.docker.internal");
+                var http = first.EndsWith("/") ? first : first + "/";
+
                 var log = ctx.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
                 var logger = log?.GetLogger(resource.Resource);
                 var ann = resource.Resource.Annotations.FirstOrDefault(it => it is AnnotationClients) as AnnotationClients;
-                if(ann == null)
+                if (ann == null)
                 {
                     return new ExecuteCommandResult() { Success = false, ErrorMessage = "No annotation found" };
                 }
-                if (ann.Data.Length==0)
+                if (ann.Data.Length == 0)
                 {
                     return new ExecuteCommandResult() { Success = false, ErrorMessage = "No clients available" };
                 }
-                var sb = new StringBuilder();
-                sb.AppendLine("Available clients:");
-                foreach(var client in ann.Data)
+                logger?.LogInformation("Available clients:");
+                HttpClient httpClient = new();
+                httpClient.BaseAddress = new Uri(ann.Url);
+                foreach (var client in ann.Data)
                 {
-                    sb.AppendLine($"- {client}");
+                    logger?.LogInformation($"- {client}");
+                    byte[] data = await GetClientZip(httpClient, client, $"{http}openapi/v1.json");
+                    if (!Directory.Exists(downloadFolder))
+                    {
+                        Directory.CreateDirectory(downloadFolder);
+                    }
+                    if (data.Length > 0)
+                    {
+                        var file = Path.Combine(downloadFolder, $"{client}.zip");
+                        await File.WriteAllBytesAsync(file, data);
+                        logger?.LogInformation($"  - saved to {file}");
+                    }
+                    else
+                    {
+                        logger?.LogInformation($"  - failed to get client {client}");
+                    }
                 }
-                logger?.LogInformation(sb.ToString());
-                return new ExecuteCommandResult() { Success = true};
+                return new ExecuteCommandResult() { Success = true };
             }, new CommandOptions()
             {
                 Description = "List available SDK clients",
@@ -131,7 +162,7 @@ internal static class WebAPIDocsExtensions
                 Method = HttpMethod.Post,
                 PrepareRequest = (context) =>
                 {
-                    
+
                     var endPoints = project.Resource.GetEndpoints()?.ToArray() ?? [];
                     var first = endPoints.First(it => it.Url.Contains("http://")).Url.Replace("localhost", "host.docker.internal");
                     var http = first.EndsWith("/") ? first : first + "/";
@@ -168,7 +199,7 @@ internal static class WebAPIDocsExtensions
                     return new ExecuteCommandResult() { Success = false, ErrorMessage = "test" };
                 }
             });
-        
+
         //foreach (var proj in projects)
         //{
         //    resource.WithReference(proj);
@@ -187,37 +218,73 @@ internal static class WebAPIDocsExtensions
         //    }, null);
         //    return Task.CompletedTask;
         //});
-        
-            
-            //var dir = projects[0].Name.Replace("-", "_");
-            //var script = $"""
-            //    #!/bin/sh
-            //    set -e
-            //    echo Generating SDK for {projects[0].Name} from ${{OPENAPI_URL:-{url}/swagger/v1/swagger.json}} into {dir}
-            //    mkdir -p {dir}
-            //    wget -q -O {dir}/openapi.json ${{OPENAPI_URL:-{url}/swagger/v1/swagger.json}}
-            //    openapi-generator-cli generate -i {dir}/openapi.json -g csharp -o {dir} --additional-properties=packageName={projects[0].Name.Replace("-", "")}.Client,packageVersion=1.0.0,nunitVersion=3.12.0,netCoreProjectFile=true
-            //    echo SDK generation completed.
-            //    """;
-            
-            //var sb = new System.Text.StringBuilder();
-            //sb.AppendLine("#!/bin/sh");
-            //sb.AppendLine("set -e");
-            //foreach (var proj in projects)
-            //{
-            //    var svc = proj.GetServiceDiscovery();
-            //    var url = svc.GetHttpEndpoint().Url;
-            //    var dir = proj.Name.Replace("-", "_");
-            //    sb.AppendLine($"echo Generating SDK for {proj.Name} from ${{OPENAPI_URL:-{url}/swagger/v1/swagger.json}} into {dir}");
-            //    sb.AppendLine($"mkdir -p {dir}");
-            //    sb.AppendLine($"wget -q -O {dir}/openapi.json ${{OPENAPI_URL:-{url}/swagger/v1/swagger.json}}");
-            //    sb.AppendLine($"openapi-generator-cli generate -i {dir}/openapi.json -g csharp -o {dir} --additional-properties=packageName={proj.Name.Replace("-", "")}.Client,packageVersion=1.0.0,nunitVersion=3.12.0,netCoreProjectFile=true");
-            //}
-            //sb.AppendLine("echo SDK generation completed.");
-            //var script = sb.ToString();
-            //Console.WriteLine($"Generated script:\n{script}");
-            //res.ExecuteCommand(new[] { "sh", "-c", script });
+
+
+        //var dir = projects[0].Name.Replace("-", "_");
+        //var script = $"""
+        //    #!/bin/sh
+        //    set -e
+        //    echo Generating SDK for {projects[0].Name} from ${{OPENAPI_URL:-{url}/swagger/v1/swagger.json}} into {dir}
+        //    mkdir -p {dir}
+        //    wget -q -O {dir}/openapi.json ${{OPENAPI_URL:-{url}/swagger/v1/swagger.json}}
+        //    openapi-generator-cli generate -i {dir}/openapi.json -g csharp -o {dir} --additional-properties=packageName={projects[0].Name.Replace("-", "")}.Client,packageVersion=1.0.0,nunitVersion=3.12.0,netCoreProjectFile=true
+        //    echo SDK generation completed.
+        //    """;
+
+        //var sb = new System.Text.StringBuilder();
+        //sb.AppendLine("#!/bin/sh");
+        //sb.AppendLine("set -e");
+        //foreach (var proj in projects)
+        //{
+        //    var svc = proj.GetServiceDiscovery();
+        //    var url = svc.GetHttpEndpoint().Url;
+        //    var dir = proj.Name.Replace("-", "_");
+        //    sb.AppendLine($"echo Generating SDK for {proj.Name} from ${{OPENAPI_URL:-{url}/swagger/v1/swagger.json}} into {dir}");
+        //    sb.AppendLine($"mkdir -p {dir}");
+        //    sb.AppendLine($"wget -q -O {dir}/openapi.json ${{OPENAPI_URL:-{url}/swagger/v1/swagger.json}}");
+        //    sb.AppendLine($"openapi-generator-cli generate -i {dir}/openapi.json -g csharp -o {dir} --additional-properties=packageName={proj.Name.Replace("-", "")}.Client,packageVersion=1.0.0,nunitVersion=3.12.0,netCoreProjectFile=true");
+        //}
+        //sb.AppendLine("echo SDK generation completed.");
+        //var script = sb.ToString();
+        //Console.WriteLine($"Generated script:\n{script}");
+        //res.ExecuteCommand(new[] { "sh", "-c", script });
         //});
         return resource;
     }
-}    
+
+    private static async Task<byte[]> GetClientZip(HttpClient client, string typeClient, string json)
+    {
+        try
+        {
+            var content = JsonContent.Create(
+
+            new
+            {
+                openAPIUrl = json
+                //openapiNormalizer = [],
+                //options= { },
+                //spec= { }
+            }
+            );
+
+            var response = await client.PostAsync($"api/gen/clients/{typeClient}", content);
+            response.EnsureSuccessStatusCode();
+            var text = await response.Content.ReadAsStringAsync();
+
+            var resDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(text);
+            ArgumentNullException.ThrowIfNull(resDict);
+            if (!resDict.TryGetValue("link", out var url))
+            {
+
+                return [];
+            }
+            return await client.GetByteArrayAsync(url);
+        }
+        catch
+        {
+            //maybe log the error
+            return [];
+        }
+    }
+
+}
