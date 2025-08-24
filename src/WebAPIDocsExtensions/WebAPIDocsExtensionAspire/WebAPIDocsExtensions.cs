@@ -44,7 +44,12 @@ public static class WebAPIDocsExtensions
                 response.EnsureSuccessStatusCode();
                 var text = await response.Content.ReadAsStringAsync();
                 logger?.LogInformation($"!!!Clients: {text}");
-                var ann = res.Annotations.First(it => it is AnnotationClients) as AnnotationClients;
+                var ann = res.Annotations.FirstOrDefault(it => it is AnnotationClients) as AnnotationClients;
+                if (ann == null)
+                {
+                    logger?.LogError($"!!!!!!!!Container {name} has no annotation.");
+                    return;
+                }
                 ann.Url = first;
                 ann.Data = text
                     .Replace("[", "")

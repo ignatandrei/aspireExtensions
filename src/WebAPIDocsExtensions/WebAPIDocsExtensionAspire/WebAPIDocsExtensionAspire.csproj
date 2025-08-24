@@ -1,19 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+	  <IsPackable>true</IsPackable>
+<OutputType>Library</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- NuGet metadata -->
+    <Version>940.2025.821.800</Version>
+    <Authors>Andrei Ignat</Authors>
+    <Company>AOM</Company>
+    <Description>Extension methods for integrating OpenAPI/Swagger SDK generation into .NET Aspire distributed applications.</Description>
+    <PackageTags>aspire;openapi;swagger;sdk;generator;dotnet;extensions</PackageTags>
+    <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions</PackageProjectUrl>
+    <Copyright>Copyright © 2024 Andrei Ignat</Copyright>
+	  <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+	  <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0" />
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
-	</ItemGroup>
 
-	<PropertyGroup>
-		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GX</CompilerGeneratedFilesOutputPath>
-	</PropertyGroup>
-
+  <ItemGroup>
+    <None Include="..\LICENSE.txt" Link="LICENSE.txt" Pack="true" PackagePath="/"  />
+    <None Include="..\README.md" Link="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GX</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
 
 </Project>
