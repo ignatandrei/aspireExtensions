@@ -1,4 +1,4 @@
-using WebAPIDocsExtensions.AppHost.sdk;
+using WebAPIDocsExtensionAspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -11,6 +11,6 @@ builder.AddProject<Projects.WebAPIDocsExtensions_Web>("webfrontend")
     .WithReference(apiService)
     .WaitFor(apiService);
 
-apiService.AddSDKGeneration();
+apiService.AddSDKGeneration_openapitools();
     
 builder.Build().Run();

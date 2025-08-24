@@ -1,27 +1,8 @@
-﻿
-using k8s.KubeConfigModels;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Net.Http.Json;
-using System.Text;
+﻿namespace WebAPIDocsExtensionAspire;
 
-namespace WebAPIDocsExtensions.AppHost.sdk;
-internal class AnnotationClients:IResourceAnnotation
+public static class WebAPIDocsExtensions
 {
-    public string Text { get; set; } = string.Empty;
-    public string[] Data { get; set; } =[];
-    public string Url { get; set; } = string.Empty;
-    public AnnotationClients(string text)
-    {
-        Text = text;
-    }
-}
-
-internal static class WebAPIDocsExtensions
-{
-    public static IResourceBuilder<ContainerResource> AddSDKGeneration(this IResourceBuilder<ProjectResource> project, string downloadFolder = "wwwroot/docs")
+    public static IResourceBuilder<ContainerResource> AddSDKGeneration_openapitools(this IResourceBuilder<ProjectResource> project, string downloadFolder = "wwwroot/docs")
     {
         if (!Path.IsPathRooted(downloadFolder))
         {
