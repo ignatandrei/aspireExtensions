@@ -2,7 +2,7 @@
 
 public static class WebAPIDocsExtensions
 {
-    public static IResourceBuilder<ContainerResource> AddSDKGeneration_openapitools(this IResourceBuilder<ProjectResource> project, string downloadFolder = "wwwroot/docs")
+    public static IResourceBuilder<ContainerResource> AddSDKGeneration_openapitools(this IResourceBuilder<ProjectResource> project, string downloadFolder = "wwwroot/docs", string jsonPath= "openapi/v1.json")
     {
         if (!Path.IsPathRooted(downloadFolder))
         {
@@ -121,7 +121,7 @@ public static class WebAPIDocsExtensions
                 foreach (var client in ann.Data)
                 {
                     logger?.LogInformation($"- {client}");
-                    byte[] data = await GetClientZip(httpClient, client, $"{http}openapi/v1.json");
+                    byte[] data = await GetClientZip(httpClient, client, $"{http}{jsonPath}");
                     if (!Directory.Exists(downloadFolder))
                     {
                         Directory.CreateDirectory(downloadFolder);
