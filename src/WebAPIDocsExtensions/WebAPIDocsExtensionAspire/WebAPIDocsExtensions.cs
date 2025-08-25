@@ -98,6 +98,26 @@ public static class WebAPIDocsExtensions
                     return new ExecuteCommandResult() { Success = true };
                 },
             })
+            .WithCommand("opinionated", "opinionated", async (ctx) =>
+            {
+                var log = ctx.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
+                var logger = log?.GetLogger(resource.Resource);
+
+                var commandService = ctx.ServiceProvider.GetService(typeof(ResourceCommandService))as ResourceCommandService;
+                if(commandService==null)
+                {
+                    return CommandResults.Failure("No command service");
+                }
+                var result = await commandService.ExecuteCommandAsync(resource.Resource, "genClients");
+                if(!result.Success)
+                {
+                    return CommandResults.Failure(result.ErrorMessage);
+                }
+                var path = jsonPath;
+
+                return CommandResults.Success();
+
+            })
             .WithCommand("genClients", "genClients", async (ctx) =>
             {
                 var endPoints = project.Resource.GetEndpoints()?.ToArray() ?? [];
@@ -142,26 +162,40 @@ public static class WebAPIDocsExtensions
             {
                 Description = "List available SDK clients",
             })
-            .WithHttpCommand("api/gen/clients/html2", "Html2",
+            .WithHttpCommand("api/gen/clients", "choose",
             commandOptions: new HttpCommandOptions()
             {
                 Method = HttpMethod.Post,
-                PrepareRequest = (context) =>
+                PrepareRequest = async (context) =>
                 {
 
                     var endPoints = project.Resource.GetEndpoints()?.ToArray() ?? [];
                     var first = endPoints.First(it => it.Url.Contains("http://")).Url.Replace("localhost", "host.docker.internal");
                     var http = first.EndsWith("/") ? first : first + "/";
-
+                    #pragma warning disable ASPIREINTERACTION001 
+                    var interaction= context.ServiceProvider.GetService(typeof(IInteractionService)) as IInteractionService;
+                    var responseUser = await interaction.PromptInputAsync("API Export", "What do you want to export?( html2 , csharp ...) ", "Client", "html2");    
+                    if(responseUser.Canceled)
+                    {
+                        return ;
+                    }
+                    var what= responseUser.Data.Value?.Trim()??"html2";
                     var data = new
                     {
-                        openAPIUrl = $"{http}openapi/v1.json"
+                        openAPIUrl = $"{http}{jsonPath}"
                         //openapiNormalizer = [],
                         //options= { },
                         //spec= { }
                     };
                     context.Request.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
-                    return Task.CompletedTask;
+                    var uri = context!.Request!.RequestUri!.ToString();
+                    if(!uri.EndsWith("/"))
+                        uri += "/";
+                    uri= uri+what;
+                    context.Request.RequestUri = new Uri(uri);
+                    return ;
+                    #pragma warning restore ASPIREINTERACTION001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
                 },
                 GetCommandResult = async (res) =>
                 {

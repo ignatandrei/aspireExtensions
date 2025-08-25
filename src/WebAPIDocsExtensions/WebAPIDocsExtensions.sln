@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPIDocsExtensions.Web", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPIDocsExtensionAspire", "WebAPIDocsExtensionAspire\WebAPIDocsExtensionAspire.csproj", "{72A222F5-5E6C-4387-8076-E1B77394E750}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleOpinionated", "ConsoleOpinionated\ConsoleOpinionated.csproj", "{400CCA48-703A-4D63-827A-788CC50DAA38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{72A222F5-5E6C-4387-8076-E1B77394E750}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72A222F5-5E6C-4387-8076-E1B77394E750}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72A222F5-5E6C-4387-8076-E1B77394E750}.Release|Any CPU.Build.0 = Release|Any CPU
+		{400CCA48-703A-4D63-827A-788CC50DAA38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{400CCA48-703A-4D63-827A-788CC50DAA38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{400CCA48-703A-4D63-827A-788CC50DAA38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{400CCA48-703A-4D63-827A-788CC50DAA38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
