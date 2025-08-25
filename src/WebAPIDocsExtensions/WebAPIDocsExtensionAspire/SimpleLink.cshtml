@@ -1,0 +1,17 @@
+@inherits RazorBlade.PlainTextTemplate<string[]>
+
+<h2>Download Clients Code</h2>
+<ul class="nav nav-tabs nav-tabs-examples">
+    @foreach(var lang in Model)
+    {
+        <li><a href="#Example@(lang)">@lang</a></li>
+    }
+</ul>
+<div class="tab-content">
+    @foreach(var lang in Model)
+    {
+        <div class="tab-pane" id="Example@(lang)">
+            <h3><a target="_blank" href="@(lang + ".zip")" class="btn btn-primary mb-3">Download @(lang) code</a></h3>
+        </div>
+    }
+</div>

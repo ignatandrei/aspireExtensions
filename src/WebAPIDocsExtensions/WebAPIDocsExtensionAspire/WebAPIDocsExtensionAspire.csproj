@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- NuGet metadata -->
-    <Version>940.2025.824.2022</Version>
+    <Version>940.2025.825.2100</Version>
     <Authors>Andrei Ignat</Authors>
     <Company>AOM</Company>
     <Description>Extension methods for integrating OpenAPI/Swagger SDK generation into .NET Aspire distributed applications.</Description>
@@ -22,9 +22,12 @@
 	  <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="RazorBlade" Version="0.10.0" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\LICENSE.txt" Link="LICENSE.txt" Pack="true" PackagePath="/"  />
+	<ItemGroup>
+    <None Include="..\LICENSE.txt" Link="LICENSE.txt" Pack="true" PackagePath="/" />
     <None Include="..\README.md" Link="README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
   <ItemGroup>

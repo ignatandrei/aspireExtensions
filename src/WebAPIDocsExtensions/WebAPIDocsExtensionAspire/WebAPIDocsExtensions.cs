@@ -1,4 +1,6 @@
-﻿namespace WebAPIDocsExtensionAspire;
+﻿using ConsoleOpinionated;
+
+namespace WebAPIDocsExtensionAspire;
 
 public static class WebAPIDocsExtensions
 {
@@ -114,7 +116,8 @@ public static class WebAPIDocsExtensions
                     return CommandResults.Failure(result.ErrorMessage);
                 }
                 var path = jsonPath;
-
+                await (new ConsoleOpinionated.ExportOpinionated()).Generate(jsonPath);
+                logger.LogInformation($"Opinionated docs generated in {path}. See index.html");
                 return CommandResults.Success();
 
             })

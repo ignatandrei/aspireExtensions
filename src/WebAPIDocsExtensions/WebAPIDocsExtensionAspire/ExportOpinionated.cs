@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace ConsoleOpinionated;
 internal class ExportOpinionated
 {
-    internal async Task Generate(string folder)
+    public async Task Generate(string folder)
     {
         string OpinionatedFolder = Path.Combine(folder, "Opinionated");
         if (!Directory.Exists(OpinionatedFolder))
@@ -32,7 +32,7 @@ internal class ExportOpinionated
         Directory.Delete(newFolder, true);
         var zipFiles = Directory.GetFiles(folder, "*.zip");
         var model = zipFiles.Select(f => Path.GetFileNameWithoutExtension(f)).ToArray();
-        var template = new SimpleLink(model);
+        var template = new WebAPIDocsExtensionAspire.SimpleLink(model);
         var res = await template.RenderAsync();
 
         var str=File.ReadAllText(Path.Combine(OpinionatedFolder, "index.html"));
