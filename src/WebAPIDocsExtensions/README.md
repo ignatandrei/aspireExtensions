@@ -28,7 +28,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var apiService = builder.AddProject<Projects.MyApi>("api");
 
-builder.AddSDKGeneration_openapitools(apiService);
+apiService.AddSDKGeneration_openapitools(apiService);
 
 builder.Build().Run();
 ```
