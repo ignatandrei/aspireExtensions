@@ -1,5 +1,9 @@
 # DotnetGlobalToolsExtensionAspire
 
+
+
+[![NuGet](https://img.shields.io/nuget/v/DotnetGlobalToolsExtensionAspire.svg)](https://www.nuget.org/packages/DotnetGlobalToolsExtensionAspire/)
+
 A .NET Aspire extension for managing and integrating .NET global tools into your Aspire applications.
 
 ## Features
