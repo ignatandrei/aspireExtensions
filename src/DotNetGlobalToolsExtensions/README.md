@@ -17,7 +17,7 @@ A .NET Aspire extension for managing and integrating .NET global tools into your
    - Add the `DotnetGlobalToolsExtensionAspire` package to your Aspire project.
 
 ```bash
-dotnet add package SqlExtensionsAspire
+dotnet add package DotnetGlobalToolsExtensionAspire
 ```
 
 2. **Usage**
