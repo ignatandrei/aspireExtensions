@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 namespace SqlExtensionsAspire;
 
@@ -38,7 +37,7 @@ public static partial class SqlServerExtensions
 
             // Get a logger instance for this specific database resource
             var lg = log.GetLogger(db.Resource);
-            if (log == null) return new ExecuteCommandResult()
+            if (lg == null) return new ExecuteCommandResult()
             {
                 Success = false,
                 ErrorMessage = $"on {db.Resource.Name} no logger"
@@ -121,7 +120,7 @@ public static partial class SqlServerExtensions
     /// <param name="db">The SQL Server database resource builder to extend</param>
     /// <param name="sqlScripts">Collection of SQL script strings to execute</param>
     /// <returns>The same database resource builder for method chaining</returns>
-    public static IResourceBuilder<SqlServerDatabaseResource> ExecuteSqlServerScriptsAtStartup(this IResourceBuilder<SqlServerDatabaseResource> db, params IEnumerable<string> sqlScripts)
+    public static IResourceBuilder<SqlServerDatabaseResource> ExecuteSqlServerScriptsAtStartup(this IResourceBuilder<SqlServerDatabaseResource> db, params string[] sqlScripts)
     {
         var builder = db.ApplicationBuilder;
         DropCreateDBCommand(db);
@@ -183,6 +182,11 @@ public static partial class SqlServerExtensions
                     // Execute the current batch when GO statement is found
                     var count = matchGo.Groups["repeat"].Success ? int.Parse(matchGo.Groups["repeat"].Value, CultureInfo.InvariantCulture) : 1;
                     var batch = batchBuilder.ToString();
+                    if (string.IsNullOrWhiteSpace(batch))
+                    {
+                        batchBuilder.Clear();
+                        continue;
+                    }
 
                     // Execute the batch the specified number of times (default: 1)
                     for (var i = 0; i < count; i++)
@@ -240,10 +244,10 @@ public static partial class SqlServerExtensions
         lg?.LogInformation($"Executed {nr} scripts on database {dbRes.Name}");
         return true;
     }
-    private static IResourceBuilder<SqlServerDatabaseResource> ExecScripts(this IResourceBuilder<SqlServerDatabaseResource> db, params IEnumerable<string> sqlScripts)
+    private static IResourceBuilder<SqlServerDatabaseResource> ExecScripts(this IResourceBuilder<SqlServerDatabaseResource> db, params string[] sqlScripts)
     {
-        var arr= sqlScripts?.ToArray();
-        if(arr==null || arr.Length==0) return db;
+        var arr = sqlScripts?.ToArray();
+        if(arr == null || arr.Length == 0) return db;
         string sqlAll = string.Join("\r\nGO\r\n", arr);
         db.WithSqlCommand("Startup_ExecScripts",sqlAll, new CommandOptions()
         {
@@ -259,14 +263,14 @@ public static partial class SqlServerExtensions
  USE master;
 IF DB_ID(N'{dbName}') IS NOT NULL
     BEGIN
-        ALTER DATABASE {dbName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-        DROP DATABASE {dbName};
+        ALTER DATABASE [{dbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+        DROP DATABASE [{dbName}];
     END
-CREATE DATABASE {dbName};
+CREATE DATABASE [{dbName}];
 ", new CommandOptions() { Description = $"Drop and recreate database {dbName}", IconName = "DatabaseWarning" });
         return db;
     }
-    static IResourceBuilder<SqlServerDatabaseResource> RecreateWithScripts(this IResourceBuilder<SqlServerDatabaseResource> db, params IEnumerable<string> sqlScripts)
+    static IResourceBuilder<SqlServerDatabaseResource> RecreateWithScripts(this IResourceBuilder<SqlServerDatabaseResource> db, params string[] sqlScripts)
     {
         string sqlAll = string.Join("\r\nGO\r\n", sqlScripts);
         db
@@ -310,7 +314,7 @@ CREATE DATABASE {dbName};
                 return CommandResults.Failure(ex);
             }
         },
-new CommandOptions() { Description = $"Drop and recreate database {db.Resource.DatabaseName}",IconName= "ArrowClockwise" })
+new CommandOptions() { Description = $"Drop and recreate database {db.Resource.DatabaseName}", IconName = "ArrowClockwise" })
             ; 
         return db;
     }
