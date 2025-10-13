@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace SqlExtensionsAspire;
 
@@ -12,7 +13,7 @@ namespace SqlExtensionsAspire;
 /// Extension methods for SQL Server resources in .NET Aspire applications.
 /// Provides functionality for executing SQL commands, adding SQL Pad viewer, and running SQL scripts.
 /// </summary>
-public  static partial class SqlServerExtensions
+public static partial class SqlServerExtensions
 {
     /// <summary>
     /// Adds a custom SQL command to a SQL Server database resource that can be executed through the Aspire dashboard.
@@ -22,19 +23,19 @@ public  static partial class SqlServerExtensions
     /// <param name="sql">The SQL script to execute when the command is invoked</param>
     /// <param name="commandOptions">Optional command configuration options</param>
     /// <returns>The same resource builder for method chaining</returns>
-    public static IResourceBuilder<SqlServerDatabaseResource> WithSqlCommand(this IResourceBuilder<SqlServerDatabaseResource> db, string name, string sql, CommandOptions? commandOptions=null)
+    public static IResourceBuilder<SqlServerDatabaseResource> WithSqlCommand(this IResourceBuilder<SqlServerDatabaseResource> db, string name, string sql, CommandOptions? commandOptions = null)
     {
-        
-        db.WithCommand(name, name,async ecc =>
+
+        db.WithCommand(name, name, async ecc =>
         {
             // Get the resource logger service to log command execution
-            var log= ecc.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
+            var log = ecc.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
             if (log == null) return new ExecuteCommandResult()
             {
                 Success = false,
                 ErrorMessage = $"no logging available"
             };
-            
+
             // Get a logger instance for this specific database resource
             var lg = log.GetLogger(db.Resource);
             if (log == null) return new ExecuteCommandResult()
@@ -42,43 +43,23 @@ public  static partial class SqlServerExtensions
                 Success = false,
                 ErrorMessage = $"on {db.Resource.Name} no logger"
             };
-            
+            var data = await ExecuteSqlScripts( db.Resource, lg, CancellationToken.None, new[] { sql });
             // Retrieve the connection string for the database
-            var cn = await db.Resource.ConnectionStringExpression.GetValueAsync(CancellationToken.None);
-            if (cn == null) return new ExecuteCommandResult()
+            if(data) 
             {
-                Success = false,
-                ErrorMessage = $"no connection available on {db.Resource?.Name}"
-            };
-            
-            // Create and open SQL connection
-            using var sqlConnection = new SqlConnection();
-            sqlConnection.ConnectionString = cn;
-            await sqlConnection.OpenAsync(CancellationToken.None);
-            
-            // Prepare and execute the SQL command
-            using var command = sqlConnection.CreateCommand();
-            command.CommandText = sql;
-            lg.LogInformation("executing : " + sql);
-            
-            // Set command timeout to 2 minutes (TODO: make this configurable)
-            command.CommandTimeout = 120;
-            try
-            {
-                // Execute the SQL command
-                await command.ExecuteNonQueryAsync();
-                return new ExecuteCommandResult() { Success = true };
+                lg.LogInformation($"Executed command {name} on database {db.Resource.Name}");
+                return CommandResults.Success();
             }
-            catch(Exception ex)
+            else
             {
-                // Return error details if execution fails
-                return new ExecuteCommandResult() { Success = false,ErrorMessage =ex.Message};
+                lg.LogError($"Failed to execute command {name} on database {db.Resource.Name}");
+                return CommandResults.Failure($"Failed to execute command {name}");
+            }
 
-            }
         }, commandOptions);
         return db;
     }
-    
+
     /// <summary>
     /// Adds a SQLPad web-based SQL editor and query tool for the specified database.
     /// SQLPad provides a web interface for running SQL queries and visualizing results.
@@ -140,20 +121,22 @@ public  static partial class SqlServerExtensions
     /// <param name="db">The SQL Server database resource builder to extend</param>
     /// <param name="sqlScripts">Collection of SQL script strings to execute</param>
     /// <returns>The same database resource builder for method chaining</returns>
-    public static IResourceBuilder<SqlServerDatabaseResource> ExecuteSqlServerScripts(this IResourceBuilder<SqlServerDatabaseResource> db, params IEnumerable<string> sqlScripts)
+    public static IResourceBuilder<SqlServerDatabaseResource> ExecuteSqlServerScriptsAtStartup(this IResourceBuilder<SqlServerDatabaseResource> db, params IEnumerable<string> sqlScripts)
     {
         var builder = db.ApplicationBuilder;
-
+        DropCreateDBCommand(db);
+        ExecScripts(db, sqlScripts);
+        RecreateWithScripts(db, sqlScripts);
         // Subscribe to the resource ready event to execute scripts when database is available
         db.OnResourceReady(async (dbRes, ev, ct) =>
         {
             // Get the database connection string
             var cn = await dbRes.ConnectionStringExpression.GetValueAsync(ct);
             if (cn == null) return;
-            
+
             // Set up logging for script execution
             var log = ev.Services.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
-            if(log == null)
+            if (log == null)
             {
                 Console.WriteLine("No ResourceLoggerService");
                 return;
@@ -164,82 +147,172 @@ public  static partial class SqlServerExtensions
                 Console.WriteLine($"No logger for {db.Resource.Name}");
                 return;
             }
-            
+
             // Open connection to the database
-            using var sqlConnection = new SqlConnection();
-            sqlConnection.ConnectionString = cn;
-            await sqlConnection.OpenAsync(ct);
-            
-            int nr = 0;
-            // Process each SQL script
-            foreach (var item in sqlScripts)
-            {
-                lg.LogInformation($"Executing script {++nr}");
-                using var reader = new StringReader(item);
-                var batchBuilder = new StringBuilder();
-
-                // Parse the script line by line to handle GO statements
-                while (reader.ReadLine() is { } line)
-                {
-                    var matchGo = GoStatements().Match(line);
-
-                    if (matchGo.Success)
-                    {
-                        // Execute the current batch when GO statement is found
-                        var count = matchGo.Groups["repeat"].Success ? int.Parse(matchGo.Groups["repeat"].Value, CultureInfo.InvariantCulture) : 1;
-                        var batch = batchBuilder.ToString();
-
-                        // Execute the batch the specified number of times (default: 1)
-                        for (var i = 0; i < count; i++)
-                        {
-                            using var command = sqlConnection.CreateCommand();
-                            command.CommandText = batch;
-                            // Set command timeout to 2 minutes (TODO: make this configurable)
-                            command.CommandTimeout = 120;
-                            try
-                            {
-                                await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
-                            }
-                            catch (Exception ex)
-                            {
-                                // Log errors but continue with remaining scripts
-                                lg.LogError(ex,$"!!!!Error in executing {batch} :\r\n !!!! {ex.Message}");
-                            }
-                        }
-
-                        // Clear the batch builder for the next batch
-                        batchBuilder.Clear();
-                    }
-                    else
-                    {
-                        // Add non-empty lines to the current batch
-                        if (!string.IsNullOrWhiteSpace(line))
-                        {
-                            batchBuilder.AppendLine(line);
-                        }
-                    }
-                }
-
-                // Process any remaining batch lines after the last GO statement
-                if (batchBuilder.Length > 0)
-                {
-                    using var command = sqlConnection.CreateCommand();
-                    var batch = batchBuilder.ToString();
-                    command.CommandText = batch;
-                    // Set command timeout (TODO: make this configurable)
-                    try
-                    {
-                        await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log errors for the final batch
-                        lg.LogError(ex, $"!!!!Error in executing {batch} :\r\n !!!! {ex.Message}");
-                    }
-                }
-            }
-            lg.LogInformation($"Executed {nr} scripts on database {dbRes.Name}");
+            await ExecuteSqlScripts( dbRes, lg, ct, sqlScripts.ToArray());
         });
         return db;
     }
+
+    private static async Task<bool> ExecuteSqlScripts(SqlServerDatabaseResource dbRes,  ILogger? lg, CancellationToken ct, params string[] scripts)
+    {
+        var sqlScripts = scripts?.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+        if (sqlScripts == null || sqlScripts.Length == 0) return false;
+        var cn = await dbRes.ConnectionStringExpression.GetValueAsync(ct);
+        if (cn == null) return false;
+        using var sqlConnection = new SqlConnection();
+        sqlConnection.ConnectionString = cn;
+        await sqlConnection.OpenAsync(ct);
+        if(ct.IsCancellationRequested) return false;
+        int nr = 0;
+        // Process each SQL script
+        foreach (var item in sqlScripts)
+        {
+            if (ct.IsCancellationRequested) return false;
+            lg?.LogInformation($"Executing script {++nr}");
+            using var reader = new StringReader(item);
+            var batchBuilder = new StringBuilder();
+
+            // Parse the script line by line to handle GO statements
+            while (reader.ReadLine() is { } line)
+            {
+                var matchGo = GoStatements().Match(line);
+
+                if (matchGo.Success)
+                {
+                    // Execute the current batch when GO statement is found
+                    var count = matchGo.Groups["repeat"].Success ? int.Parse(matchGo.Groups["repeat"].Value, CultureInfo.InvariantCulture) : 1;
+                    var batch = batchBuilder.ToString();
+
+                    // Execute the batch the specified number of times (default: 1)
+                    for (var i = 0; i < count; i++)
+                    {
+                        using var command = sqlConnection.CreateCommand();
+                        command.CommandText = batch;
+                        // Set command timeout to 2 minutes (TODO: make this configurable)
+                        command.CommandTimeout = 120;
+                        try
+                        {
+                            await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log errors but continue with remaining scripts
+                            lg?.LogError(ex, $"!!!!Error in executing {batch} :\r\n !!!! {ex.Message}");
+                        }
+                    }
+
+                    // Clear the batch builder for the next batch
+                    batchBuilder.Clear();
+                }
+                else
+                {
+                    // Add non-empty lines to the current batch
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        batchBuilder.AppendLine(line);
+                    }
+                }
+            }
+
+            // Process any remaining batch lines after the last GO statement
+            if (batchBuilder.Length > 0)
+            {
+                if(sqlConnection.State != System.Data.ConnectionState.Open)
+                {
+                    await sqlConnection.OpenAsync(ct);
+                }
+                using var command = sqlConnection.CreateCommand();
+                var batch = batchBuilder.ToString();
+                command.CommandText = batch;
+                // Set command timeout (TODO: make this configurable)
+                try
+                {
+                    await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    // Log errors for the final batch
+                    lg?.LogError(ex, $"!!!!Error in executing {batch} :\r\n !!!! {ex.Message}");
+                }
+            }
+        }
+        lg?.LogInformation($"Executed {nr} scripts on database {dbRes.Name}");
+        return true;
+    }
+    private static IResourceBuilder<SqlServerDatabaseResource> ExecScripts(this IResourceBuilder<SqlServerDatabaseResource> db, params IEnumerable<string> sqlScripts)
+    {
+        var arr= sqlScripts?.ToArray();
+        if(arr==null || arr.Length==0) return db;
+        string sqlAll = string.Join("\r\nGO\r\n", arr);
+        db.WithSqlCommand("Startup_ExecScripts",sqlAll, new CommandOptions()
+        {
+            Description = $"Execute {arr.Length} startup scripts on database {db.Resource.DatabaseName}",
+            IconName = "TextBulletListSquareWarning",
+        });
+        return db;
+    }
+    static IResourceBuilder<SqlServerDatabaseResource> DropCreateDBCommand(this IResourceBuilder<SqlServerDatabaseResource> db)
+    {
+        string dbName    = db.Resource.DatabaseName;
+        db.WithSqlCommand("dropCreate", $@"
+ USE master;
+IF DB_ID(N'{dbName}') IS NOT NULL
+    BEGIN
+        ALTER DATABASE {dbName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+        DROP DATABASE {dbName};
+    END
+CREATE DATABASE {dbName};
+", new CommandOptions() { Description = $"Drop and recreate database {dbName}", IconName = "DatabaseWarning" });
+        return db;
+    }
+    static IResourceBuilder<SqlServerDatabaseResource> RecreateWithScripts(this IResourceBuilder<SqlServerDatabaseResource> db, params IEnumerable<string> sqlScripts)
+    {
+        string sqlAll = string.Join("\r\nGO\r\n", sqlScripts);
+        db
+            .WithCommand("reset-all", "Reset Everything", async ct =>
+            {
+            var log = ct.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
+            if (log == null) return new ExecuteCommandResult()
+            {
+                Success = false,
+                ErrorMessage = $"no logging available"
+            };
+
+            // Get a logger instance for this specific database resource
+            var logger = log.GetLogger(db.Resource);
+            if (logger == null) return new ExecuteCommandResult()
+            {
+                Success = false,
+                ErrorMessage = $"on {db.Resource.Name} no logger"
+            };
+
+
+            var commandService = ct.ServiceProvider.GetService(typeof(ResourceCommandService)) as ResourceCommandService;
+            if (commandService == null) return CommandResults.Failure($"no command service available");
+
+                logger.LogInformation("Starting database system reset...");
+            try
+            {
+                var flushResult = await commandService.ExecuteCommandAsync(db.Resource, "dropCreate");
+                var restartResult = await commandService.ExecuteCommandAsync(db.Resource, "Startup_ExecScripts");
+                if (!restartResult.Success || !flushResult.Success)
+                {
+                    return CommandResults.Failure($"System reset failed");
+                }
+
+                logger.LogInformation("System reset completed successfully");
+                return CommandResults.Success();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "System reset failed");
+                return CommandResults.Failure(ex);
+            }
+        },
+new CommandOptions() { Description = $"Drop and recreate database {db.Resource.DatabaseName}",IconName= "ArrowClockwise" })
+            ; 
+        return db;
+    }
+
 }
