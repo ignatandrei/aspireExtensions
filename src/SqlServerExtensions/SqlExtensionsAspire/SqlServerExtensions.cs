@@ -204,7 +204,7 @@ public static partial class SqlServerExtensions
                                 case ExecCommandEnum.NonQuery:
                                     var nrRows = await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
                                     lg?.LogInformation($"Executed batch (GO {i + 1} from {count}), affected rows: \u001b[38;5;1m{nrRows}\u001b[0m");
-                                    break;
+                                    continue;
                                 case ExecCommandEnum.Scalar:
                                     var scalarResult = await command.ExecuteScalarAsync(ct).ConfigureAwait(false);
                                     lg?.LogInformation($"Executed batch (GO {i + 1} from {count}), scalar result: \u001b[38;5;1m{scalarResult}\u001b[0m");
@@ -259,7 +259,7 @@ public static partial class SqlServerExtensions
                         case ExecCommandEnum.NonQuery:
                             var nrRows = await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
                             lg?.LogInformation($"Executed batch (final), affected rows: \u001b[38;5;1m{nrRows}\u001b[0m");
-                            break;
+                            continue;
                         case ExecCommandEnum.Scalar:
                             var scalarResult = await command.ExecuteScalarAsync(ct).ConfigureAwait(false);
                             lg?.LogInformation($"Executed batch (final), scalar result: \u001b[38;5;1m{scalarResult}\u001b[0m");
