@@ -14,6 +14,8 @@ namespace SqlExtensionsAspire;
 /// </summary>
 public static partial class SqlServerExtensions
 {
+    private const string AnsiColorRed = "\u001b[38;5;1m";
+    private const string AnsiColorReset = "\u001b[0m";
     /// <summary>
     /// Adds a custom SQL command to a SQL Server database resource that can be executed through the Aspire dashboard.
     /// </summary>
@@ -22,7 +24,7 @@ public static partial class SqlServerExtensions
     /// <param name="sql">The SQL script to execute when the command is invoked</param>
     /// <param name="commandOptions">Optional command configuration options</param>
     /// <returns>The same resource builder for method chaining</returns>
-    public static IResourceBuilder<SqlServerDatabaseResource> WithSqlCommand(this IResourceBuilder<SqlServerDatabaseResource> db, string name, string sql, CommandOptions? commandOptions = null)
+    public static IResourceBuilder<SqlServerDatabaseResource> WithSqlCommand(this IResourceBuilder<SqlServerDatabaseResource> db, string name, string sql, ExecCommandEnum exec, CommandOptions? commandOptions = null)
     {
 
         db.WithCommand(name, name, async ecc =>
@@ -42,11 +44,11 @@ public static partial class SqlServerExtensions
                 Success = false,
                 ErrorMessage = $"on {db.Resource.Name} no logger"
             };
-            var data = await ExecuteSqlScripts( db.Resource, lg, CancellationToken.None, new[] { sql });
-            
+            var data = await ExecuteSqlScripts( db.Resource, lg, CancellationToken.None, exec, new[] { sql });
+
             if(data) 
             {
-                lg.LogInformation($"Executed command {name} on database {db.Resource.Name}");
+                lg.LogDebug($"Executed command {name} on database {db.Resource.Name}");
                 return CommandResults.Success();
             }
             else
@@ -120,7 +122,7 @@ public static partial class SqlServerExtensions
     /// <param name="db">The SQL Server database resource builder to extend</param>
     /// <param name="sqlScripts">Collection of SQL script strings to execute</param>
     /// <returns>The same database resource builder for method chaining</returns>
-    public static IResourceBuilder<SqlServerDatabaseResource> ExecuteSqlServerScriptsAtStartup(this IResourceBuilder<SqlServerDatabaseResource> db, params string[] sqlScripts)
+    public static IResourceBuilder<SqlServerDatabaseResource> ExecuteSqlServerScriptsAtStartup(this IResourceBuilder<SqlServerDatabaseResource> db,  params string[] sqlScripts)
     {
         var builder = db.ApplicationBuilder;
         DropCreateDBCommand(db);
@@ -148,12 +150,39 @@ public static partial class SqlServerExtensions
             }
 
             // Open connection to the database
-            await ExecuteSqlScripts( dbRes, lg, ct, sqlScripts);
+            await ExecuteSqlScripts( dbRes, lg, ct, ExecCommandEnum.NonQuery, sqlScripts);
         });
         return db;
     }
+    private static async Task<string?> ExecuteBatchCommand(
+        SqlCommand command,
+        ExecCommandEnum execCommandEnum,
+        ILogger? lg,
+        int batchIndex,
+        int totalBatches,
+        bool isFinalBatch,
+        CancellationToken ct)
+    {
+        var batchLabel = isFinalBatch ? "final" : $"GO {batchIndex} from {totalBatches}";
+        switch (execCommandEnum)
+        {
+            case ExecCommandEnum.None:
+                throw new InvalidOperationException("ExecCommandEnum.None is not valid for execution");
+            case ExecCommandEnum.NonQuery:
+                var nrRows = await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                
+                lg?.LogInformation($"Executed batch ({batchLabel}), affected rows: {AnsiColorRed}{nrRows}{AnsiColorReset}");
+                return nrRows.ToString();
+            case ExecCommandEnum.Scalar:
+                var scalarResult = await command.ExecuteScalarAsync(ct).ConfigureAwait(false);
+                lg?.LogInformation($"Executed batch ({batchLabel}), scalar result: {AnsiColorRed}{scalarResult}{AnsiColorReset}");
+                return scalarResult?.ToString();
+            default:
+                throw new ArgumentOutOfRangeException(nameof(execCommandEnum), execCommandEnum, null);
+    }
+    }
 
-    private static async Task<bool> ExecuteSqlScripts(SqlServerDatabaseResource dbRes,  ILogger? lg, CancellationToken ct, params string[] scripts)
+    static async Task<bool> ExecuteSqlScripts(SqlServerDatabaseResource dbRes,  ILogger? lg, CancellationToken ct, ExecCommandEnum execCommandEnum, params string[] scripts)
     {
         var sqlScripts = scripts?.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
         if (sqlScripts == null || sqlScripts.Length == 0) return false;
@@ -168,7 +197,7 @@ public static partial class SqlServerExtensions
         foreach (var item in sqlScripts)
         {
             if (ct.IsCancellationRequested) return false;
-            lg?.LogInformation($"Executing script {++nr}");
+            lg?.LogDebug($"Executing script {++nr}");
             using var reader = new StringReader(item);
             var batchBuilder = new StringBuilder();
 
@@ -197,8 +226,8 @@ public static partial class SqlServerExtensions
                         command.CommandTimeout = 120;
                         try
                         {
-                            var nrRows= await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
-                            lg?.LogInformation($"Executed batch (GO {i+1} from {count}), affected rows: {nrRows}");
+                            await ExecuteBatchCommand (command, execCommandEnum, lg, i + 1, count, false, ct);
+
                         }
                         catch (Exception ex)
                         {
@@ -238,8 +267,7 @@ public static partial class SqlServerExtensions
                 // Set command timeout (TODO: make this configurable)
                 try
                 {
-                    var nrRows = await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
-                    lg?.LogInformation($"Executed batch (final), affected rows: {nrRows}");
+                    await ExecuteBatchCommand(command, execCommandEnum, lg, 0, 0, true, ct);
                 }
                 catch (Exception ex)
                 {
@@ -248,7 +276,7 @@ public static partial class SqlServerExtensions
                 }
             }
         }
-        lg?.LogInformation($"Executed {nr} scripts on database {dbRes.Name}");
+        lg?.LogDebug($"Executed {nr} scripts on database {dbRes.Name}");
         return true;
     }
     private static IResourceBuilder<SqlServerDatabaseResource> ExecScripts(this IResourceBuilder<SqlServerDatabaseResource> db, params string[] sqlScripts)
@@ -256,7 +284,7 @@ public static partial class SqlServerExtensions
         var arr = sqlScripts?.ToArray();
         if(arr == null || arr.Length == 0) return db;
         string sqlAll = string.Join("\r\nGO\r\n", arr);
-        db.WithSqlCommand("Startup_ExecScripts",sqlAll, new CommandOptions()
+        db.WithSqlCommand("Startup_ExecScripts",sqlAll,ExecCommandEnum.NonQuery, new CommandOptions()
         {
             Description = $"Execute {arr.Length} startup scripts on database {db.Resource.DatabaseName}",
             IconName = "TextBulletListSquareWarning",
@@ -274,7 +302,7 @@ IF DB_ID(N'{dbName}') IS NOT NULL
         DROP DATABASE [{dbName}];
     END
 CREATE DATABASE [{dbName}];
-", new CommandOptions() { Description = $"Drop and recreate database {dbName}", IconName = "DatabaseWarning" });
+", ExecCommandEnum.NonQuery,new CommandOptions() { Description = $"Drop and recreate database {dbName}", IconName = "DatabaseWarning" });
         return db;
     }
     static IResourceBuilder<SqlServerDatabaseResource> RecreateWithScripts(this IResourceBuilder<SqlServerDatabaseResource> db, params string[] sqlScripts)
@@ -302,7 +330,7 @@ CREATE DATABASE [{dbName}];
             var commandService = ct.ServiceProvider.GetService(typeof(ResourceCommandService)) as ResourceCommandService;
             if (commandService == null) return CommandResults.Failure($"no command service available");
 
-                logger.LogInformation("Starting database system reset...");
+                logger.LogDebug("Starting database system reset...");
             try
             {
                 var flushResult = await commandService.ExecuteCommandAsync(db.Resource, "dropCreate");
@@ -312,7 +340,7 @@ CREATE DATABASE [{dbName}];
                     return CommandResults.Failure($"System reset failed");
                 }
 
-                logger.LogInformation("System reset completed successfully");
+                logger.LogDebug("System reset completed successfully");
                 return CommandResults.Success();
             }
             catch (Exception ex)

@@ -1,16 +1,23 @@
-Insert into Department (
-	Name
-) values (
-	'IT'
-);
+if not exists (select 1 from Department)
+begin
+	Insert into Department (
+		Name
+	) values (
+		'IT'
+	);
 
-Insert into Department (
-	Name
-) values (
-	'Security'
-);
+	Insert into Department (
+		Name
+	) values (
+		'Security'
+	);
+end
 
 GO
+
+if not exists (select 1 from Employee)
+begin
+	
 
 Insert into Employee (
 	Name, IDepartment
@@ -24,5 +31,6 @@ Insert into Employee (
 	'John Doe', 2
 );
 
+end
 GO
 
