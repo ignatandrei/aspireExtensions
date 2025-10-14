@@ -4,8 +4,8 @@ using SqlExtensionsAspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var apiService = builder.AddProject<Projects.SqlServerExtensions_ApiService>("apiservice")
-    .WithHttpHealthCheck("/health");
+//var apiService = builder.AddProject<Projects.SqlServerExtensions_ApiService>("apiservice")
+//    .WithHttpHealthCheck("/health");
 
 //builder.AddProject<Projects.SqlServerExtensions_Web>("webfrontend")
 //    .WithExternalHttpEndpoints()
@@ -18,12 +18,14 @@ var paramPass = builder.AddParameter("password", "myP@ssW0rd");
 
 //string str = string.Join("\r\nGO\r\n", DBFiles.FilesToCreate);
 var sqlserver = builder.AddSqlServer("sqlserver", paramPass, 1433)
+    .WithLifetime(ContainerLifetime.Persistent)
     //.WithDbGate()
     ;
 
 var db = sqlserver.AddDatabase("DepEmp")
     .WithSqlPadViewerForDB(sqlserver)    
     .WithSqlCommand("delete","delete from Employee")
+    .WithSqlCommand("select", "select * from Employee")
     .ExecuteSqlServerScriptsAtStartup(DBFiles.FilesToCreate.ToArray())
     //.DropCreateDBCommand()
     //.ExecScripts(DBFiles.FilesToCreate)

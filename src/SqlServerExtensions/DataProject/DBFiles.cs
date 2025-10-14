@@ -10,6 +10,10 @@ public class DBFiles
             {
                 yield return FromStreamReader(reader);
             }
+            using (var reader = EmbeddedResources.sql_002_InsertData_sql_Reader)
+            {
+                yield return FromStreamReader(reader);
+            }
         }
     }
     static string FromStreamReader(StreamReader streamReader)

@@ -43,7 +43,7 @@ public static partial class SqlServerExtensions
                 ErrorMessage = $"on {db.Resource.Name} no logger"
             };
             var data = await ExecuteSqlScripts( db.Resource, lg, CancellationToken.None, new[] { sql });
-            // Retrieve the connection string for the database
+            
             if(data) 
             {
                 lg.LogInformation($"Executed command {name} on database {db.Resource.Name}");
@@ -148,7 +148,7 @@ public static partial class SqlServerExtensions
             }
 
             // Open connection to the database
-            await ExecuteSqlScripts( dbRes, lg, ct, sqlScripts.ToArray());
+            await ExecuteSqlScripts( dbRes, lg, ct, sqlScripts);
         });
         return db;
     }
@@ -197,7 +197,8 @@ public static partial class SqlServerExtensions
                         command.CommandTimeout = 120;
                         try
                         {
-                            await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                            var nrRows= await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                            lg?.LogInformation($"Executed batch (GO {i+1} from {count}), affected rows: {nrRows}");
                         }
                         catch (Exception ex)
                         {
@@ -228,11 +229,17 @@ public static partial class SqlServerExtensions
                 }
                 using var command = sqlConnection.CreateCommand();
                 var batch = batchBuilder.ToString();
+                if (string.IsNullOrWhiteSpace(batch))
+                {
+                    batchBuilder.Clear();
+                    continue;
+                }
                 command.CommandText = batch;
                 // Set command timeout (TODO: make this configurable)
                 try
                 {
-                    await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                    var nrRows = await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                    lg?.LogInformation($"Executed batch (final), affected rows: {nrRows}");
                 }
                 catch (Exception ex)
                 {
