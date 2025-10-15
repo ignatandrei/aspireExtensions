@@ -22,7 +22,7 @@ public class WebTests :  IAsyncLifetime
     {
 
         hostWithData = await CreateAspireHost<Projects.SqlServerExtensions_AppHost>.Create(DefaultTimeout, TestContext.Current.CancellationToken);
-        //Process.Start(new ProcessStartInfo() { FileName = hostWithData.urlDashboard, UseShellExecute = true });
+        Process.Start(new ProcessStartInfo() { FileName = hostWithData.urlDashboard, UseShellExecute = true });
         
     }
 
@@ -69,6 +69,25 @@ public class WebTests :  IAsyncLifetime
         var res = await cmd.ExecuteScalarAsync(ct);
         Assert.NotNull(res);
         Assert.Equal("0", res.ToString());
+    }
+    [Fact]
+    public async Task RestoreDatabaseWorks()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await SqlCommandWorks();
+        var message = string.Join("\r\n", hostWithData.fakeLoggerProvider!.Collector.GetSnapshot(true).Select(it => it.Message).ToArray());
+        var result = await hostWithData.app.ResourceCommands.ExecuteCommandAsync("DepEmp", "reset-all", ct);
+        //TODO: see fake logger messages
+        Assert.True(result.Success);
+        //await Task.Delay(30000, ct);
+        var cnString = await hostWithData.app!.GetConnectionStringAsync("DepEmp", ct);
+        using var cn = new SqlConnection(cnString);
+        await cn.OpenAsync(ct);
+        using var cmd = cn.CreateCommand();
+        cmd.CommandText = "select count(*) from Employee";
+        var res = await cmd.ExecuteScalarAsync(ct);
+        Assert.NotNull(res);
+        Assert.Equal("2", res.ToString());
     }
     [Fact]
     public async Task DashboardIsAvailable()
