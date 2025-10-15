@@ -1,40 +1,53 @@
+using Aspire.Hosting;
+using Aspire.Hosting.Testing;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
+using System.Diagnostics;
 
 namespace SqlServerExtensions.Tests;
 
-public class WebTests
+public class WebTests :  IAsyncLifetime
 {
-    private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(59);
+    CreateAspireHost<Projects.SqlServerExtensions_AppHost>? hostWithData;
+    public async ValueTask InitializeAsync()
+    {
+
+        hostWithData = await CreateAspireHost<Projects.SqlServerExtensions_AppHost>.Create(DefaultTimeout, TestContext.Current.CancellationToken);
+        Process.Start(new ProcessStartInfo() { FileName = hostWithData.urlDashboard, UseShellExecute = true });
+     
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hostWithData != null) await hostWithData.DisposeAsync();
+    }
 
     [Fact]
-    public async Task GetWebResourceRootReturnsOkStatusCode()
+    public async Task DatabaseIsCorrectlyConfigured()
     {
-        // Arrange
+        ArgumentNullException.ThrowIfNull(hostWithData);
+        var dashboardUrl = Environment.GetEnvironmentVariable("ASPIRE_DASHBOARD_URLS");
+
+
         var cancellationToken = TestContext.Current.CancellationToken;
-
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.SqlServerExtensions_AppHost>(cancellationToken);
-        appHost.Services.AddLogging(logging =>
-        {
-            logging.SetMinimumLevel(LogLevel.Debug);
-            // Override the logging filters from the app's configuration
-            logging.AddFilter(appHost.Environment.ApplicationName, LogLevel.Debug);
-            logging.AddFilter("Aspire.", LogLevel.Debug);
-            // To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
-        });
-        appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        {
-            clientBuilder.AddStandardResilienceHandler();
-        });
-
-        await using var app = await appHost.BuildAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
-        await app.StartAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
-
-        // Act
-        var httpClient = app.CreateHttpClient("webfrontend");
-        await app.ResourceNotifications.WaitForResourceHealthyAsync("webfrontend", cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
-        var response = await httpClient.GetAsync("/", cancellationToken);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        await hostWithData.app.ResourceNotifications.WaitForResourceHealthyAsync("DepEmp", cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
+        var cnString = await hostWithData.app.GetConnectionStringAsync("DepEmp", cancellationToken);
+        await Task.Delay(20000,cancellationToken);
+        await Task.Yield();
+        var message = string.Join("\r\n", hostWithData.fakeLoggerProvider!.Collector.GetSnapshot().Select(it => it.Message).ToArray());
+        using var cn = new SqlConnection(cnString);
+        await cn.OpenAsync(cancellationToken);
+        using var cmd = cn.CreateCommand();
+        cmd.CommandText = "select count(*) from Department";
+        var res = await cmd.ExecuteScalarAsync(cancellationToken);
+        Assert.NotNull(res);
+        Assert.Equal("2", res.ToString());
     }
+
+    
 }
