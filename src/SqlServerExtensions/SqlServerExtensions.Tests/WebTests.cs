@@ -7,9 +7,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using System.Diagnostics;
+using System.Threading;
 
 namespace SqlServerExtensions.Tests;
+[CollectionDefinition("SerialTests", DisableParallelization = true)]
+public class SerialTestsCollection { }
 
+[Collection("SerialTests")]
 public class WebTests :  IAsyncLifetime
 {
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(59);
@@ -42,10 +46,29 @@ public class WebTests :  IAsyncLifetime
         using var cn = new SqlConnection(cnString);
         await cn.OpenAsync(cancellationToken);
         using var cmd = cn.CreateCommand();
-        cmd.CommandText = "select count(*) from Department";
+        cmd.CommandText = "select count(*) from Employee";
         var res = await cmd.ExecuteScalarAsync(cancellationToken);
         Assert.NotNull(res);
         Assert.Equal("2", res.ToString());
+    }
+    [Fact]
+    public async Task SqlCommandWorks()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await DatabaseIsCorrectlyConfigured();
+        var message = string.Join("\r\n", hostWithData.fakeLoggerProvider!.Collector.GetSnapshot(true).Select(it => it.Message).ToArray());
+        var cnString = await hostWithData.app!.GetConnectionStringAsync("DepEmp", ct);
+        var result= await hostWithData.app.ResourceCommands.ExecuteCommandAsync("DepEmp", "deleteEmployee", ct);
+        //TODO: see fake logger messages
+        Assert.True(result.Success);
+        //await Task.Delay(20000, ct);
+        using var cn = new SqlConnection(cnString);
+        await cn.OpenAsync(ct);
+        using var cmd = cn.CreateCommand();
+        cmd.CommandText = "select count(*) from Employee";
+        var res = await cmd.ExecuteScalarAsync(ct);
+        Assert.NotNull(res);
+        Assert.Equal("0", res.ToString());
     }
     [Fact]
     public async Task DashboardIsAvailable()
@@ -58,12 +81,12 @@ public class WebTests :  IAsyncLifetime
         //var content = await response.Content.ReadAsStringAsync(cancellationToken);
         //Assert.Contains("Aspire Hosting Dashboard", content);
     }
-    [Theory]
-    [InlineData(60)]
-    public async Task EnsureDashboardAvailable(int seconds)
-    {
-        Process.Start(new ProcessStartInfo() { FileName = hostWithData!.urlDashboard, UseShellExecute = true });
-        await Task.Delay(seconds*1000, TestContext.Current.CancellationToken);
-    }
+    //[Theory]
+    //[InlineData(60)]
+    //public async Task EnsureDashboardAvailable(int seconds)
+    //{
+    //    Process.Start(new ProcessStartInfo() { FileName = hostWithData!.urlDashboard, UseShellExecute = true });
+    //    await Task.Delay(seconds*1000, TestContext.Current.CancellationToken);
+    //}
 
 }
