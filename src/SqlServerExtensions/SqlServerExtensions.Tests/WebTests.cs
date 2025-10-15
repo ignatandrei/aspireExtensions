@@ -13,27 +13,64 @@ namespace SqlServerExtensions.Tests;
 [CollectionDefinition("SerialTests", DisableParallelization = true)]
 public class SerialTestsCollection { }
 
-[Collection("SerialTests")]
-public class WebTests :  IAsyncLifetime
+public class WebTestsFixture :IAsyncDisposable
 {
-    private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(59);
-    CreateAspireHost<Projects.SqlServerExtensions_AppHost>? hostWithData;
-    public async ValueTask InitializeAsync()
-    {
+    private CreateAspireHost<Projects.SqlServerExtensions_AppHost>? HostWithData { get; set; }
 
-        hostWithData = await CreateAspireHost<Projects.SqlServerExtensions_AppHost>.Create(DefaultTimeout, TestContext.Current.CancellationToken);
-        Process.Start(new ProcessStartInfo() { FileName = hostWithData.urlDashboard, UseShellExecute = true });
+    public WebTestsFixture()
+    {
+    }
+    static Lock lockHost = new Lock();
+    public async Task<CreateAspireHost<Projects.SqlServerExtensions_AppHost>> GetHostWithData()
+    {
+    
         
+        lock (lockHost)
+        {
+            if (HostWithData != null) return HostWithData;
+
+        }
+
+        HostWithData = await CreateAspireHost<Projects.SqlServerExtensions_AppHost>.Create(
+            TimeSpan.FromSeconds(59), TestContext.Current.CancellationToken);
+        Process.Start(new ProcessStartInfo() { FileName = HostWithData.urlDashboard, UseShellExecute = true });
+        return HostWithData;
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (hostWithData != null) await hostWithData.DisposeAsync();
+        if (HostWithData != null) await HostWithData.DisposeAsync();
+    }
+
+   
+}
+
+[Collection("SerialTests")]
+public class WebTests : IClassFixture<WebTestsFixture>
+{
+    private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(59);
+    //static CreateAspireHost<Projects.SqlServerExtensions_AppHost>? hostWithData;
+
+
+    private readonly WebTestsFixture _fixture;
+
+    public WebTests(WebTestsFixture fixture)
+    {
+        _fixture = fixture;
+        
+    }
+    
+
+    public async ValueTask DisposeAsync()
+    {
+        if(_fixture != null)
+            await _fixture.DisposeAsync();
     }
 
     [Fact]
     public async Task DatabaseIsCorrectlyConfigured()
     {
+        var hostWithData = await _fixture.GetHostWithData();
         var cancellationToken = TestContext.Current.CancellationToken;
 
         ArgumentNullException.ThrowIfNull(hostWithData);
@@ -54,6 +91,7 @@ public class WebTests :  IAsyncLifetime
     [Fact]
     public async Task SqlCommandWorks()
     {
+        var hostWithData = await _fixture.GetHostWithData();
         var ct = TestContext.Current.CancellationToken;
         await DatabaseIsCorrectlyConfigured();
         var message = string.Join("\r\n", hostWithData.fakeLoggerProvider!.Collector.GetSnapshot(true).Select(it => it.Message).ToArray());
@@ -73,6 +111,7 @@ public class WebTests :  IAsyncLifetime
     [Fact]
     public async Task RestoreDatabaseWorks()
     {
+        var hostWithData = await _fixture.GetHostWithData();
         var ct = TestContext.Current.CancellationToken;
         await SqlCommandWorks();
         var message = string.Join("\r\n", hostWithData.fakeLoggerProvider!.Collector.GetSnapshot(true).Select(it => it.Message).ToArray());
@@ -92,6 +131,7 @@ public class WebTests :  IAsyncLifetime
     [Fact]
     public async Task DashboardIsAvailable()
     {
+        var hostWithData = await _fixture.GetHostWithData();
         var cancellationToken = TestContext.Current.CancellationToken;
         ArgumentNullException.ThrowIfNull(hostWithData);
         var httpClient = new HttpClient();
