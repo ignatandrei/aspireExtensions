@@ -6,44 +6,9 @@ using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
-using System.Diagnostics;
 using System.Threading;
 
 namespace SqlServerExtensions.Tests;
-[CollectionDefinition("SerialTests", DisableParallelization = true)]
-public class SerialTestsCollection { }
-
-public class WebTestsFixture :IAsyncDisposable
-{
-    private CreateAspireHost<Projects.SqlServerExtensions_AppHost>? HostWithData { get; set; }
-
-    public WebTestsFixture()
-    {
-    }
-    static Lock lockHost = new Lock();
-    public async Task<CreateAspireHost<Projects.SqlServerExtensions_AppHost>> GetHostWithData()
-    {
-    
-        
-        lock (lockHost)
-        {
-            if (HostWithData != null) return HostWithData;
-
-        }
-
-        HostWithData = await CreateAspireHost<Projects.SqlServerExtensions_AppHost>.Create(
-            TimeSpan.FromSeconds(59), TestContext.Current.CancellationToken);
-        Process.Start(new ProcessStartInfo() { FileName = HostWithData.urlDashboard, UseShellExecute = true });
-        return HostWithData;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (HostWithData != null) await HostWithData.DisposeAsync();
-    }
-
-   
-}
 
 [Collection("SerialTests")]
 public class WebTests : IClassFixture<WebTestsFixture>

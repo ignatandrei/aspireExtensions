@@ -1,4 +1,5 @@
 ﻿using Aspire.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using System.Diagnostics;
@@ -16,13 +17,11 @@ public class CreateAspireHost<TEntryPoint>: IAsyncDisposable
     {
         CreateAspireHost<TEntryPoint> instance = new CreateAspireHost<TEntryPoint>();
         instance.fakeLoggerProvider = new FakeLoggerProvider();
-
         instance.appHost = await DistributedApplicationTestingBuilder.CreateAsync<TEntryPoint>([],
             (dao, habs) =>
             {
                 dao.DisableDashboard = false;
-                dao.AllowUnsecuredTransport = true;
-
+                dao.AllowUnsecuredTransport = true;                
             },
             cancellationToken);
         instance.appHost.Services.AddLogging(logging =>
