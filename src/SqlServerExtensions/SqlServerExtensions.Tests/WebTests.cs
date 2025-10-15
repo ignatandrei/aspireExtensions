@@ -18,8 +18,8 @@ public class WebTests :  IAsyncLifetime
     {
 
         hostWithData = await CreateAspireHost<Projects.SqlServerExtensions_AppHost>.Create(DefaultTimeout, TestContext.Current.CancellationToken);
-        Process.Start(new ProcessStartInfo() { FileName = hostWithData.urlDashboard, UseShellExecute = true });
-     
+        //Process.Start(new ProcessStartInfo() { FileName = hostWithData.urlDashboard, UseShellExecute = true });
+        
     }
 
     public async ValueTask DisposeAsync()
@@ -30,13 +30,12 @@ public class WebTests :  IAsyncLifetime
     [Fact]
     public async Task DatabaseIsCorrectlyConfigured()
     {
-        ArgumentNullException.ThrowIfNull(hostWithData);
-        var dashboardUrl = Environment.GetEnvironmentVariable("ASPIRE_DASHBOARD_URLS");
-
-
         var cancellationToken = TestContext.Current.CancellationToken;
-        await hostWithData.app.ResourceNotifications.WaitForResourceHealthyAsync("DepEmp", cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
-        var cnString = await hostWithData.app.GetConnectionStringAsync("DepEmp", cancellationToken);
+
+        ArgumentNullException.ThrowIfNull(hostWithData);
+
+        await hostWithData.app!.ResourceNotifications.WaitForResourceHealthyAsync("DepEmp", cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
+        var cnString = await hostWithData.app!.GetConnectionStringAsync("DepEmp", cancellationToken);
         await Task.Delay(20000,cancellationToken);
         await Task.Yield();
         var message = string.Join("\r\n", hostWithData.fakeLoggerProvider!.Collector.GetSnapshot().Select(it => it.Message).ToArray());
@@ -48,6 +47,23 @@ public class WebTests :  IAsyncLifetime
         Assert.NotNull(res);
         Assert.Equal("2", res.ToString());
     }
+    [Fact]
+    public async Task DashboardIsAvailable()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        ArgumentNullException.ThrowIfNull(hostWithData);
+        var httpClient = new HttpClient();
+        var response = await httpClient.GetAsync(hostWithData.urlDashboard, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        //var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        //Assert.Contains("Aspire Hosting Dashboard", content);
+    }
+    [Theory]
+    [InlineData(60)]
+    public async Task EnsureDashboardAvailable(int seconds)
+    {
+        Process.Start(new ProcessStartInfo() { FileName = hostWithData!.urlDashboard, UseShellExecute = true });
+        await Task.Delay(seconds*1000, TestContext.Current.CancellationToken);
+    }
 
-    
 }
