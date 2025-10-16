@@ -7,7 +7,6 @@
         "playwright",
         "run-test-mcp-server"
       ],
-      "cwd": "${workspaceFolder}"
     }
   },
   "inputs": []
