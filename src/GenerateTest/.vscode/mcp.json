@@ -7,7 +7,17 @@
         "playwright",
         "run-test-mcp-server"
       ],
-    }
+    },
+    "filesystem": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-filesystem",
+				"${workspaceFolder}"
+			],
+			"type": "stdio"
+		}
   },
+  
   "inputs": []
 }
