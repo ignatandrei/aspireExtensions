@@ -11,7 +11,7 @@ using System.Threading;
 namespace SqlServerExtensions.Tests;
 
 [Collection("SerialTests")]
-public class WebTests : IClassFixture<WebTestsFixture>
+public class CommandsTests : IClassFixture<WebTestsFixture>
 {
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(59);
     //static CreateAspireHost<Projects.SqlServerExtensions_AppHost>? hostWithData;
@@ -19,7 +19,7 @@ public class WebTests : IClassFixture<WebTestsFixture>
 
     private readonly WebTestsFixture _fixture;
 
-    public WebTests(WebTestsFixture fixture)
+    public CommandsTests(WebTestsFixture fixture)
     {
         _fixture = fixture;
         
