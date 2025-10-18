@@ -23,17 +23,22 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
+  timeout: 60000,
+  
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
     // baseURL: 'http://localhost:3000',
-
+    screenshot:'on',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    video: {
-          mode: 'on-first-retry',
-          size: { width: 640, height: 480 }
-        },
+    video:'on',
+     browserName: 'chromium', 
+      headless: false,
+    // video: {
+    //       mode: 'on-first-retry',
+    //       size: { width: 640, height: 480 }
+    //     },
   },
  
   /* Configure projects for major browsers */
@@ -43,15 +48,15 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
 
     /* Test against mobile viewports. */
     // {
@@ -75,9 +80,14 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command: 'powershell ./startServer.ps1',
+    url: 'http://localhost:15102',
+    reuseExistingServer: false,
+
+    stdout: 'pipe',
+    stderr: 'pipe',
+    timeout: 40 * 1000,
+
+  },
 });

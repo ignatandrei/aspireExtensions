@@ -2,8 +2,17 @@
 // seed: tests/seed.spec.ts
 
 import { test, expect } from '@playwright/test';
+import { endTest, setupDepEmpTest } from './test-helpers';
 
 test.describe('DepEmp Resource Actions', () => {
+ test.beforeEach(async ({ page }) => {
+     await setupDepEmpTest(page);
+   });
+   test.afterEach( async ( {page}, testInfo) => {
+    await endTest(page  , testInfo);
+   });
+   
+
   test('dropCreate Command Execution', async ({ page }) => {
     // 1. Navigate to http://localhost:15102/consolelogs/resource/DepEmp
     await page.goto('http://localhost:15102/consolelogs/resource/DepEmp');
