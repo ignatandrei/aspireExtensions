@@ -35,12 +35,11 @@ public class CommandsTests : IClassFixture<WebTestsFixture>
     [Fact]
     public async Task DatabaseIsCorrectlyConfigured()
     {
-        var hostWithData = await _fixture.GetHostWithData();
+        var hostWithData = await _fixture.GetHostWithData("DepEmp", false);
         var cancellationToken = TestContext.Current.CancellationToken;
 
         ArgumentNullException.ThrowIfNull(hostWithData);
 
-        await hostWithData.app!.ResourceNotifications.WaitForResourceHealthyAsync("DepEmp", cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
         var cnString = await hostWithData.app!.GetConnectionStringAsync("DepEmp", cancellationToken);
         await Task.Delay(20000,cancellationToken);
         await Task.Yield();
@@ -56,7 +55,7 @@ public class CommandsTests : IClassFixture<WebTestsFixture>
     [Fact]
     public async Task SqlCommandWorks()
     {
-        var hostWithData = await _fixture.GetHostWithData();
+        var hostWithData = await _fixture.GetHostWithData("DepEmp",false);
         var ct = TestContext.Current.CancellationToken;
         await DatabaseIsCorrectlyConfigured();
         var message = string.Join("\r\n", hostWithData.fakeLoggerProvider!.Collector.GetSnapshot(true).Select(it => it.Message).ToArray());
@@ -76,7 +75,7 @@ public class CommandsTests : IClassFixture<WebTestsFixture>
     [Fact]
     public async Task RestoreDatabaseWorks()
     {
-        var hostWithData = await _fixture.GetHostWithData();
+        var hostWithData = await _fixture.GetHostWithData("DepEmp", false);
         var ct = TestContext.Current.CancellationToken;
         await SqlCommandWorks();
         var message = string.Join("\r\n", hostWithData.fakeLoggerProvider!.Collector.GetSnapshot(true).Select(it => it.Message).ToArray());
@@ -96,7 +95,7 @@ public class CommandsTests : IClassFixture<WebTestsFixture>
     [Fact]
     public async Task DashboardIsAvailable()
     {
-        var hostWithData = await _fixture.GetHostWithData();
+        var hostWithData = await _fixture.GetHostWithData("DepEmp", false);
         var cancellationToken = TestContext.Current.CancellationToken;
         ArgumentNullException.ThrowIfNull(hostWithData);
         var httpClient = new HttpClient();

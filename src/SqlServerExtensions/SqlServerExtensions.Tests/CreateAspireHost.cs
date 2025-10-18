@@ -13,7 +13,8 @@ public class CreateAspireHost<TEntryPoint>: IAsyncDisposable
     {
         
     }
-    public static async Task<CreateAspireHost<TEntryPoint>> Create(TimeSpan DefaultTimeout ,CancellationToken cancellationToken)
+    public static async Task<CreateAspireHost<TEntryPoint>> Create(
+        TimeSpan DefaultTimeout ,string? WaitForResource=null, CancellationToken cancellationToken= CancellationToken.None)
     {
         CreateAspireHost<TEntryPoint> instance = new CreateAspireHost<TEntryPoint>();
         instance.fakeLoggerProvider = new FakeLoggerProvider();
@@ -40,6 +41,10 @@ public class CreateAspireHost<TEntryPoint>: IAsyncDisposable
 
         await instance.app.StartAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
         var tsWait =TimeSpan.FromSeconds(1);
+        if(WaitForResource != null)
+        {
+            await instance.app.ResourceNotifications.WaitForResourceHealthyAsync(WaitForResource, cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
+        }
         while (true)
         {
             await Task.Delay(tsWait, cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);

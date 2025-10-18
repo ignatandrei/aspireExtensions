@@ -10,7 +10,7 @@ public class WebTestsFixture :IAsyncDisposable
     {
     }
     static Lock lockHost = new Lock();
-    public async Task<CreateAspireHost<Projects.SqlServerExtensions_AppHost>> GetHostWithData()
+    public async Task<CreateAspireHost<Projects.SqlServerExtensions_AppHost>> GetHostWithData(string? WaitForResource,bool startUI=false)
     {
     
         
@@ -21,8 +21,9 @@ public class WebTestsFixture :IAsyncDisposable
         }
 
         HostWithData = await CreateAspireHost<Projects.SqlServerExtensions_AppHost>.Create(
-            TimeSpan.FromSeconds(59), TestContext.Current.CancellationToken);
-        Process.Start(new ProcessStartInfo() { FileName = HostWithData.urlDashboard, UseShellExecute = true });
+            TimeSpan.FromSeconds(59), WaitForResource, TestContext.Current.CancellationToken);
+        if(startUI)
+            Process.Start(new ProcessStartInfo() { FileName = HostWithData.urlDashboard, UseShellExecute = true });
         return HostWithData;
     }
 
