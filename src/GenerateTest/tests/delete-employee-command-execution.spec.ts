@@ -1,42 +1,36 @@
 // spec: specs/DepEmp-Resource-Actions-TestPlan.md
 // seed: tests/seed.spec.ts
 
-import { test, expect } from '@playwright/test';
-import { endTest, setupDepEmpTest } from './test-helpers';
+import {  expect } from '@playwright/test';
+import { flashAndClick, test } from './common';
 
 test.describe('DepEmp Resource Actions', () => {
-  // test.beforeEach(async ({ page }) => {
-  //   await setupDepEmpTest(page);
-  // });
-  // test.afterEach( async ( {page}) => {
-  //  await endTest(page);
-  // });
-
+  
   test('deleteEmployee Command Execution', async ({ page }) => {
     // 1. Navigate to http://localhost:15102/consolelogs/resource/DepEmp
     await page.goto('http://localhost:15102/consolelogs/resource/DepEmp');
     
     // 2. Click the Resource actions button (three dots icon in the toolbar)
-    await page.getByRole('button', { name: 'Resource actions' }).click();
+    await flashAndClick(page.getByRole('button', { name: 'Resource actions' }));
     
     // 3. Select "Reset Everything" from the dropdown menu
-    await page.getByRole('menuitem', { name: 'Reset Everything' }).click();
+    await flashAndClick(page.getByRole('menuitem', { name: 'Reset Everything' }));
     
     // 4. Wait for the success notification "DepEmp 'Reset Everything' succeeded"
     await expect(page.getByText('DepEmp "Reset Everything" succeeded')).toBeVisible();
     
     // 5. Click the "Remove data" button in the toolbar
-    await page.getByRole('button', { name: 'Remove data' }).click();
+    await flashAndClick( page.getByRole('button', { name: 'Remove data' }));
     
     // 6. Click "Remove all" from the dropdown menu
-    await page.getByRole('menuitem', { name: 'Remove all' }).click();
+    await flashAndClick(page.getByRole('menuitem', { name: 'Remove all' }));
     
     // 7. Click the Resource actions button (three dots icon)
-    await page.getByRole('button', { name: 'Resource actions' }).click();
+    await flashAndClick(page.getByRole('button', { name: 'Resource actions' }));
     
     // 8. Click on the "deleteEmployee" menu item
-    await page.getByRole('menuitem', { name: 'deleteEmployee' }).click();
-    
+    await flashAndClick(page.getByRole('menuitem', { name: 'deleteEmployee' }));
+
     // Verify: Console logs contain `Executing command 'deleteEmployee'.`
     await expect(page.getByText("Executing command 'deleteEmployee'.")).toBeVisible();
     
