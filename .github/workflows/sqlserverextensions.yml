@@ -1,0 +1,59 @@
+name: Build and Test SqlServerExtensions
+
+on:
+  push:
+    paths:
+      - 'src/SqlServerExtensions/**'
+  pull_request:
+    paths:
+      - 'src/SqlServerExtensions/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/SqlServerExtensions
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+    
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24.3.0'
+
+      - name: install playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4   
+        with:
+          dotnet-version: '9.0.306'
+
+      - name: Restore dependencies
+        run: | 
+          cd src
+          cd SqlServerExtensions
+          dotnet restore SqlServerExtensions.sln
+
+      - name: Build solution
+        run: |
+            dotnet build SqlServerExtensions.sln --configuration Release --no-restore
+
+      - name: Run GenerateTest tests
+        run: |
+            cd src
+            cd SqlServerExtensions
+            cd GenerateTest
+            npm ci            
+            npm run runTests
+      
+      - name: Pack
+        if: success()
+        run: |
+            cd src 
+            cd SqlServerExtensions
+            cd SqlExtensionsAspire
+            dotnet pack SqlExtensionsAspire.csproj --configuration Release --no-build --output ../../nupkg/
+            
