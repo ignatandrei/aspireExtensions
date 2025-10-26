@@ -42,7 +42,9 @@ jobs:
 
       - name: Build solution
         run: |
-            dotnet build SqlServerExtensions.sln --configuration Release --no-restore
+          cd src
+          cd SqlServerExtensions
+          dotnet build SqlServerExtensions.sln --configuration Release --no-restore
 
       - name: Run GenerateTest tests
         run: |
