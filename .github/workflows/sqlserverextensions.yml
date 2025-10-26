@@ -32,7 +32,9 @@ jobs:
           dotnet-version: '9.0.306'
 
       - name: Restore dependencies
-        run: | 
+        run: |
+          ls -lh
+          pwd
           cd src
           cd SqlServerExtensions
           dotnet restore SqlServerExtensions.sln
