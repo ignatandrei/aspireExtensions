@@ -21,7 +21,7 @@ public class WebTestsFixture :IAsyncDisposable
         }
 
         HostWithData = await CreateAspireHost<Projects.SqlServerExtensions_AppHost>.Create(
-            TimeSpan.FromSeconds(59), WaitForResource, TestContext.Current.CancellationToken);
+            TimeSpan.FromSeconds(59), TestContext.Current.CancellationToken,WaitForResource);
         if(startUI)
             Process.Start(new ProcessStartInfo() { FileName = HostWithData.urlDashboard, UseShellExecute = true });
         return HostWithData;

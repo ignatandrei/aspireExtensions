@@ -14,8 +14,10 @@ public class CreateAspireHost<TEntryPoint>: IAsyncDisposable
         
     }
     public static async Task<CreateAspireHost<TEntryPoint>> Create(
-        TimeSpan DefaultTimeout ,string? WaitForResource=null, CancellationToken cancellationToken= CancellationToken.None)
+        TimeSpan DefaultTimeout , CancellationToken?  cancellationToken, string? WaitForResource = null)
+
     {
+        var ct = cancellationToken ?? CancellationToken.None;
         CreateAspireHost<TEntryPoint> instance = new CreateAspireHost<TEntryPoint>();
         instance.fakeLoggerProvider = new FakeLoggerProvider();
         instance.appHost = await DistributedApplicationTestingBuilder.CreateAsync<TEntryPoint>([],
@@ -24,7 +26,7 @@ public class CreateAspireHost<TEntryPoint>: IAsyncDisposable
                 dao.DisableDashboard = false;
                 dao.AllowUnsecuredTransport = true;                
             },
-            cancellationToken);
+            ct);
         instance.appHost.Services.AddLogging(logging =>
         {
             logging.ClearProviders();
@@ -36,19 +38,19 @@ public class CreateAspireHost<TEntryPoint>: IAsyncDisposable
         {
             clientBuilder.AddStandardResilienceHandler();
         });
-        instance.app = await instance.appHost.BuildAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
+        instance.app = await instance.appHost.BuildAsync(ct).WaitAsync(DefaultTimeout, ct);
 
 
-        await instance.app.StartAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
+        await instance.app.StartAsync(ct).WaitAsync(DefaultTimeout, ct);
         var tsWait =TimeSpan.FromSeconds(1);
         if(WaitForResource != null)
         {
-            await instance.app.ResourceNotifications.WaitForResourceHealthyAsync(WaitForResource, cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
+            await instance.app.ResourceNotifications.WaitForResourceHealthyAsync(WaitForResource, ct).WaitAsync(DefaultTimeout, ct);
         }
         while (true)
         {
-            await Task.Delay(tsWait, cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
-            DefaultTimeout= DefaultTimeout.Subtract(tsWait);            
+            await Task.Delay(tsWait, ct).WaitAsync(DefaultTimeout, ct);
+            DefaultTimeout= DefaultTimeout.Subtract(tsWait);    
             if( DefaultTimeout <= TimeSpan.Zero) throw new TimeoutException("Timeout waiting for Aspire Host to start");
 
             var messages= instance.fakeLoggerProvider.Collector.GetSnapshot(false).Select(it => it.Message).ToArray();
