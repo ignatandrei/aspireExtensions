@@ -2,7 +2,7 @@
 // seed: tests/seed.spec.ts
 
 import {  expect } from '@playwright/test';
-import { endTest, flashAndClick, setupDepEmpTest, sleepMessage, test,sleep } from './common';
+import { endTest, flashAndClick, setupDepEmpTest, sleepMessage, test,sleep } from '../common';
 
 test.describe('DepEmp Resource Actions', () => {
 

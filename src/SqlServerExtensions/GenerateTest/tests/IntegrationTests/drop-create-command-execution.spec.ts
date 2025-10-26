@@ -2,14 +2,14 @@
 // seed: tests/seed.spec.ts
 
 import {  expect } from '@playwright/test';
-import { test,endTest, setupDepEmpTest, flashAndClick } from './common';
+import { test,endTest, setupDepEmpTest, flashAndClick } from '../common';
 
 test.describe('DepEmp Resource Actions', () => {
- test.beforeEach(async ({ page }) => {
-     await setupDepEmpTest(page);
+ test.beforeEach(async ({ page },test) => {
+     await setupDepEmpTest(page,test);
    });
    test.afterEach( async ( {page}, testInfo) => {
-    await endTest(page  , testInfo);
+    //await endTest(page  , testInfo);
    });
    
 

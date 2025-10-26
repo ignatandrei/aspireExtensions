@@ -1,5 +1,5 @@
 import { TestInfo } from '@playwright/test';
-import { endTest, flashAndClick, setupDepEmpTest, sleepMessage, test,sleep } from './common';
+import { endTest, flashAndClick, setupDepEmpTest, sleepMessage, test,sleep } from '../common';
 
 test.describe('Videos', () => {
 

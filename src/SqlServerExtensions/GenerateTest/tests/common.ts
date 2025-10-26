@@ -3,7 +3,25 @@ import { Page,test as baseTest, expect, Locator, TestInfo } from '@playwright/te
 import config from './config.json';
 import path from 'path';
 import fs from 'fs/promises';
-import { timeStamp } from 'console';
+
+function formatTimestamp() {
+    const now = new Date(Date.now());
+
+    // Extract components of the date and time
+    const year = String(now.getFullYear()).padStart(4, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+    const day = String(now.getDate()).padStart(2, '0');
+
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    // Combine components into the desired format
+    const formattedTimestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
+
+    return formattedTimestamp;
+}
+
 
 export const test = baseTest.extend<{ page: any }>({
   page: async ({ browser }, use, testInfo) => {
@@ -36,7 +54,7 @@ export async function endTest(page: Page, testInfo: TestInfo): Promise<void> {
         console.log(`Video saved to: ${await page.video()!.path()}`);
         page.context().close();
         await sleep(10);
-        var timeData = timeStamp();
+        var timeData = formatTimestamp();
         await fs.rename( 
           await page.video()!.path(),
           path.join('videos', `video-${testInfo.title.replace(/[^a-zA-Z0-9-_]/g,'_')}-${timeData}.webm`));
@@ -70,23 +88,6 @@ await sleepMessage(page,`
   await page.getByRole('menuitem', { name: 'Remove all' }).click();
 
   
-}
-function formatTimestamp() {
-    const now = new Date(Date.now());
-
-    // Extract components of the date and time
-    const year = String(now.getFullYear()).padStart(4, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-    const day = String(now.getDate()).padStart(2, '0');
-
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    // Combine components into the desired format
-    const formattedTimestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
-
-    return formattedTimestamp;
 }
 function shouldRecordVideo(testInfo:TestInfo) {
 
