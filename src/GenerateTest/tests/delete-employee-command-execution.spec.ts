@@ -2,37 +2,32 @@
 // seed: tests/seed.spec.ts
 
 import {  expect } from '@playwright/test';
-import { flashAndClick, test } from './common';
+import { endTest, flashAndClick, setupDepEmpTest, sleepMessage, test,sleep } from './common';
 
 test.describe('DepEmp Resource Actions', () => {
-  
+
+  test.beforeEach(async ({ page,browser },testInfo) => {
+      //var cnt = await browser.newContext();
+      //var newPage = await cnt.newPage();
+       await setupDepEmpTest(page,testInfo);
+       //await cnt.close();
+     });
+     test.afterEach( async ( {page}, testInfo) => {
+      await endTest(page  , testInfo);
+     });
   test('deleteEmployee Command Execution', async ({ page }) => {
     // 1. Navigate to http://localhost:15102/consolelogs/resource/DepEmp
+    
     await page.goto('http://localhost:15102/consolelogs/resource/DepEmp');
-    
-    // 2. Click the Resource actions button (three dots icon in the toolbar)
-    await flashAndClick(page.getByRole('button', { name: 'Resource actions' }));
-    
-    // 3. Select "Reset Everything" from the dropdown menu
-    await flashAndClick(page.getByRole('menuitem', { name: 'Reset Everything' }));
-    
-    // 4. Wait for the success notification "DepEmp 'Reset Everything' succeeded"
-    await expect(page.getByText('DepEmp "Reset Everything" succeeded')).toBeVisible();
-    
-    // 5. Click the "Remove data" button in the toolbar
-    await flashAndClick( page.getByRole('button', { name: 'Remove data' }));
-    
-    // 6. Click "Remove all" from the dropdown menu
-    await flashAndClick(page.getByRole('menuitem', { name: 'Remove all' }));
     
     // 7. Click the Resource actions button (three dots icon)
     await flashAndClick(page.getByRole('button', { name: 'Resource actions' }));
-    
+    await sleep(5);
     // 8. Click on the "deleteEmployee" menu item
     await flashAndClick(page.getByRole('menuitem', { name: 'deleteEmployee' }));
-
+    await sleep(5);
     // Verify: Console logs contain `Executing command 'deleteEmployee'.`
-    await expect(page.getByText("Executing command 'deleteEmployee'.")).toBeVisible();
+    await expect(page.getByText("Executing command 'deleteEmployee'.", { exact: false })).toBeVisible();
     
     // Verify: Console logs contain `Executing script 1`
     await expect(page.getByText('Executing script')).toBeVisible();
