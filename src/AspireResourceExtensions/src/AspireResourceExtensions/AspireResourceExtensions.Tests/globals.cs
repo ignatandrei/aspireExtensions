@@ -1,0 +1,10 @@
+﻿global using LightBDD.XUnit2;
+global using System.Runtime.CompilerServices;
+global using System.Threading.Tasks;
+global using Microsoft.Playwright;
+global using Xunit;
+global using LightBDD.Framework;
+global using LightBDD.Framework.Scenarios;
+global using LightBDD.Core.Configuration;
+global using LightBDD.Framework.Configuration;
+global using LightBDD.Framework.Reporting.Formatters;

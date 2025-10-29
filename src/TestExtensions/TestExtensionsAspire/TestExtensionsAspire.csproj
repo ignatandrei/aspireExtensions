@@ -37,7 +37,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0" />
+	 <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.9.0" />
+	 <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>

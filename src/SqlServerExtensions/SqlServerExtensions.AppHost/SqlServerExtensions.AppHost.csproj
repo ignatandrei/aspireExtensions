@@ -12,7 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataProject\DataProject.csproj" IsAspireProjectResource="false" />
+	  <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.9.0" />
+
+	  <ProjectReference Include="..\DataProject\DataProject.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\SqlExtensionsAspire\SqlExtensionsAspire.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\SqlServerExtensions.ApiService\SqlServerExtensions.ApiService.csproj" />
   </ItemGroup>
