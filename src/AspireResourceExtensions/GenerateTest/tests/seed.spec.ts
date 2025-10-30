@@ -6,8 +6,8 @@
 import { expect } from '@playwright/test';
 import { endTest, flashAndClick, test } from './common';
 
-const DEFAULT_BASE_URL = process.env.ASPIRE_BASE_URL ??"https://localhost:17146/";
-const DEFAULT_LOGIN_URL = process.env.ASPIRE_LOGIN_URL??"https://localhost:17146/login?t=540eae37810193e8c06aa9a6a69d884d"; 
+const DEFAULT_BASE_URL = process.env.ASPIRE_BASE_URL ??"";
+const DEFAULT_LOGIN_URL = process.env.ASPIRE_LOGIN_URL??""; 
 const RESOURCE_URL = `${DEFAULT_BASE_URL}`;
 
 test.describe('Test group', () => {
