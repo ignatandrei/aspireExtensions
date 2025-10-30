@@ -12,7 +12,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireResourceExtensions.We
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireResourceExtensionsAspire", "AspireResourceExtensionsAspire\AspireResourceExtensionsAspire.csproj", "{9381774A-C550-4D4C-BF24-304CF6F3BAA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireResourceExtensions.Tests", "src\AspireResourceExtensions\AspireResourceExtensions.Tests\AspireResourceExtensions.Tests.csproj", "{0BDA730C-2AFC-018D-23F9-E36B8F80ACDC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireResourceExtensions.Tests", "AspireResourceExtensions.Tests\AspireResourceExtensions.Tests.csproj", "{A5B26C26-969E-5AB0-9C95-F0833D7191B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,10 +40,10 @@ Global
 		{9381774A-C550-4D4C-BF24-304CF6F3BAA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9381774A-C550-4D4C-BF24-304CF6F3BAA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9381774A-C550-4D4C-BF24-304CF6F3BAA7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0BDA730C-2AFC-018D-23F9-E36B8F80ACDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0BDA730C-2AFC-018D-23F9-E36B8F80ACDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0BDA730C-2AFC-018D-23F9-E36B8F80ACDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0BDA730C-2AFC-018D-23F9-E36B8F80ACDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5B26C26-969E-5AB0-9C95-F0833D7191B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5B26C26-969E-5AB0-9C95-F0833D7191B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5B26C26-969E-5AB0-9C95-F0833D7191B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5B26C26-969E-5AB0-9C95-F0833D7191B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

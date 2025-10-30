@@ -12,9 +12,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspireResourceExtensions.ApiService\AspireResourceExtensions.ApiService.csproj" />
+    <ProjectReference Include="..\AspireResourceExtensions.Tests\AspireResourceExtensions.Tests.csproj" />
     <ProjectReference Include="..\AspireResourceExtensions.Web\AspireResourceExtensions.Web.csproj" />
     <ProjectReference Include="..\AspireResourceExtensionsAspire\AspireResourceExtensionsAspire.csproj" IsAspireProjectResource="false" />
-    <ProjectReference Include="..\src\AspireResourceExtensions\AspireResourceExtensions.Tests\AspireResourceExtensions.Tests.csproj" />
   </ItemGroup>
 
   <ItemGroup>
