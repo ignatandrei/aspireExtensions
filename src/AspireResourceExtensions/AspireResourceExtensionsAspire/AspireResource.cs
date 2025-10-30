@@ -6,11 +6,14 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
 
     }
     private List<IResourceBuilder<IResourceWithEnvironment>> resources = new();
-    public void AddEnvironmentVariablesTo(IResourceBuilder<IResourceWithEnvironment> resource)
+    public void AddEnvironmentVariablesTo(params IResourceBuilder<IResourceWithEnvironment>[] resources)
     {
-        resources.Add(resource);
-        resource.WithEnvironment("ASPIRE_LOGIN_URL", LoginUrl);
-        resource.WithEnvironment("ASPIRE_BASE_URL", BaseUrl);
+        foreach (var resource in resources)
+        {
+            this.resources.Add(resource);
+            resource.WithEnvironment("ASPIRE_LOGIN_URL", LoginUrl);
+            resource.WithEnvironment("ASPIRE_BASE_URL", BaseUrl);
+        }
     }
 
     private string? _loginUrl;

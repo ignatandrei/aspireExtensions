@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using AspireResourceExtensionsAspire;
 using TestExtensionsAspire;
 
@@ -27,8 +28,11 @@ var tests= builder.AddTestProject<Projects.AspireResourceExtensions_Tests>("MyTe
     .WaitFor(aspire)
     ;
 
+var npmTests= builder.AddNpmApp("GenerateVideo", "../GenerateTest")    
+    .WaitFor(aspire)
+    ;
 
-aspire.Resource.AddEnvironmentVariablesTo(tests);
+aspire.Resource.AddEnvironmentVariablesTo(tests,npmTests);
 var app = builder.Build();
 //var result = f.ParseLoginUrl(app);
 var result = aspire.Resource.StartParsing(app);

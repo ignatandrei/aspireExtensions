@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="9.5.2" />
     <PackageReference Include="TestExtensionsAspire" Version="94.2025.805.2239" />
   </ItemGroup>

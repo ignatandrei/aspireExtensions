@@ -1,5 +1,3 @@
-using System.Buffers.Text;
-
 namespace AspireResourceExtensions.Tests;
 
 public partial class AspireResourceTests
@@ -34,7 +32,7 @@ public partial class AspireResourceTests
         await Task.Delay(5000);// wait for AspireResource to be fully loaded
         //await page.GotoAsync("https://localhost:17146/");
         var (loginUrl, baseUrl) = Endpoints;
-
+        ArgumentNullException.ThrowIfNull(browser);
         page = await browser.NewPageAsync();
         await page.GotoAsync(loginUrl);
         await Task.Delay(5000);// wait for AspireResource to be fully loaded
