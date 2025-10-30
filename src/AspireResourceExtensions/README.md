@@ -167,10 +167,11 @@ const actionsButton = page.getByRole('button', { name: 'Actions' }).nth(1);
     await secondRow.highlight();
 ```
 
-And this is the video
-<a  href="https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/ShowUrl.gif">
-<video  src="https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/ShowUrl.gif"></video>
-</a>
+And this is the video generated
+
+![ShowUrl](https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/ShowUrl.gif)
+
+
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
