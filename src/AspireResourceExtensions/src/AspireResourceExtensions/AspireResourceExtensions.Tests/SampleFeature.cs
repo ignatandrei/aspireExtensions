@@ -35,10 +35,21 @@ namespace AspireResourceExtensions.Tests
             //by the fact that this test runs, we know that AspireResource is running
             //and sending endpoints to the test project
             await Runner.RunScenarioAsync(  
-            GotoAspire,
-            AspireResourceIsRunning
+            _ => GotoAspire(),
+            _ => AspireResourceIsRunning()
             );
         }
-        
+        [Scenario]
+        [Trait("Category", "Integration")]
+        public async Task ScreenshotGraph()
+        {
+            //by the fact that this test runs, we know that AspireResource is running
+            //and sending endpoints to the test project
+            await Runner.RunScenarioAsync(
+            _ => GotoAspire(),
+            _ => AspireResourceGraph()
+            );
+        }
+
     }
 }

@@ -26,10 +26,12 @@ var tests= builder.AddTestProject<Projects.AspireResourceExtensions_Tests>("MyTe
     "test --filter Category=Integration"
     )
     .WaitFor(aspire)
+    .WithExplicitStart()
     ;
 
-var npmTests= builder.AddNpmApp("GenerateVideo", "../GenerateTest")    
+var npmTests = builder.AddNpmApp("GenerateVideo", "../GenerateTest")
     .WaitFor(aspire)
+    .WithExplicitStart()
     ;
 
 aspire.Resource.AddEnvironmentVariablesTo(tests,npmTests);

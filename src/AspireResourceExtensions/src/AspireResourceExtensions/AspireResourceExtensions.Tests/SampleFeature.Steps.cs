@@ -11,8 +11,8 @@ public partial class AspireResourceTests
     private async Task GotoAspire()
     {
         var (loginUrl, baseUrl) = Endpoints;
-        using var playwright = await Playwright.CreateAsync();
-        await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false });
+        playwright = await Playwright.CreateAsync();
+        browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false });
         page = await browser.NewPageAsync();
         await page.GotoAsync(loginUrl);
         //var title = await page.TitleAsync();
@@ -26,6 +26,24 @@ public partial class AspireResourceTests
 
 
         
+    }
+    private async Task AspireResourceGraph()
+    {
+        var (loginUrl, baseUrl) = Endpoints;
+        //ArgumentNullException.ThrowIfNull(browser);
+        //page = await browser.NewPageAsync();
+        //await page.GotoAsync(loginUrl);
+        //await Task.Delay(5000);// wait for AspireResource to be fully loaded
+        ArgumentNullException.ThrowIfNull(page);
+        await page.GotoAsync(baseUrl );
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        await page.GetByRole(AriaRole.Tab,new() { Name = "Graph" ,Exact=false} ).ClickAsync();
+        await Task.Delay(5000);
+        await page.GetByRole(AriaRole.Button, new() { Name = "Zoom Out", Exact = false }).ClickAsync();
+        await Task.Delay(5000);
+        await page.ScreenshotAsync(new PageScreenshotOptions { Path = "AspireResourceGraph.png" });
+
     }
     private async Task AspireResourceIsRunning()
     {
