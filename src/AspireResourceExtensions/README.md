@@ -136,7 +136,7 @@ Test code to obtain the screenshot of aspire
 
 This is the result
 
-![Graph](https://raw.githubusercontent.com/ignatandrei/aspireExtensions/main/docs/images/AspireResourceExtensions/AspireResourceGraph.png)
+![Graph](https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/AspireResourceGraph.png)
 
 ### Video of Aspire Dashboard
 
@@ -168,8 +168,8 @@ const actionsButton = page.getByRole('button', { name: 'Actions' }).nth(1);
 ```
 
 And this is the video
-<a  href="https://raw.githubusercontent.com/ignatandrei/aspireExtensions/main/docs/images/AspireResourceExtensions/ShowUrl.mp4">
-<video  src="https://raw.githubusercontent.com/ignatandrei/aspireExtensions/main/docs/images/AspireResourceExtensions/ShowUrl.mp4"></video>
+<a  href="https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/ShowUrl.gif">
+<video  src="https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/ShowUrl.gif"></video>
 </a>
 ## License
 
