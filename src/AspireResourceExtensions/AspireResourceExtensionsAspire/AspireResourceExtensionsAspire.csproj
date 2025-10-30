@@ -9,6 +9,7 @@
     <Version>95.2025.1030.2019</Version>
 	<Authors>Ignat Andrei</Authors>
     <Company>AOM</Company>
+	  <RepositoryType>git</RepositoryType>
     <Description>Adding Aspire to the dashboard as resource for easy of testing aspire dashboard</Description>
     <PackageTags>aspire;extensions;distributed;resources;</PackageTags>
     <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
@@ -38,6 +39,8 @@
 		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.0" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.9.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+
 	</ItemGroup>
 
 
