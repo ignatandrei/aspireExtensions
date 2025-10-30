@@ -4,8 +4,35 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- NuGet package metadata -->
+    <PackageId>AspireExtensionsResource</PackageId>
+    <Version>95.2025.1030.2019</Version>
+	<Authors>Ignat Andrei</Authors>
+    <Company>AOM</Company>
+    <Description>Adding Aspire to the dashboard as resource for easy of testing aspire dashboard</Description>
+    <PackageTags>aspire;extensions;distributed;resources;</PackageTags>
+    <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions/tree/main/src/AspireResourceExtensions</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IsPackable>true</IsPackable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<EmbedUntrackedSources>true</EmbedUntrackedSources>
+	
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="..\LICENSE" Link="LICENSE" PackagePath="/">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+	  <Content Include="..\README.md" Link="README.md" PackagePath="/" >
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+   </ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.0" />
