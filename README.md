@@ -12,3 +12,5 @@ Aspire Extensions
 - [More about DotNet Global Tools Extensions](src/DotNetGlobalToolsExtensions//README.md)  
 
 - [More about WebAPIDocsExtensions ](src/WebAPIDocsExtensions//README.md)  
+
+- [More about AspireResourceExtensions](src/AspireResourceExtensions/README.md)
