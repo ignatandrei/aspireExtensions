@@ -70,7 +70,7 @@ var database = sqlserver.AddDatabase("mydatabase")
 ## Requirements
 
 - .NET 9.0 or later
-- .NET Aspire 9.2.0 or later
+- .NET Aspire 9.5.0 or later
 - SQL Server (via Aspire.Hosting.SqlServer)
 
 ## License
