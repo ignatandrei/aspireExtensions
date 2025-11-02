@@ -171,6 +171,8 @@ const actionsButton = page.getByRole('button', { name: 'Actions' }).nth(1);
 
 And this is the video generated
 
+https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/ShowUrl.gif
+
 ![ShowUrl](https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/ShowUrl.gif)
 
 

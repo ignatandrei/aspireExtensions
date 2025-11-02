@@ -57,7 +57,7 @@ test.describe('Videos', () => {
     await flashAndClick(page.getByText('scalar result: 2'));
     await sleep(3);
     await sleepMessage(page,`<h1>End demo for ${test.title}</h1>
-      Nuget :  ...
+      Nuget :  https://www.nuget.org/packages/SqlExtensionsAspire/
       `,5);
     
      });
@@ -103,7 +103,7 @@ test.describe('Videos', () => {
 
       <b>.WithSqlCommand("selectEmployeeCount", "select count(*) from Employee", ExecCommandEnum.Scalar)</b>
       <b>.WithSqlCommand("deleteEmployee","delete from Employee", ExecCommandEnum.NonQuery)</b>
-      Nuget :  ...
+      Nuget :  https://www.nuget.org/packages/SqlExtensionsAspire/
       `,5);
   });
 });

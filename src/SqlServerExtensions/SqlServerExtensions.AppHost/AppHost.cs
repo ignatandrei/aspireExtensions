@@ -38,6 +38,7 @@ var tests = builder.AddNpmApp("PlaywrightTests", "../GenerateTest")
     //.WithWorkingDirectory("SqlServerExtensions.Tests/WebTests")
     //.WithReference(db)
     .WaitFor(db)
+    .WithExplicitStart()
     ;
 var da = builder.Build();
 

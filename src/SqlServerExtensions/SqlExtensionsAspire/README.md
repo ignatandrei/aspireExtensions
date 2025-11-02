@@ -34,29 +34,31 @@ var database = sqlserver.AddDatabase("mydatabase");
 ### SQL Command Execution
 
 ```csharp
-var database = sqlserver.AddDatabase("mydatabase")
-    .WithSqlCommand("clear-data", "DELETE FROM Users WHERE IsTemporary = 1")
-    .WithSqlCommand("seed-data", "INSERT INTO Users (Name, Email) VALUES ('Admin', 'admin@example.com')");
+var db = sqlserver.AddDatabase("DepEmp")
+    .WithSqlCommand("deleteEmployee","delete from Employee", ExecCommandEnum.NonQuery)
+    .WithSqlCommand("selectEmployeeCount", "select count(*) from Employee", ExecCommandEnum.Scalar)
 ```
 
-### SQL Script Execution
 
+See above link with demo for executing commands - there are 2 employees, then, after delete command, there is 0 employee.
+
+https://ignatandrei.github.io/aspireExtensions/images/SqlServerExtensions/video-Execute_SqlCommand-20251102225723.mp4
+
+
+## Recreate Database at initial state with scripts
 ```csharp
-var createTableScript = @"
-CREATE TABLE Users (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    Name NVARCHAR(100) NOT NULL,
-    Email NVARCHAR(255) NOT NULL
-);
-GO
+var db = sqlserver.AddDatabase("DepEmp")
+    .WithSqlCommand("deleteEmployee","delete from Employee", ExecCommandEnum.NonQuery) //just for demo
+    .WithSqlCommand("selectEmployeeCount", "select count(*) from Employee", ExecCommandEnum.Scalar) //just for demo
+    .ExecuteSqlServerScriptsAtStartup(DBFiles.FilesToCreate.ToArray())
 
-CREATE INDEX IX_Users_Email ON Users(Email);
-GO
-";
-
-var database = sqlserver.AddDatabase("mydatabase")
-    .ExecuteSqlServerScripts(createTableScript);
 ```
+
+
+See above link with demo for recreate database with  scripts whenever you want.
+
+https://ignatandrei.github.io/aspireExtensions/images/SqlServerExtensions/video-Recreate_Database_With_Scripts-20251102225854.mp4
+
 
 ### SQLPad Integration
 
