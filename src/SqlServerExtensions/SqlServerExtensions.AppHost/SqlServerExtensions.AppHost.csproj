@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+	  <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
 	  <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.9.0" />
 
 	  <ProjectReference Include="..\DataProject\DataProject.csproj" IsAspireProjectResource="false" />

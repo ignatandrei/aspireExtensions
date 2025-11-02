@@ -80,14 +80,14 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'powershell ./startServer.ps1',
-    url: 'http://localhost:15102',
-    reuseExistingServer: false,
+  // webServer: {
+  //   command: 'powershell ./startServer.ps1',
+  //   url: 'http://localhost:15102',
+  //   reuseExistingServer: false,
 
-    stdout: 'pipe',
-    stderr: 'pipe',
-    timeout: 40 * 1000,
+  //   stdout: 'pipe',
+  //   stderr: 'pipe',
+  //   timeout: 40 * 1000,
 
-  },
+  // },
 });

@@ -15,7 +15,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 //    .WithReference(apiService)
 //    .WaitFor(apiService);
 
-builder.Services.AddFakeLogging();
+//builder.Services.AddFakeLogging();
 var paramPass = builder.AddParameter("password", "myP@ssW0rd");
 
 //string str = string.Join("\r\nGO\r\n", DBFiles.FilesToCreate);
@@ -34,6 +34,11 @@ var db = sqlserver.AddDatabase("DepEmp")
     //.RecreateWithScripts(DBFiles.FilesToCreate)
     ;
 
+var tests = builder.AddNpmApp("PlaywrightTests", "../GenerateTest")
+    //.WithWorkingDirectory("SqlServerExtensions.Tests/WebTests")
+    //.WithReference(db)
+    .WaitFor(db)
+    ;
 var da = builder.Build();
 
 await Task.WhenAll(da.RunAsync(), Data(da));
