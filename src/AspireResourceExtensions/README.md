@@ -1,5 +1,7 @@
 # AspireExtensionsResource
 
+[![NuGet Version](https://img.shields.io/nuget/v/AspireExtensionsResource.svg?label=NuGet&logo=nuget)](https://www.nuget.org/packages/AspireExtensionsResource)
+
 This package provides Aspire as a Resource in the Aspire Host Dashboard , making it easier to test and manage Aspire dashboards.
 You can download the solution at https://github.com/ignatandrei/aspireExtensions/tree/main/src/AspireResourceExtensions in order to see the tests 
 
