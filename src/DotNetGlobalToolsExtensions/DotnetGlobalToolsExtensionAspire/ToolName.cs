@@ -32,5 +32,8 @@ public enum ToolName: UInt64
     run_script = 1 << 11,
     [Display(Name = "watch2")]
     watch2=1 << 12,
-    
+    [Display(Name = "run-script")]
+    runScript = 1 << 13
+
+
 }
