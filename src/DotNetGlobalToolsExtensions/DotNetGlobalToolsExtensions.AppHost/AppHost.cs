@@ -13,5 +13,8 @@ builder.AddProject<Projects.DotNetGlobalToolsExtensions_Web>("webfrontend")
 
 //builder.AddDotnetGlobalTools(ToolName.powershell | ToolName.dotnet_project_licenses);
 //builder.AddDotnetGlobalTools(toolName: DotnetGlobalToolResourceBuilderExtensions.All());
-builder.AddDotnetGlobalTools("dotnet-ef", "dotnet-depends");
+builder
+    .AddDotnetGlobalTools("dotnet-ef", "dotnet-depends")
+    .AddCommandTool(apiService, "dotnet-thx");
+    
 builder.Build().Run();

@@ -12,6 +12,77 @@ public static class DotnetGlobalToolResourceBuilderExtensions
         }
         return (ToolName)result;
     }
+    public static IResourceBuilder<DotnetGlobalToolResource> AddCommandTool( 
+        this IResourceBuilder<DotnetGlobalToolResource> builder, 
+        IResourceBuilder<ProjectResource> projectBuilder , string toolName,
+        string args = "")
+    {
+        var metadata = projectBuilder.Resource.Annotations.FirstOrDefault(it => it.GetType().GetInterfaces().Contains(typeof(IProjectMetadata)));
+        if(metadata == null)
+            throw new ArgumentNullException(nameof(metadata), "Project metadata not found in project resource annotations.");
+
+        var met = (metadata as IProjectMetadata)!;
+        projectBuilder.WithCommand($"{toolName} {args}", $"{toolName} {args}", async ecc =>
+        {
+            var loggerService = ecc.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
+            var logger = loggerService?.GetLogger(projectBuilder.Resource);
+            if (logger == null)
+            {
+                Console.WriteLine($"Logger not found for {projectBuilder.Resource.Name}");
+                return new ExecuteCommandResult() { Success = false, ErrorMessage = "Logger not found" };
+            }
+            var folderCsproj = Path.GetDirectoryName(met.ProjectPath);  
+            
+            logger.LogInformation($"Exec dotnet {args} in folder: {folderCsproj}");
+            var exportStartInfo = new ProcessStartInfo
+            {
+                FileName = toolName,
+                Arguments = args,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = folderCsproj,
+                WindowStyle = ProcessWindowStyle.Hidden,
+            };
+            var result = await ExecuteProcess(exportStartInfo);
+            if (result.Success)
+            {
+                logger.LogInformation($"Executing {toolName} {args} result: {result.Output}");
+                return new ExecuteCommandResult() { Success = true };
+            }
+            logger.LogError($"Executing {toolName} {args} failed: {result.ErrorMessage}");
+            return new ExecuteCommandResult() { Success = false, ErrorMessage = result.ErrorMessage };
+        });
+
+
+
+        return builder;
+
+
+        //return builder.WithCommand(toolName.ToStringFast(true), toolName.ToStringFast(true), async ecc =>
+        //{
+        //    var loggerService = ecc.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
+        //    var logger = loggerService?.GetLogger(builder.Resource);
+        //    if (logger == null)
+        //    {
+        //        Console.WriteLine($"Logger not found for {builder.Resource.Name}");
+        //        return new ExecuteCommandResult() { Success = false, ErrorMessage = "Logger not found" };
+        //    }
+        //    var exportStartInfo = new ProcessStartInfo
+        //    {
+        //        FileName = "dotnet",
+        //        Arguments = $"\"{path}\" {args}",
+        //        RedirectStandardOutput = true,
+        //        RedirectStandardError = true,
+        //        UseShellExecute = false,
+        //        CreateNoWindow = true,
+        //        WindowStyle = ProcessWindowStyle.Hidden,
+        //    }
+        //    ;
+        //});
+    }
+
     public static IResourceBuilder<DotnetGlobalToolResource> AddDotnetGlobalTools(
         this IDistributedApplicationBuilder builder,
         ToolName toolName = ToolName.None
