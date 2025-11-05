@@ -1,0 +1,1901 @@
+<#@ template hostSpecific="true" debug="true" #>
+<#
+   // System.Diagnostics.Debugger.Launch();
+#>
+<#@ assembly name="Microsoft.EntityFrameworkCore" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore.Design" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore.Relational" #>
+<#@ assembly name="Microsoft.Extensions.DependencyInjection.Abstractions" #>
+<#@ parameter name="EntityType" type="Microsoft.EntityFrameworkCore.Metadata.IEntityType" #>
+<#@ parameter name="Options" type="Microsoft.EntityFrameworkCore.Scaffolding.ModelCodeGenerationOptions" #>
+<#@ parameter name="NamespaceHint" type="System.String" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.ComponentModel.DataAnnotations" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Design" #>
+<#@ import namespace="Microsoft.Extensions.DependencyInjection" #>
+<#
+    if (EntityType.IsSimpleManyToManyJoinEntityType())
+    {
+        // Don't scaffold these
+        return "";
+    }
+
+    var services = (IServiceProvider)Host;
+    var annotationCodeGenerator = services.GetRequiredService<IAnnotationCodeGenerator>();
+    var code = services.GetRequiredService<ICSharpHelper>();
+
+    var usings = new List<string>
+    {
+        "System",
+        "System.Collections.Generic",
+        "System.Linq.Expressions",
+        "Database.Generic"
+    };
+
+    if (Options.UseDataAnnotations)
+    {
+        usings.Add("System.ComponentModel.DataAnnotations");
+        usings.Add("System.ComponentModel.DataAnnotations.Schema");
+        usings.Add("Microsoft.EntityFrameworkCore");
+    }
+
+    if (!string.IsNullOrEmpty(NamespaceHint))
+    {
+#>
+namespace <#= NamespaceHint #>;
+
+<#
+    }
+
+    if (!string.IsNullOrEmpty(EntityType.GetComment()))
+    {
+#>
+/// <summary>
+/// <#= code.XmlComment(EntityType.GetComment()) #>
+/// </summary>
+<#
+    }
+
+    if (Options.UseDataAnnotations)
+    {
+        foreach (var dataAnnotation in EntityType.GetDataAnnotations(annotationCodeGenerator))
+        {
+#>
+<#= code.Fragment(dataAnnotation) #>
+<#
+        }
+    }
+#>
+public partial class <#= EntityType.Name #>
+{
+<#
+    var firstProperty = true;
+    foreach (var property in EntityType.GetProperties().OrderBy(p => p.GetColumnOrder() ?? -1))
+    {
+        if (!firstProperty)
+        {
+            WriteLine("");
+        }
+
+        if (!string.IsNullOrEmpty(property.GetComment()))
+        {
+#>
+    /// <summary>
+    /// <#= code.XmlComment(property.GetComment(), indent: 1) #>
+    /// </summary>
+<#
+        }
+
+        if (Options.UseDataAnnotations)
+        {
+            var dataAnnotations = property.GetDataAnnotations(annotationCodeGenerator)
+                .Where(a => !(a.Type == typeof(RequiredAttribute) && Options.UseNullableReferenceTypes && !property.ClrType.IsValueType));
+            foreach (var dataAnnotation in dataAnnotations)
+            {
+#>
+    <#= code.Fragment(dataAnnotation) #>
+<#
+            }
+        }
+
+        usings.AddRange(code.GetRequiredUsings(property.ClrType));
+
+        var needsNullable = Options.UseNullableReferenceTypes && property.IsNullable && !property.ClrType.IsValueType;
+        var needsInitializer = Options.UseNullableReferenceTypes && !property.IsNullable && !property.ClrType.IsValueType;
+#>
+    public <#= code.Reference(property.ClrType) #><#= needsNullable ? "?" : "" #> <#= property.Name #> { get; set; }<#= needsInitializer ? " = null!;" : "" #>
+<#
+        firstProperty = false;
+    }
+
+    foreach (var navigation in EntityType.GetNavigations())
+    {
+        WriteLine("");
+
+        if (Options.UseDataAnnotations)
+        {
+            foreach (var dataAnnotation in navigation.GetDataAnnotations(annotationCodeGenerator))
+            {
+#>
+    <#= code.Fragment(dataAnnotation) #>
+<#
+            }
+        }
+
+        var targetType = navigation.TargetEntityType.Name;
+        if (navigation.IsCollection)
+        {
+#>
+    public virtual ICollection<<#= targetType #>> <#= navigation.Name #> { get; set; } = new List<<#= targetType #>>();
+<#
+        }
+        else
+        {
+            var needsNullable = Options.UseNullableReferenceTypes && !(navigation.ForeignKey.IsRequired && navigation.IsOnDependent);
+            var needsInitializer = Options.UseNullableReferenceTypes && navigation.ForeignKey.IsRequired && navigation.IsOnDependent;
+#>
+    public virtual <#= targetType #><#= needsNullable ? "?" : "" #> <#= navigation.Name #> { get; set; }<#= needsInitializer ? " = null!;" : "" #>
+<#
+        }
+    }
+
+    foreach (var skipNavigation in EntityType.GetSkipNavigations())
+    {
+        WriteLine("");
+
+        if (Options.UseDataAnnotations)
+        {
+            foreach (var dataAnnotation in skipNavigation.GetDataAnnotations(annotationCodeGenerator))
+            {
+#>
+    <#= code.Fragment(dataAnnotation) #>
+<#
+            }
+        }
+#>
+    public virtual ICollection<<#= skipNavigation.TargetEntityType.Name #>> <#= skipNavigation.Name #> { get; set; } = new List<<#= skipNavigation.TargetEntityType.Name #>>();
+<#
+    }
+#>
+}
+//andrei start
+<# 
+    var navigations= EntityType.GetNavigations();
+    var properties=EntityType.GetProperties().OrderBy(p => p.GetColumnOrder() ?? -1).ToArray();
+    var key = EntityType.FindPrimaryKey();
+    var hasOneKey = (key != null && key.Properties != null && key.Properties.Count ==1);
+    string namePK="";
+    if(hasOneKey){ 
+        
+        Console.WriteLine(code == null);
+
+        var lambda= code.Lambda(key.Properties, "e") ;
+        Console.WriteLine(lambda == null);
+        var pk=key.Properties[0].FindContainingPrimaryKey() ;
+        Console.WriteLine(pk == null) ;
+        var keyType=pk.GetKeyType();        
+        Console.WriteLine(keyType == null);
+        var dot=lambda.IndexOf(".");
+        namePK=lambda.Substring(dot+1);
+
+    }
+#>
+
+static partial class Extension<#= EntityType.Name #> {
+    
+    public static IOrderedQueryable<I<#= EntityType.Name #>> TransformToOrder(this IQueryable<I<#= EntityType.Name #>>  data,params OrderBy[] OrderBys)
+    {
+        if(OrderBys == null || OrderBys.Length ==0){
+            <# if(hasOneKey) { #>
+            OrderBy orderByPK=new();
+            orderByPK.PropertyName = "<#= namePK #>";
+            orderByPK.Ascending=-1;
+            OrderBys=[orderByPK];
+            <# } else { #>
+                throw new ArgumentException("please define 1 col PK for <#= EntityType.Name #> ");
+            <# } ;// has one key #>
+        }
+        var order = OrderBys[0]!;
+        IOrderedQueryable<I<#= EntityType.Name #>> ret;
+        switch(order.PropertyName?.ToUpper()){
+                <# foreach (var navig20 in navigations){ 
+            if(navig20.IsCollection)
+                continue; //do not search in collections
+            var name  = navig20.Name;
+            var targetType=navig20.TargetEntityType.Name;
+            var propsFK = navig20.TargetEntityType.GetProperties().OrderBy(p => p.GetColumnOrder() ?? -1).ToArray();
+            var propsFKString = propsFK.Where(it=>code.Reference(it.ClrType).StartsWith("string")).ToArray();
+            var fkName= navig20.ForeignKey.Properties[0].Name;
+       #> 
+            /*
+            Name : <#= name  #>
+            targetType :<#= targetType #>
+            fkName :<#= fkName #>
+            search just for strings
+            */
+
+        <# 
+            if (propsFKString.Length == 0 )continue; 
+            var str= string.Join("||",propsFKString.Select(pkFK=>$"(it.{name} != null && it.{name}.{pkFK.Name} != null && it.{name}.{pkFK.Name}OPERATOR(value))"));
+            
+            #>
+            
+            case "<#= name.ToUpper() #>" : {
+                
+                  var rt = data as IQueryable<<#= EntityType.Name #>>;
+                    if (rt == null)
+                        throw new ArgumentException($"search for FK <#= name.ToUpper() #> is bad !");
+                    if (order.IsAscending())
+                        ret = rt.OrderBy(it => it.<#= name#>!.ReplaceWithOrderRelevant);
+                    else
+                        ret = rt.OrderByDescending(it => it.<#= name#>!.ReplaceWithOrderRelevant);
+                }
+                break;
+            
+
+        <# } #>
+        //end search for string  in FKs
+        
+        
+        
+        <# foreach (var prop in properties){ #>
+            case "<#= prop.Name?.ToUpper()??""#>":
+                if(order.IsAscending())
+                    ret = data.OrderBy(it=>it.<#= prop.Name #>);
+                else
+                    ret = data.OrderByDescending(it=>it.<#= prop.Name #>);
+                
+                break;
+
+        <# } // foreach property #>
+            default:
+                throw new ArgumentException(" cannot order <#= EntityType.Name #> by "+ order.PropertyName);
+            
+        }//end switch
+
+        for(var i=1;i<OrderBys.Length;i++){
+            order=OrderBys[i];
+            switch(order.PropertyName?.ToUpper()??""){
+        <# foreach (var prop in properties){ #>
+            case "<#= prop.Name #>":
+                if(order.IsAscending())
+                    ret = ret.ThenBy(it=>it.<#= prop.Name #>);
+                else
+                    ret = ret.ThenByDescending(it=>it.<#= prop.Name #>);
+                
+                break;
+        <# } // foreach property #>
+            default:
+                throw new ArgumentException(" cannot order <#= EntityType.Name #> by "+ order.PropertyName);
+            
+        }//end switch
+        }//end for in order by
+        return ret;
+            
+    }
+    public static IQueryable<I<#= EntityType.Name #>> TransformToPaging(this IOrderedQueryable<I<#= EntityType.Name #>>  data, int pageNumber, int pageSize){
+        if(pageNumber <1)
+            return data;
+        if(pageSize <1) pageSize=10;
+        return data.Skip((pageNumber-1)*pageSize).Take(pageSize);
+    }
+    public static IQueryable<I<#= EntityType.Name #>> TransformToWhere(this IQueryable<I<#= EntityType.Name #>> data, params SearchField[] SearchFields){
+
+        if(SearchFields == null || SearchFields.Length ==0)        
+            return data;
+
+        var returnValue=data;
+
+        foreach(var s in SearchFields){
+        //search for string  in FKs
+    
+
+            switch(s.PropertyName?.ToUpper()??""){
+
+            //search in collections 
+        <# foreach (var navig20 in navigations){ 
+            if(navig20.IsCollection)
+                continue; //do not search in collections
+            var name  = navig20.Name;
+            var targetType=navig20.TargetEntityType.Name;
+            var propsFK = navig20.TargetEntityType.GetProperties().OrderBy(p => p.GetColumnOrder() ?? -1).ToArray();
+            var propsFKString = propsFK.Where(it=>code.Reference(it.ClrType).StartsWith("string")).ToArray();
+            var fkName= navig20.ForeignKey.Properties[0].Name;
+       #> 
+            /*
+            Name : <#= name  #>
+            targetType :<#= targetType #>
+            fkName :<#= fkName #>
+            search just for strings
+            */
+            <# 
+            if (propsFKString.Length == 0 )continue; 
+            var str= string.Join("||",propsFKString.Select(pkFK=>$"(it.{name} != null && it.{name}.{pkFK.Name} != null && it.{name}.{pkFK.Name}OPERATOR(value))"));
+            
+            #>
+            
+            case "<#= name.ToUpper() #>" : {
+                var value = s.Value??"";
+                  var ret=returnValue as IQueryable<<#= EntityType.Name #>>;
+                    if(ret == null)
+                        throw new ArgumentException($"search for FK <#= name.ToUpper() #> is bad !");
+                 switch(s.Criteria){
+                 case SearchCriteria.Equal:
+                        returnValue =ret.Where(it=><#= str.Replace("OPERATOR", "==")#>);
+                        continue;
+                case SearchCriteria.Contains:{
+                      
+                        returnValue =ret.Where(it=><#= str.Replace("OPERATOR", ".Contains")#>);
+                        continue;
+                          }
+                    case SearchCriteria.StartsWith:{
+                       
+                        returnValue =ret.Where(it=><#= str.Replace("OPERATOR", ".StartsWith")#>);
+                        continue;
+                        }
+                    case SearchCriteria.EndsWith:
+                        {
+                        
+                        returnValue =ret.Where(it=><#= str.Replace("OPERATOR", ".EndsWith")#>);
+                        continue;
+                        }
+                
+                    default:
+                        throw new ArgumentException($"cannot search for {s.Criteria} in {s.PropertyName} for <#= EntityType.Name #> with value {s.Value}");
+                }//end switch s.Criteria
+            }
+
+        <# } #>
+        //end search for string  in FKs
+        <# foreach (var prop in properties){ 
+        var hasLess = 0;
+        var hasString=0;
+        var hasDateTime=0;
+        var hasArray=0;
+        var propType=code.Reference(prop.ClrType);
+        if(propType.Contains("[]"))
+            hasArray=1;
+        var needsNullable = Options.UseNullableReferenceTypes && prop.IsNullable && !prop.ClrType.IsValueType;
+        var isNullable = prop.IsNullable ;
+        var propTypeNotNull= propType.Replace("?","");
+
+if ("float" == propTypeNotNull ||  "byte" == propTypeNotNull || "string" == propTypeNotNull || "short" == propTypeNotNull || "int" == propTypeNotNull || "long" == propTypeNotNull  || "double" == propTypeNotNull || "DateTime" == propTypeNotNull || "System.DateTime" == propTypeNotNull || "decimal" == propTypeNotNull)
+    hasLess=1;
+
+if ("string" == propType) 
+    hasString=1;
+
+if ("DateTime" == propTypeNotNull || "System.DateTime" == propTypeNotNull )
+    hasDateTime=1;
+
+if(hasArray == 1) //for the moment, we do not search for arrays
+    continue;
+        #>
+            
+            case "<#= prop.Name.ToUpper() #>":
+                //<#= propType #> isNullable <#= isNullable  #>
+                if(s.Value == null)
+        {
+            <# if (isNullable || hasString == 1) { #>
+                switch(s.Criteria){
+                    case SearchCriteria.Equal:
+                        returnValue =returnValue.Where(it=>it.<#= prop.Name #>==null);
+                        continue;
+                    case SearchCriteria.Different:
+                        returnValue =returnValue.Where(it=>it.<#= prop.Name #>!=null);
+                        continue;
+                    default:
+                        throw new ArgumentException($"null cannot have {(int)s.Criteria} {s.Criteria} for {s.PropertyName}");
+                    }
+                
+            
+            <# } else { #>
+                throw new ArgumentException("<#= EntityType.Name #>.<#= prop.Name #> cannot be null");
+            <# } // end if from needs nullable and has string #>
+            <# var hasValueDefined=false; #>
+        }//end if s.value is null -search for null
+        //if we are here, s.Value is not null
+        { //use this to define value in smaller scope
+        <# if ("bool" == propTypeNotNull || "DateTime" == propTypeNotNull || "double" == propTypeNotNull || "float" == propTypeNotNull ||  "byte" == propTypeNotNull  || propTypeNotNull == "short" || propTypeNotNull == "long" || propTypeNotNull == "int" || propTypeNotNull == "decimal") 
+        { hasValueDefined=true;
+        #>
+                var valueArray = s.Value
+                    .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(it=><#=propTypeNotNull#>.Parse(it))
+                    .ToArray();
+                var value = valueArray[0];
+        <# } //endif many numeric #>
+        <# if (propType == "string") 
+        {  hasValueDefined=true; 
+        #>
+                var value = s.Value;
+                var valueArray= s.Value?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .ToArray();
+                ;
+        <# } //endif string #>  
+        <# if(!hasValueDefined) { #>
+        //hoping will convert
+        <#=propType#> value;
+        try{
+            value =(<#=propType#>)((dynamic)s.Value);
+        }
+        catch(Exception ex){
+            throw new ArgumentException("cannot convert to <#=propType#> :"+s.Value);
+        }
+        <#= propType #>[] valueArray=null;
+        <# } //endif !hasValueDefined #>  
+        switch(s.Criteria){
+
+            case SearchCriteria.Between:
+                if(valueArray?.Length != 2){
+                    throw new ArgumentException("between must have 2 args, separated by comma => value is:" + s.Value);
+                }
+                <# if(hasString == 1) { #>
+                    returnValue =returnValue.Where(it=>String.Compare(it.<#= prop.Name #>,valueArray[0]) >= 0  && String.Compare(it.<#= prop.Name #>,valueArray[1]) <= 0);
+                <# } else if(hasLess == 1){ #>
+                    returnValue =returnValue.Where(it=>it.<#= prop.Name #> >= valueArray[0] && it.<#= prop.Name #> <= valueArray[1]);
+                <# } else { #>
+                    throw new ArgumentException("cannot have between for <#=propType#> <#=prop.Name#>");
+                <# } //endif !hasString #>  
+                continue;
+            case SearchCriteria.NotBetween:
+            
+            if(valueArray?.Length != 2){
+                    throw new ArgumentException("not between must have 2 args, separated by comma => value is:" + s.Value);
+                }
+                <# if(hasString == 1) { #>
+                    returnValue =returnValue.Where(it=>String.Compare(it.<#= prop.Name #>,valueArray[0]) < 0  || String.Compare(it.<#= prop.Name #>,valueArray[1]) > 0);
+                <# } else if ( hasLess == 1) { #>
+                    returnValue =returnValue.Where(it=>it.<#= prop.Name #> < valueArray[0] || it.<#= prop.Name #> > valueArray[1]);
+                <# } else { #>
+                    throw new ArgumentException("cannot apply NotBetween to <#=propType#> <#=prop.Name#>" );
+                <# } //endif  #>  
+                continue;
+            case SearchCriteria.InArray:
+            <# if(isNullable && hasString != 1) { #>
+            returnValue =returnValue.Where(it=>it.<#= prop.Name #> != null && valueArray!.Contains(it.<#= prop.Name #>.Value));
+                <# } else { #>
+            returnValue =returnValue.Where(it=> valueArray!.Contains(it.<#= prop.Name #>));
+                <# } //endif #>  
+                continue;
+            case SearchCriteria.NotInArray:
+            <# if(isNullable && hasString != 1) { #>
+            returnValue =returnValue.Where(it=>it.<#= prop.Name #> != null && !valueArray!.Contains(it.<#= prop.Name #>.Value));
+                <# } else { #>
+            returnValue =returnValue.Where(it=> !valueArray!.Contains(it.<#= prop.Name #>));
+                <# } //endif #>  
+                continue;
+            case SearchCriteria.Equal:
+                returnValue =returnValue.Where(it=>it.<#= prop.Name #>==value);
+                continue;
+            case SearchCriteria.Different:
+                returnValue =returnValue.Where(it=>it.<#= prop.Name #>!=value);
+                continue;
+            <# if( hasLess == 1 ) { #>
+
+            case SearchCriteria.Less:
+                        <# if(  "string" == propTypeNotNull) { #>
+                            returnValue =returnValue.Where(it=>String.Compare(it.<#= prop.Name #>,value) < 0 );
+                        <# } else { #>
+                        returnValue =returnValue.Where(it=>it.<#= prop.Name #><value);
+                        <# } // if string #>
+                        
+                        continue;
+                    case SearchCriteria.LessOrEqual:
+                        <# if(  "string" == propTypeNotNull) { #>
+                            returnValue =returnValue.Where(it=>String.Compare(it.<#= prop.Name #>,value) <= 0 );
+                        <# } else { #>
+                        
+                        returnValue =returnValue.Where(it=>it.<#= prop.Name #><=value);
+                        <# } // if string #>
+                        
+                        continue;
+                    case SearchCriteria.Greater:
+                        <# if(  "string" == propTypeNotNull) { #>
+                            returnValue =returnValue.Where(it=>String.Compare(it.<#= prop.Name #>,value) > 0 );
+                        <# } else { #>
+                        
+                        returnValue =returnValue.Where(it=>it.<#= prop.Name #>>value);
+                        <# } // if string #>
+                        continue;
+                    case SearchCriteria.GreaterOrEqual:
+                        <# if(  "string" == propTypeNotNull) { #>
+                            returnValue =returnValue.Where(it=>String.Compare(it.<#= prop.Name #>,value) >= 0 );
+                        <# } else { #>
+                        returnValue =returnValue.Where(it=>it.<#= prop.Name #>>=value);
+                        <# } // if string #>
+                        continue;
+            <# } //end if has less #>
+            <# if (hasString == 1) { #>
+                    case SearchCriteria.Contains:
+                        returnValue =returnValue.Where(it=>it.<#= prop.Name #> != null && it.<#= prop.Name #>.Contains(value));
+                        continue;
+                    case SearchCriteria.StartsWith:
+                        returnValue =returnValue.Where(it=>it.<#= prop.Name #> != null &&  it.<#= prop.Name #>.StartsWith(value));
+                        continue;
+                    case SearchCriteria.EndsWith:
+                        returnValue =returnValue.Where(it=>it.<#= prop.Name #> != null && it.<#= prop.Name #>.EndsWith(value));
+                        continue;
+                    /*case SearchCriteria.Contains:
+                        returnValue =returnValue.Where(it=> it.<#= prop.Name #> != null && it.<#= prop.Name #>.Contains(value));
+                        continue;
+                    */
+            <# } //end if has string #>
+            <# if (hasDateTime == 1) { #>
+            case SearchCriteria.EqualYear:
+            {//for variable year
+                var year=  value.Year;
+                var yearStart=new DateTime(year,1,1);
+                var yearEnd=new DateTime(year+1,1,1);
+                returnValue =returnValue.Where(it=>it.<#= prop.Name #>>=yearStart && it.<#= prop.Name #><yearEnd);
+                }//end for variable year
+                continue;
+            case SearchCriteria.DifferentYear:
+            {//for variable year
+                var year=  value.Year;
+                var yearStart=new DateTime(year,1,1);
+                var yearEnd=new DateTime(year+1,1,1);
+                returnValue =returnValue.Where(it=>it.<#= prop.Name #><yearStart || it.<#= prop.Name #>>=yearEnd);
+                }//end for variable year
+                continue;
+            case SearchCriteria.GreaterYear:
+            {//for variable year
+                var year=  value.Year;
+                
+                var yearStart=new DateTime(year+1,1,1);
+                returnValue =returnValue.Where(it=>it.<#= prop.Name #> > yearStart);
+                }//end for variable year
+                continue;
+            case SearchCriteria.GreaterOrEqualYear:
+            {//for variable year
+                var year=  value.Year;
+                
+                var yearStart=new DateTime(year,1,1);
+                returnValue =returnValue.Where(it=>it.<#= prop.Name #> > yearStart);
+                }//end for variable year
+                continue;
+                    
+            case SearchCriteria.LessYear:
+            {//for variable year
+                var year=  value.Year;
+                
+                var yearEnd=new DateTime(year,1,1).AddMicroseconds(-1);
+                returnValue =returnValue.Where(it=>it.<#= prop.Name #> <= yearEnd);
+                }//end for variable year
+                continue;
+            case SearchCriteria.LessOrEqualYear:
+            {//for variable year
+                var year=  value.Year;
+                
+                var yearEnd=new DateTime(year+1,1,1).AddMicroseconds(-1);
+                returnValue =returnValue.Where(it=>it.<#= prop.Name #> <= yearEnd);
+                }//end for variable year
+                continue;
+
+            <# } //end if hasDateTime #>
+                                    
+
+            default:
+                throw new ArgumentException($"not found Criteria {(int)s.Criteria} {s.Criteria} for {s.PropertyName}");
+        }//end switch after s.Criteria
+
+                //continue;
+        } //end use this to define value in smaller scope
+            
+        <# } // foreach property #>
+        default:
+            throw new ArgumentException("cannot find property " + s.PropertyName);
+        }//end switch  
+       }//end foreach
+    return returnValue;
+
+
+        throw new ArgumentException("test");
+        
+    }
+
+}
+
+public partial class SearchI<#= EntityType.Name #>: Search<I<#= EntityType.Name #>>
+{
+    public SearchI<#= EntityType.Name #>():base()
+    {
+            
+    }
+    public SearchI<#= EntityType.Name #>(BaseSearch search) : base(search)
+    {
+
+    }
+
+    public override IOrderedQueryable<I<#= EntityType.Name #>> TransformToOrder(IQueryable<I<#= EntityType.Name #>> data)
+    {
+        return Extension<#= EntityType.Name #>.TransformToOrder(data, OrderBys ?? []);
+    }
+    public override IQueryable<I<#= EntityType.Name #>> TransformToPaging(IOrderedQueryable<I<#= EntityType.Name #>> data)
+    {
+        return Extension<#= EntityType.Name #>.TransformToPaging(data, this.PageNumber, this.PageSize);
+    }
+    public override IQueryable<I<#= EntityType.Name #>> TransformToWhere(IQueryable<I<#= EntityType.Name #>> data)
+    {
+        return Extension<#= EntityType.Name #>.TransformToWhere(data, SearchFields ?? []);
+    }
+}
+
+partial class <#= EntityType.Name #> : I<#= EntityType.Name #>
+{
+
+}
+[InterfaceToNullObject.ToNullObject]
+public interface I<#= EntityType.Name #>
+{
+<#
+    foreach (var property1 in EntityType.GetProperties().OrderBy(p => p.GetColumnOrder() ?? -1))
+    {
+        var needsNullable = Options.UseNullableReferenceTypes && property1.IsNullable && !property1.ClrType.IsValueType;
+        var needsInitializer = Options.UseNullableReferenceTypes && !property1.IsNullable && !property1.ClrType.IsValueType;
+    
+    #>
+    public <#= code.Reference(property1.ClrType) #><#= needsNullable ? "?" : "" #> <#= property1.Name #> { get; set; }
+    <#
+
+
+    }
+
+#>
+    
+}
+
+//andrei end
+
+//aici modificarile de radzen
+//10 : EntityTypeInterface.t4
+/* file name : I<#= EntityType.Name #>.cs in XP.Interfaces
+
+namespace XP.Interfaces;
+
+[ToNullObject]
+public interface I<#= EntityType.Name #>List
+{
+    Task<int> NumberOf<#= EntityType.Name #>();
+    IAsyncEnumerable<I<#= EntityType.Name #>> <#= EntityType.Name #>();
+<# if (hasOneKey) { #>
+    Task<I<#= EntityType.Name #>?> Get<#= EntityType.Name #>(int <#= namePK #>);
+<# } #>
+    Task<DataFromPaging<I<#= EntityType.Name #>>> GetPaging(BaseSearch searchI<#= EntityType.Name #>);
+    
+}
+<# if (hasOneKey) { #>
+[ToNullObject]
+public interface I<#= EntityType.Name #>CUD
+{
+    Task<long> Add<#= EntityType.Name #>(I<#= EntityType.Name #> <#= EntityType.Name #>);
+    Task<long> Delete<#= EntityType.Name #>(I<#= EntityType.Name #> <#= namePK #>);
+    Task<long> Update<#= EntityType.Name #>(I<#= EntityType.Name #> <#= EntityType.Name #>);
+}
+<# } #>
+*/
+
+
+
+
+
+//20 : EntityTypeDataFromAPI.t4
+/* filename: DataFromAPI<#= EntityType.Name #>.cs in XP.DataFromAPI
+namespace XP.DataFromAPI;
+public class DataFromAPI<#= EntityType.Name #> : I<#= EntityType.Name #>List
+{
+    private readonly HttpClient httpApi;
+    private ReadFromAPI readFromAPI;
+    public DataFromAPI<#= EntityType.Name #>(HttpClient httpApi)
+    {
+        readFromAPI = new ReadFromAPI(httpApi);
+        this.httpApi = httpApi;
+    }
+    <# if (hasOneKey) { #>
+    public async Task<I<#= EntityType.Name #>?> Get<#= EntityType.Name #>(int <#= namePK #>)
+    {
+        return await readFromAPI.ReadID<I<#= EntityType.Name #>>($"api/StandAlone_local/ObtainData/<#= EntityType.Name #>/find/{<#= namePK #>}", new I<#= EntityType.Name #>Converter());
+    }
+    <# } #>
+    public async Task<int> NumberOf<#= EntityType.Name #>()
+    {
+        //TODO: Implement retry logic with polly
+        int retries = 3;
+        while (retries > 0)
+        {
+            try
+            {
+                return await readFromAPI.ReadInt("api/StandAlone_local/ObtainData/<#= EntityType.Name #>/count");
+            }
+            catch (Exception)
+            {
+                retries--;
+                await Task.Delay(2000);
+            }
+        }
+        //TODO: Implement logging
+        //TODO: implement new error
+        throw new ArgumentException("Could not get the number of <#= EntityType.Name #>s");
+    }
+
+
+    public async IAsyncEnumerable<I<#= EntityType.Name #>> <#= EntityType.Name #>()
+    {
+        //TODO: Implement retry logic with polly
+
+        var data = readFromAPI.ReadStreaming("api/StandAlone_local/ObtainData/<#= EntityType.Name #>/listAll", new I<#= EntityType.Name #>Converter());
+        await foreach (I<#= EntityType.Name #>? item in data)
+        {
+            if (item == null) continue;
+
+            yield return item;
+
+        }
+    }
+     public async Task<DataFromPaging<I<#= EntityType.Name #>>> GetPaging(BaseSearch search)
+    {
+        var url = "api/StandAlone_local/ObtainData/<#= EntityType.Name #>/getPaging?";
+        var data = await readFromAPI.GetDataFromPaging<I<#= EntityType.Name #>>(search,url, new I<#= EntityType.Name #>Converter());
+        ArgumentNullException.ThrowIfNull(data);
+        return data;
+        
+    }
+}
+*/
+
+//25: 
+/* filename: CUDFromAPI<#= EntityType.Name #>.cs fin XP.DataFromAPI
+<# if (!hasOneKey) { #>
+//do not generate CUDFromAPI<#= EntityType.Name #>
+<# } #> 
+<# if (hasOneKey) { #>
+namespace XP.DataFromAPI;
+
+public class CUDFromAPI<#= EntityType.Name #> : I<#= EntityType.Name #>CUD
+{
+    private readonly HttpClient httpApi;
+    private ReadFromAPI readFromAPI;
+    public CUDFromAPI<#= EntityType.Name #>(HttpClient httpApi)
+    {
+        this.httpApi = httpApi;
+        readFromAPI = new ReadFromAPI(httpApi);
+    }
+    public async Task<long> Add<#= EntityType.Name #>(I<#= EntityType.Name #> newItem)
+    {
+        <#= EntityType.Name #>.<#= namePK #> = 0;
+        return await readFromAPI.SaveData("api/StandAlone_local/CUD/<#= EntityType.Name #>/add", newItem);
+
+    }
+
+    public async Task<long> Delete<#= EntityType.Name #>(I<#= EntityType.Name #> delItem)
+    {
+        var data = await readFromAPI.DeleteData("api/StandAlone_local/CUD/<#= EntityType.Name #>/delete",delItem);        
+        return data.<#= namePK #>;
+    }
+
+    public async Task<long> Update<#= EntityType.Name #>(I<#= EntityType.Name #> updItem)
+    {
+        var data = await readFromAPI.UpdateData("api/StandAlone_local/CUD/<#= EntityType.Name #>/save", updItem);
+        return data.<#= namePK #>;
+    }
+}
+<# } #>
+*/
+
+
+
+
+//30 :EntityTypeListFromDB.t4
+/* filename <#= EntityType.Name #>List.cs in XP.DataFromDB
+using Database.Generic;
+
+namespace XP.DataFromDB;
+
+public class <#= EntityType.Name #>ListFromDB: I<#= EntityType.Name #>List
+{
+    private readonly Xpert<#=EntityType.Name#>Context <#=EntityType.Name#>Context;
+    private readonly IPrincipalProvider principalProvider;
+
+    public <#= EntityType.Name #>ListFromDB(Xpert<#=EntityType.Name#>Context <#=EntityType.Name#>Context, IPrincipalProvider principalProvider)
+    {
+        this.<#=EntityType.Name#>Context = <#=EntityType.Name#>Context;
+        this.principalProvider = principalProvider;
+    }
+    <# if (!hasOneKey) { #>
+    public async Task<I<#= EntityType.Name #>?> Get<#= EntityType.Name #>(int <#= namePK #>)
+    {
+        if(!principalProvider.CanReadDB())
+            return null;
+
+        var ret= await <#=EntityType.Name#>Context.<#= EntityType.Name #>.FirstOrDefaultAsync(it=>it.<#= namePK #>==<#= namePK #>);
+        if (ret == null)
+        {
+            return null;
+        }
+        <#= EntityType.Name #>_null <#= EntityType.Name #> = new ();
+        <#= EntityType.Name #>.CopyPropertiesFrom(ret);
+        return <#= EntityType.Name #>;
+    }
+    <# } #>
+    public async Task<int> NumberOf<#= EntityType.Name #>()
+    {
+        if (!principalProvider.CanReadDB())
+            return -1;
+
+        return await <#=EntityType.Name#>Context.<#= EntityType.Name #>.CountAsync();
+    }
+
+    public async IAsyncEnumerable<I<#= EntityType.Name #>> <#= EntityType.Name #>()
+    {
+        if (!principalProvider.CanReadDB())
+            yield break;
+
+        await foreach (var item in <#=EntityType.Name#>Context.<#= EntityType.Name #>.OrderDescending().ToAsyncEnumerable())
+        {
+            <#= EntityType.Name #>_null data = new ();
+            data.CopyPropertiesFrom(item);
+            yield return data;
+        }
+    }
+
+
+ public async Task<DataFromPaging<I<#= EntityType.Name #>>> GetPaging(BaseSearch search)
+    {
+        await Task.Delay(2000);
+        SearchI<#= EntityType.Name #> searchI<#= EntityType.Name #>= new (search);
+                using var contractContext = await contractContextFactory.CreateDbContextAsync();
+        return await searchI<#= EntityType.Name #>.GetData(this.<#=EntityType.Name#>Context.<#= EntityType.Name #>);
+    }
+}
+
+*/
+
+
+
+//40 : EntityTypeObtainData.t4
+
+/*filename ObtainData<#= EntityType.Name #>.cs in XP.API
+using Database.Generic;
+using Microsoft.AspNetCore.Mvc;
+
+namespace XP.API;
+
+public class ObtainData<#= EntityType.Name #>
+{
+    private readonly string key;
+    public ObtainData<#= EntityType.Name #>(string key)
+    {
+        
+        
+        this.key = key;
+    }
+    public virtual void Register(IEndpointRouteBuilder builder)
+    {
+        string route = key;
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            route = "nullObject";
+        }
+        Func<string, I<#= EntityType.Name #>List> dataFunc = (keyValue) =>
+        {
+        
+            if (string.IsNullOrEmpty(key))
+            {
+                return Program.Original!.GetRequiredService<I<#= EntityType.Name #>List>();
+            }
+            else
+            {
+                return Program.Original!.GetRequiredKeyedService<I<#= EntityType.Name #>List>(key);
+            }
+        };
+        var grp = builder.MapGroup($"/api/{route}/ObtainData/<#= EntityType.Name #>")
+         .WithTags($"<#= EntityType.Name #>{route}");
+
+
+        grp.MapGet("/listAll", () => {
+            var data = dataFunc(key);
+            return data!.<#= EntityType.Name #>();
+        });
+        grp.MapGet("/count", async () => {
+            var data = dataFunc(key);            
+            return await data!.NumberOf<#= EntityType.Name #>();
+        });
+        <# if (hasOneKey) { #>
+        grp.MapGet("/find/{id}", async (int id) => {
+            var data = dataFunc(key);
+            return await data!.Get<#= EntityType.Name #>(id);
+        });
+        <# } #>
+         //[AsParameters] 
+        grp.MapPost("/getPaging", async ( SearchI<#= EntityType.Name #> search) =>
+        {
+            var data = dataFunc(key);
+            return await data.GetPaging(search);
+        }); 
+
+    }
+}
+
+public class ObtainData<#= EntityType.Name #>Null : ObtainData<#= EntityType.Name #>, IApi
+{
+    public ObtainData<#= EntityType.Name #>Null() : base("")
+    {
+
+    }
+}
+public class ObtainData<#= EntityType.Name #>DB : ObtainData<#= EntityType.Name #>, IApi
+{
+    public ObtainData<#= EntityType.Name #>DB() : base(Program.DeveloperDB)
+    {
+
+    }
+}
+
+*/
+//41 in XP.DataFromDB name file <#= EntityType.Name #>CUDFromDB
+/*
+<# if (!hasOneKey) { #>
+//do not generate <#= EntityType.Name #>CUDFromDB
+<# } #>
+<# if (hasOneKey) { #>
+namespace XP.DataFromDB;
+public class <#= EntityType.Name #>CUDFromDB: I<#= EntityType.Name #>CUD
+{
+    private readonly IDbContextFactory<XpertContractContext> contractContextFactory;
+    private readonly IPrincipalProvider principalProvider;
+    //static int nr = 1;
+    public <#= EntityType.Name #>CUDFromDB(IDbContextFactory<XpertContractContext> contextFactory, IPrincipalProvider principalProvider)
+    {
+        this.contractContextFactory = contextFactory;
+        this.principalProvider = principalProvider;
+    }
+    public async Task<long> Add<#= EntityType.Name #>(I<#= EntityType.Name #> item)
+    {
+        if(principalProvider.CanCUDDB() == false)
+        {
+            return -1;
+        }
+        var data = new <#= EntityType.Name #>();
+        <#= EntityType.Name #>_null.CopyProperties(item, data);
+        data.CreatedAt = DateTime.UtcNow;
+        data.CreatedBy = principalProvider.UserName;
+        await contractContext.<#= EntityType.Name #>.AddAsync(data);
+        return await contractContext.SaveChangesAsync();
+    }
+    public async Task<long> Delete<#= EntityType.Name #>(I<#= EntityType.Name #> item)
+    {
+        if (principalProvider.CanCUDDB() == false)
+        {
+            return -1;
+        }
+        await Update<#= EntityType.Name #>(item);
+        var data = await contractContext.<#= EntityType.Name #>.FindAsync(item.<#= namePK #>);
+        if (data == null)
+        {
+            return 0;
+        }
+        contractContext.<#= EntityType.Name #>.Remove(data);
+        return await contractContext.SaveChangesAsync();
+    }
+    public async Task<long> Update<#= EntityType.Name #>(I<#= EntityType.Name #> item)
+    {
+        if (principalProvider.CanCUDDB() == false)
+        {
+            return -1;
+        }
+        var itemFromDB= contractContext.<#= EntityType.Name #>.Find(item.<#= namePK #>);
+        if (itemFromDB == null)
+        {
+            return 0;
+        }
+        <#= EntityType.Name #>_null.CopyProperties(item,itemFromDB);
+        itemFromDB.CreatedBy = principalProvider.UserName ;
+        itemFromDB.CreatedAt= DateTime.UtcNow;
+        return await contractContext.SaveChangesAsync();
+    }
+}
+<# } #>
+*/
+//44
+/*filename CUD<#= EntityType.Name #>.cs in XP.API
+
+namespace XP.API;
+
+public class CUD<#= EntityType.Name #>
+{
+    private readonly string key;
+    private I<#= EntityType.Name #>CUD? data;
+    public CUD<#= EntityType.Name #>(string key)
+    {
+
+
+        this.key = key;
+    }
+    public virtual void Register(IEndpointRouteBuilder builder)
+    {
+        string route = key;
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            route = "nullObject";
+        }
+        if (string.IsNullOrEmpty(key))
+        {
+            data = Program.Original!.GetRequiredService<I<#= EntityType.Name #>CUD>();
+        }
+        else
+        {
+            data = Program.Original!.GetRequiredKeyedService<I<#= EntityType.Name #>CUD>(key);
+        }
+
+        var grp = builder.MapGroup($"/api/{route}/CUD/<#= EntityType.Name #>");
+        grp.MapPost("/add", async (<#= EntityType.Name #>_null <#= EntityType.Name #>Data) => await data.Add<#= EntityType.Name #>(<#= EntityType.Name #>Data));
+        grp.MapPost("/save", async (<#= EntityType.Name #>_null <#= EntityType.Name #>Data) => await data.Update<#= EntityType.Name #>(<#= EntityType.Name #>Data));
+        grp.MapPost("/delete", async (<#= EntityType.Name #>_null <#= EntityType.Name #>Data) => await data.Delete<#= EntityType.Name #>(<#= EntityType.Name #>Data));
+
+    }
+
+}
+
+public class CUD<#= EntityType.Name #>Null : CUD<#= EntityType.Name #>, IApi
+{
+    public CUD<#= EntityType.Name #>Null() : base("")
+    {
+
+    }
+}
+public class CUD<#= EntityType.Name #>DB : CUD<#= EntityType.Name #>, IApi
+{
+    public CUD<#= EntityType.Name #>DB() : base(Program.DeveloperDB)
+    {
+
+    }
+}
+
+*/
+
+
+//45 : add DI in program.cs in XP.API
+/*
+builder.Services.AddScoped<I<#=EntityType.Name#>List, <#=EntityType.Name#>List_null>();
+<# if (hasOneKey) { #>
+builder.Services.AddScoped<I<#=EntityType.Name#>CUD, <#=EntityType.Name#>CUD_null>();
+<# } #>
+builder.Services.AddKeyedTransient<I<#=EntityType.Name#>List, <#=EntityType.Name#>ListFromDB>(Program.DeveloperDB);
+<# if (hasOneKey) { #>
+builder.Services.AddKeyedScoped<I<#=EntityType.Name#>CUD, <#=EntityType.Name#>CUDFromDB>(Program.DeveloperDB);
+<# } #>
+*/
+
+//46 : add DI in program.cs in XP.UI
+/*
+<# if (hasOneKey) { #>
+
+builder.Services.AddKeyedScoped<I<#=EntityType.Name#>CUD>(apiNameConfig, (sp, obj) =>
+{
+    var http = sp.GetRequiredKeyedService<HttpClient>(apiNameConfig);
+    return new CUDFromAPI<#=EntityType.Name#>(http);
+});
+<# } #>
+
+builder.Services.AddKeyedScoped<I<#=EntityType.Name#>List>(apiNameConfig, (sp, obj) =>
+{
+    var http = sp.GetRequiredKeyedService<HttpClient>(apiNameConfig);
+    return new DataFromAPI<#=EntityType.Name#>(http);
+});
+*/
+
+
+//50: EntityTypeRadzenPaging.t4
+
+/* fileName : DB<#= EntityType.Name #>.razor
+
+@page "/ui/db/<#= EntityType.Name #>/listAll"
+@using System.Text.Json
+@using XP.Database
+@using Radzen
+@using Microsoft.EntityFrameworkCore
+@using System.Linq
+
+
+<PageTitle><#= EntityType.Name #> List </PageTitle>
+<div class="main-db-container">
+    <div class="main-db-header">
+        <h2 class="db-header-text">
+<#= EntityType.Name #> number: (<span class="db-header-nr">@Nr<#= EntityType.Name #> </span>)
+        </h2>    
+
+
+@if(!loading)
+{
+    <FluentButton Appearance="Appearance.Lightweight" OnClick="GotoAdd">        
+            <FluentButton OnClick="GotoAdd" Class="main-add-btn"
+                IconStart="@(new Icons.Regular.Size24.AddSquare().WithColor("#ffffff"))">Add</FluentButton>
+    </FluentButton>
+}
+
+@if (loading && (Nr<#= EntityType.Name #> > 0))
+{
+    <FluentProgressRing Min="0" Max="@Nr<#= EntityType.Name #>" Value="@<#= EntityType.Name #>.Count"></FluentProgressRing>
+}
+    </div>
+
+<div>Number records filtered : <span class="db-header-nr">@count </span></div>
+  
+
+
+ @if (loading && (Nr<#= EntityType.Name #> > 0))
+ {
+     <div>
+         <FluentProgressRing class="loading-line-table"></FluentProgressRing>
+         <h3>Loading, please wait...</h3>
+     </div>
+ }
+    <RadzenDataGrid GridLines="Radzen.DataGridGridLines.Vertical" TItem="IndexWithData<I<#=EntityType.Name#>>"
+        Data="@<#=EntityType.Name#>WithIndex" LoadData="@LoadData" Count="@count" AllowSorting="true" AllowPaging="true"
+        PagerHorizontalAlign="HorizontalAlign.Center" ShowPagingSummary="true" PageSizeOptions="@pageSizeOptions"
+        PageSize="@pageSize" ColumnWidth="300px" AllowFiltering="true" FilterMode="FilterMode.SimpleWithMenu"
+        AllowColumnResize="true" ColumnResizeMode="DataGridColumnResizeMode.Columns" ColumnResized="@OnColumnResized"
+        TItem="IndexWithData<I<#=EntityType.Name#>>" Class="rz-grid-custom">
+            <Columns>
+                <RadzenDataGridColumn Property="index" Width="@(columnWidths.GetValueOrDefault("index", "50px"))" Title="ID"
+                    Frozen="true" Filterable="false" TextAlign="TextAlign.Center" >
+                                        <Template Context="a">
+                    <span title="DB: @a.data.<#= namePK #>">@(a.index +search.PageSize * (search.PageNumber-1))</span>
+                </Template>
+                </RadzenDataGridColumn>
+
+            
+<#
+    foreach (var property2 in EntityType.GetProperties().OrderBy(p => p.GetColumnOrder() ?? -1))
+    {
+        if(property2.Name == "CreatedAt" || property2.Name == namePK || property2.Name == "CreatedBy" )
+            continue;
+    #>
+    <RadzenDataGridColumn Filterable="true" Property="data.<#= property2.Name#>"Title="<#= property2.Name#>" 
+                                      FilterOperators="@filterOperators_<#= code.Reference(property2.ClrType).Replace("?","") #>" Width="@(columnWidths.GetValueOrDefault("data.<#= property2.Name#>", "150px"))" />
+
+    <#
+    }
+    #>    
+
+    <# 
+    foreach(var navig1 in navigations){
+        var name  = navig1.Name;
+        var targetType=navig1.TargetEntityType.Name;
+        var fkName= navig1.ForeignKey.Properties[0].Name;
+        if (navig1.IsCollection)
+            continue;
+    #>
+    <RadzenDataGridColumn   Width="@(columnWidths.GetValueOrDefault("data.<#= targetType#>", "150px"))"  Title="<#=targetType#>">
+            
+    <Template>
+<!--
+    Name : <#= name  #>
+    targetType :<#= targetType #>
+    fkName :<#= fkName #>
+-->
+            <div>
+                <a target="_blank" href="/ui/db/<#=targetType#>/addedit/@((context as IndexWithData<I<#=EntityType.Name#>>).data.<#=fkName#>)">
+                    @Get<#=targetType#>((context as IndexWithData<I<#=EntityType.Name#>>).data.<#=fkName#>)
+                </a>
+            </div>
+
+        </Template>
+        </RadzenDataGridColumn>
+    <#
+    }
+    #>
+    <# if (hasOneKey) { #>
+
+<RadzenDataGridColumn Width="50" MinWidth="50" MaxWidth="250" Title="Actions">
+                    <Template>
+                        @if (!loading)
+                        {
+                            <RadzenButton Click=@(async () => await Delete<#= EntityType.Name #>((IndexWithData<I<#= EntityType.Name #>>)context))
+                                class="tb-delete-btn" Icon="delete_forever" />
+                            <RadzenButton Click=@(() => Edit<#= EntityType.Name #>((IndexWithData<I<#= EntityType.Name #>>)context)) class="tb-edit-btn"
+                                Icon="edit" />
+                        }
+                    </Template>
+   </RadzenDataGridColumn>
+   <# } #>
+    </Columns>
+
+
+    </RadzenDataGrid><RazorWidth />
+
+</div>
+@if (loading && (Nr<#= EntityType.Name #> > 0))
+    {
+        <div>
+            <FluentProgress class="loading-line-table"></FluentProgress>
+            <h3>Loading, please wait...</h3>
+        </div>
+    }
+
+@code {
+
+[Inject]
+IDialogService _dialogService{get;set;}
+[Inject] 
+IJSRuntime JSRuntimeData{get;set;}
+
+    [Inject]
+    NavigationManager? Navigation{ get; set; }
+
+    <# 
+    foreach(var navig2 in navigations){
+        var name  = navig2.Name;
+        var targetType=navig2.TargetEntityType.Name;
+        var fkName= navig2.ForeignKey.Properties[0].Name;
+    
+    #>
+     public string Get<#=targetType#>(long? id)
+    {
+        if (id == null) return string.Empty;
+        var item = <#=targetType#>List.FirstOrDefault(it => it.<#=fkName#> == id.Value);
+        return item?.ReplaceWithName ?? "no <#=targetType#> with id "+id;
+    }
+    I<#=targetType#>[] <#=targetType#>List = Array.Empty<I<#=targetType#>>();
+    [Inject(Key = Program.apiNameConfig)]
+    public I<#=targetType#>List? TheListOf<#=targetType#>  { get; set; }
+    private async Task LoadReferences<#=targetType#>()
+    {
+        <#=targetType#>List = await TheListOf<#=targetType#> !.<#=targetType#> ().ToArrayAsync();
+    }
+
+    <#
+    }//for each navig 2
+    #>
+
+
+    public string NoContent
+    {
+        get
+        {
+            return loading ? "Please wait" : "No data";
+        }
+    }
+    bool loading = true;
+    private int? Nr<#= EntityType.Name #> = null;
+
+    [Inject(Key=Program.apiNameConfig)]
+    public I<#= EntityType.Name #>List? TheListOf<#= EntityType.Name #>{ get; set; }
+    <# if (hasOneKey) { #>
+
+    [Inject(Key = Program.apiNameConfig)]
+    public I<#= EntityType.Name #>CUD? CUD<#= EntityType.Name #> { get; set; }
+    <# } #>
+ 
+    FilterOperator[] filterOperators_DateTime = new FilterOperator[] 
+    { FilterOperator.Contains, 
+        FilterOperator.Equals, 
+        FilterOperator.GreaterThan,
+        FilterOperator.LessThan, 
+        //FilterOperator.NotEquals //Different
+    };
+    FilterOperator[] filterOperators_DateOnly = new FilterOperator[]
+    { FilterOperator.Contains,
+        FilterOperator.Equals,
+        FilterOperator.GreaterThan,
+        FilterOperator.LessThan,
+            //FilterOperator.NotEquals //Different
+    };
+    FilterOperator[] filterOperators_string = new FilterOperator[] 
+    { FilterOperator.Contains, 
+        FilterOperator.Equals, 
+        FilterOperator.StartsWith, 
+        FilterOperator.EndsWith, 
+        //FilterOperator.NotEquals //Different
+    };
+    FilterOperator[] filterOperators_int = new FilterOperator[]
+    { 
+        FilterOperator.Equals,
+        FilterOperator.GreaterThan,
+        FilterOperator.LessThan, 
+        //FilterOperator.NotEquals //Different
+    };
+     FilterOperator[] filterOperators_long = new FilterOperator[]
+    { 
+        FilterOperator.Equals,
+        FilterOperator.GreaterThan,
+        FilterOperator.LessThan, 
+        //FilterOperator.NotEquals //Different
+    };
+    FilterOperator[] filterOperators_decimal = new FilterOperator[]
+    { 
+        FilterOperator.Equals,
+        FilterOperator.GreaterThan,
+        FilterOperator.LessThan, 
+        //FilterOperator.NotEquals //Different
+    };
+    FilterOperator[] filterOperators_double = new FilterOperator[]
+    { 
+        FilterOperator.Equals,
+        FilterOperator.GreaterThan,
+        FilterOperator.LessThan, 
+        //FilterOperator.NotEquals //Different
+    };
+    void OnColumnResized(DataGridColumnResizedEventArgs<IndexWithData<I<#= EntityType.Name #>>> args)
+    {
+        columnWidths ??= new Dictionary<string, string>();
+        if (args.Column?.Property != null)
+        {
+            columnWidths[args.Column.Property] = $"{args.Width}px";
+            _ = SaveColumnWidths();
+        }
+        Console.WriteLine($"Resized {args.Column?.Property} to {args.Width} pixels");
+    }
+    
+    public void GotoAdd()
+    {
+        ArgumentNullException.ThrowIfNull(Navigation);
+        Navigation.NavigateTo("/ui/db/<#= EntityType.Name #>/addedit");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ArgumentNullException.ThrowIfNull(TheListOf<#= EntityType.Name #>);
+        Nr<#= EntityType.Name #> = await TheListOf<#= EntityType.Name #>.NumberOf<#= EntityType.Name #>();
+        await LoadSavedColumnWidths();
+        await LoadStateAsync(); // Load grid settings before rendering
+
+        await base.OnInitializedAsync();
+    }
+    bool firstRenderData = true;
+    <# if (hasOneKey) { #>
+
+    protected void Edit<#= EntityType.Name #>(IndexWithData<I<#= EntityType.Name #>> row)
+    {
+        ArgumentNullException.ThrowIfNull(Navigation);
+        Navigation.NavigateTo($"/ui/db/<#= EntityType.Name #>/addedit/{row.data.<#= namePK #>}");
+        
+    }
+    <# } #>
+    [Inject]
+    IDialogService? DialogService { get; set; } 
+    <# if (hasOneKey) { #>
+
+    protected async Task<bool> Delete<#= EntityType.Name #>(IndexWithData<I<#= EntityType.Name #>> row)
+    {
+        ArgumentNullException.ThrowIfNull(CUD<#= EntityType.Name #>);
+        try
+        {
+            ArgumentNullException.ThrowIfNull(DialogService);
+            var message = $"Are you <strong>sure</strong> you want to delete <#= EntityType.Name #> <p><h1>{row.data.<#= EntityType.Name #>Name}</h1> </p>?";
+            var dialog = await DialogService.ShowConfirmationAsync(message);
+            var result = await dialog.Result;
+            if(result.Cancelled) return false;
+            loading = true;
+            StateHasChanged();
+            await CUD<#= EntityType.Name #>.Delete<#= EntityType.Name #>(row.data);
+            Nr<#= EntityType.Name #>--;
+            <#= EntityType.Name #>.Remove(row.data);
+            return true;
+        }
+        finally {
+            loading = false;
+            StateHasChanged();
+        }
+    }
+    <# } #>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRenderData)
+        {
+            firstRenderData = false;
+
+    <#
+        foreach(var navig3 in navigations){
+        var name  = navig3.Name;
+        var targetType=navig3.TargetEntityType.Name;
+        var fkName= navig3.ForeignKey.Properties[0].Name;
+    
+    #>
+        await LoadReferences<#=targetType#>();
+
+    <# 
+    }
+    #>
+
+            await LoadData(new LoadDataArgs()
+            {                                                
+                Skip = 0,
+                Top= pageSize,                
+            });
+
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+    
+    private async Task Load<#= EntityType.Name #>()
+    {
+        ArgumentNullException.ThrowIfNull(TheListOf<#= EntityType.Name #>);
+        await foreach (var item in TheListOf<#= EntityType.Name #>.<#= EntityType.Name #>())
+        {
+            <#= EntityType.Name #>.Add(item);
+            if(<#= EntityType.Name #>.Count % 5 == 0)
+            {
+                StateHasChanged();
+                await Task.Delay(1000);
+            }
+
+        }
+        StateHasChanged();
+        loading = false;
+        StateHasChanged();
+    }
+    
+    
+    private List<I<#= EntityType.Name #>> <#= EntityType.Name #> = new();
+
+    int count;
+    IEnumerable<int> pageSizeOptions = new int[] { 10, 25, 35, 50, 100 };
+    int pageSize = 10;
+
+    
+    
+    private BaseSearch FromLoadData(LoadDataArgs args)
+    {
+        int defPageSize = pageSize;
+        BaseSearch ret = new BaseSearch()
+        {
+            PageSize = args.Top ?? pageSize,
+            PageNumber = (args.Skip ?? 0) == 0 ? 1 : (args.Skip ?? 0) / (args.Top ?? pageSize) + 1,
+        };
+        if (args.Filters?.Any() ?? false)
+        {
+            var filters = args.Filters.ToArray();
+            ret.SearchFields = new SearchField[filters.Length];
+            for (int i = 0; i < filters.Length; i++)
+            {
+                var filter = filters[i];
+                
+                ret.SearchFields[i] = new SearchField()
+                {
+                    PropertyName = (filter.FilterProperty??filter.Property).Replace("data.",""),
+                    Criteria = utilsFuncs.From(filter.FilterOperator),
+                    Value = filter.FilterValue?.ToString() ?? "",
+                };
+            }
+
+
+        }
+        if(args.Sorts?.Any()??false)
+        {
+            var sorts = args.Sorts.Where(it=>!string.IsNullOrWhiteSpace(it?.Property)).ToArray();
+            ret.OrderBys = new OrderBy[sorts.Length];
+            for (int i = 0; i < sorts.Length; i++)
+            {
+                var sort = sorts[i];
+                ret.OrderBys[i] = new OrderBy()
+                {
+                    PropertyName = sort.Property.Replace("data.",""),
+                    Ascending = (sort.SortOrder == SortOrder.Ascending)?1:-1
+                };
+            }
+        }
+        if(!ret.HasOrderBy)
+        {
+            ret.OrderBys = new OrderBy[1];
+            ret.OrderBys[0] = new OrderBy()
+            {
+                <# if (hasOneKey) { #>
+                PropertyName = "<#= namePK #>",
+                <# } #>
+                <# if (!hasOneKey) { #>
+                //PropertyName = "put here a property",
+                throw new ArgumentException("No order by, because PK is not 1");
+                <# } #>
+
+                Ascending = 1
+            };
+        }
+        return ret;
+    }
+
+    async Task LoadDataFromBaseSearch()
+    {
+        ArgumentNullException.ThrowIfNull(TheListOf<#= EntityType.Name #>);
+        var query = await TheListOf<#= EntityType.Name #>.GetPaging(search);
+        count = (int)query.nrRecords;
+        if (query.data == null)
+        {
+            <#= EntityType.Name #> = new List<I<#= EntityType.Name #>>();
+        }
+        else
+        {
+            <#= EntityType.Name #> = query.data.ToList();
+        }
+        loading = false;
+        StateHasChanged();
+    }
+    BaseSearch search = new BaseSearch();
+    async Task LoadData(LoadDataArgs args)
+    {
+        this.loading = true;
+        this.StateHasChanged();
+        //WriteToConsole(args);
+        search = FromLoadData(args);
+
+        //var query = await TheListOf<#= EntityType.Name #>.<#= EntityType.Name #>().ToArrayAsync();
+        
+        //count = query.Count();
+        
+        //<#= EntityType.Name #>s = query.Skip(args.Skip??0).Take(args.Top??pageSize).ToList();
+        await LoadDataFromBaseSearch();
+        this.loading = false;
+        this.StateHasChanged();
+    }
+    private IQueryable<IndexWithData<I<#= EntityType.Name #>>> <#= EntityType.Name #>WithIndex {
+        get{
+                return <#= EntityType.Name #>.Select((z, i) => new IndexWithData<I<#= EntityType.Name #>>(z,i+1)).ToArray().AsQueryable();
+            }
+    }
+    
+    //save cols
+    DataGridSettings _settings;
+    public DataGridSettings Settings
+    {
+        get => _settings;
+        set
+        {
+            if (_settings != value)
+            {
+                _settings = value;
+                InvokeAsync(SaveStateAsync);
+            }
+        }
+    }
+
+
+    private async Task LoadStateAsync()
+    {
+        ArgumentNullException.ThrowIfNull(JSRuntimeData);
+
+        var result = await JSRuntimeData.InvokeAsync<string>("window.localStorage.getItem", "Settings");
+        if (!string.IsNullOrEmpty(result))
+        {
+            _settings = JsonSerializer.Deserialize<DataGridSettings>(result);
+        }
+    }
+
+    private async Task SaveStateAsync()
+    {
+        ArgumentNullException.ThrowIfNull(JSRuntimeData);
+
+        await JSRuntimeData.InvokeVoidAsync("window.localStorage.setItem", "Settings",
+        JsonSerializer.Serialize<DataGridSettings>(Settings));
+    }
+    private Dictionary<string, string>? columnWidths = new();
+
+    private async Task LoadSavedColumnWidths()
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(JSRuntimeData);
+            var savedWidths = await JSRuntimeData.InvokeAsync<string>("localStorage.getItem", "<#= EntityType.Name #>ColumnWidths");
+            if (!string.IsNullOrEmpty(savedWidths))
+            {
+                columnWidths = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(savedWidths);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading column widths: {ex.Message}");
+            columnWidths = new Dictionary<string, string>();
+        }
+    }
+
+    private async Task SaveColumnWidths()
+    {
+        try
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize(columnWidths);
+            await JSRuntimeData.InvokeVoidAsync("localStorage.setItem", "<#= EntityType.Name #>ColumnWidths", json);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving column widths: {ex.Message}");
+        }
+    }
+
+}
+
+*/
+
+//60 addedit
+
+/* filename: <#= EntityType.Name #>AddEdit.razor
+<# if (!hasOneKey) { #>
+//no page  for add edit
+<# } #>
+<# if (hasOneKey) { #>
+
+@page "/ui/db/<#= EntityType.Name #>/addedit/{id:int?}"
+@using XP.Database
+<div class="main-db-addedit">
+
+
+@if (IsEdit)
+{
+    <h1>Edit <#= EntityType.Name #> @item?.<#= EntityType.Name #>Name </h1>
+
+}
+else
+{
+    <h1>Add <#= EntityType.Name #></h1>
+
+}
+
+<EditForm Model="item">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <#
+    foreach (var property3 in EntityType.GetProperties().OrderBy(p => p.GetColumnOrder() ?? -1))
+    {
+    
+    #>
+    
+    <FluentTextField Label="<#= property3.Name#>"  @bind-Value=<#= property3.Name#>String AriaLabel="<#= EntityType.Name #> <#= property3.Name#>"></FluentTextField>
+    <br />
+    <#
+
+
+    }
+#>
+
+
+</EditForm>
+<FluentButton Appearance="Appearance.Lightweight" OnClick="async()=>await save<#= EntityType.Name #>()">
+    Save
+    <FluentIcon Value="@(new Icons.Regular.Size24.Save())"></FluentIcon>
+</FluentButton>
+
+<FluentButton Appearance="Appearance.Lightweight" OnClick="GoBack">
+    Cancel<FluentIcon Value="@(new Icons.Regular.Size24.ArrowLeft())"></FluentIcon>
+</FluentButton>
+
+</div>
+
+
+@code {
+
+    <#
+    foreach (var property4 in EntityType.GetProperties().OrderBy(p => p.GetColumnOrder() ?? -1))
+    {
+    
+    #>
+
+    public string <#= property4.Name#>String
+    {
+        get => item.<#= property4.Name#>?.ToString() ?? string.Empty;
+        set
+        {
+            if (int.TryParse(value, out var result))
+            {
+                item.<#= property4.Name#> = result;
+            }
+            else
+            {
+                item.<#= property4.Name#> = null;
+            }
+        }
+    }    
+    <#
+    }
+    #>
+    [Inject]
+    NavigationManager? Navigation { get; set; }
+
+    [Parameter]
+    public int? id{ get; set; }
+    public bool IsEdit => (id >0);
+
+    public I<#= EntityType.Name #> item { get; set; } = new <#= EntityType.Name #>_null();
+    [Inject]
+    IJSRuntime? JSRuntime{ get; set; }
+
+    [Inject(Key = Program.apiNameConfig)]
+    public I<#= EntityType.Name #>List? TheListOf<#= EntityType.Name #> { get; set; }
+
+    [Inject(Key = Program.apiNameConfig)]
+    public I<#= EntityType.Name #>CUD? CUD<#= EntityType.Name #> { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(IsEdit)
+            item = (await TheListOf<#= EntityType.Name #>!.Get<#= EntityType.Name #>(id!.Value) )?? new <#= EntityType.Name #>_null();
+        else
+            item = new <#= EntityType.Name #>_null();
+
+        await base.OnInitializedAsync();
+    }
+    void GoBack()
+    {
+        ArgumentNullException.ThrowIfNull(JSRuntime);
+        JSRuntime.InvokeVoidAsync("history.back");
+    }
+    async Task save<#= EntityType.Name #>()
+    {
+        await Task.Delay(1000);
+
+        Console.WriteLine("Save <#= EntityType.Name #>" + item.<#= EntityType.Name #>Name);
+        if (IsEdit)
+        {
+            await CUD<#= EntityType.Name #>!.Update<#= EntityType.Name #>(item);
+        }
+        else
+        {
+            await CUD<#= EntityType.Name #>!.Add<#= EntityType.Name #>(item);
+        }
+        ArgumentNullException.ThrowIfNull(Navigation);
+        Navigation.NavigateTo("/ui/db/<#= EntityType.Name #>/listAll");
+    }
+
+}
+
+<# } #>
+//70 dropdown
+
+/* filename: <#= EntityType.Name #>DropDown.razor
+<# if (!hasOneKey) { #>
+//no page  for add edit
+<# } #>
+<# if (hasOneKey) { #>
+
+@using XP.Database
+
+<FluentAutocomplete Id="my-customized"
+@ref="<#= EntityType.Name #>List"
+TOption="I<#= EntityType.Name #>"
+Width="100%"
+Placeholder="search"
+OnOptionsSearch="@OnSearch"
+MaximumSelectedOptions="1"
+KeepOpen="true"
+OptionText="@(item => item.<#= EntityType.Name #>Name)"
+OptionStyle="min-height: 40px;"
+@bind-SelectedOptions="@SelectedItems"
+>
+
+    <LabelTemplate>
+        Select a <#= EntityType.Name #>
+    </LabelTemplate>
+
+    @* Template used with each Selected items *@
+    <SelectedOptionTemplate>
+        @context.<#= EntityType.Name #>Name 
+    </SelectedOptionTemplate>
+
+    @* Template used with each Option items *@
+    <OptionTemplate>
+        @context.<#= EntityType.Name #>Name 
+    </OptionTemplate>
+
+    @* Template used when the maximum number of selected items (MaximumSelectedOptions) has been reached *@
+    <MaximumSelectedOptionsMessage>
+        The maximum number of selected items has been reached.
+    </MaximumSelectedOptionsMessage>
+
+    @* Content display at the top of the Popup area *@
+    <HeaderContent>
+        <FluentLabel Color="Color.Accent"
+        Style="padding: 8px; font-size: 11px; border-bottom: 1px solid var(--neutral-fill-stealth-hover);">
+            Suggested Countries
+        </FluentLabel>
+    </HeaderContent>
+
+    @* Content display at the bottom of the Popup area *@
+    <FooterContent>
+        @if (!context.Any())
+        {
+            <FluentLabel Style="font-size: 11px; text-align: center; width: 200px;">
+                No results found
+            </FluentLabel>
+        }
+    </FooterContent>
+</FluentAutocomplete>
+
+@* <p>
+    <b>Selected</b>: @(String.Join(" - ", SelectedItems.Select(i => i.<#= EntityType.Name #>Name + "--"+i.<#= EntityType.Name #>Id)))
+</p>
+ *@
+@* This is @ItemSelected?.<#= EntityType.Name #>Name *@
+
+
+@code {
+
+    FluentAutocomplete<I<#= EntityType.Name #>> <#= EntityType.Name #>List = default!;
+
+    private void OnSearch(OptionsSearchEventArgs<I<#= EntityType.Name #>> e)
+    {
+        e.Items = Data.Where(i => i.<#= EntityType.Name #>Name != null && i.<#= EntityType.Name #>Name.Contains(e.Text, StringComparison.OrdinalIgnoreCase) )
+                             .OrderBy(i => i.<#= EntityType.Name #>Name);
+    }
+    [Parameter]
+    public int? IDSelected { get; set; }
+
+    [Parameter]
+    public Action<int> IDHasBeenSelected { get; set; }
+
+    [Inject(Key = Program.apiNameConfig)]
+    public I<#= EntityType.Name #>List? TheListOf<#= EntityType.Name #>s { get; set; }
+
+    public I<#= EntityType.Name #>? ItemSelected
+    {
+        get
+        {
+            if (!IDSelected.HasValue) return null;
+            if (Data.Length == 0) return null;
+            return Data.FirstOrDefault(i => i.<#= EntityType.Name #>Id == IDSelected);
+        }
+    }
+    public I<#= EntityType.Name #>[] Data { get; set; } = Array.Empty<I<#= EntityType.Name #>>();
+    private IEnumerable<I<#= EntityType.Name #>> m_SelectedItems = Array.Empty<I<#= EntityType.Name #>>();
+    IEnumerable<I<#= EntityType.Name #>> SelectedItems
+    {
+        get
+        {
+            return m_SelectedItems;
+        }
+        set
+        {
+            m_SelectedItems = value;
+            if (m_SelectedItems.Count() > 0 && IDHasBeenSelected != null)
+            {
+                IDHasBeenSelected(m_SelectedItems.First().<#= EntityType.Name #>Id);
+            }
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (Data.Length == 0)
+        {
+            var data = (TheListOf<#= EntityType.Name #>s!.<#= EntityType.Name #>().ToArrayAsync());
+            var arr = await data;
+            Data = arr ?? Array.Empty<I<#= EntityType.Name #>>();
+            if (SelectedItems.Count() == 0 && ItemSelected != null)
+            {
+                SelectedItems = new I<#= EntityType.Name #>[] { ItemSelected };
+            }
+        }
+        await  base.OnInitializedAsync();
+    }
+
+}
+
+
+
+
+
+
+
+
+
+<# } #>
+
+*/
+
+
+
+<#
+    var previousOutput = GenerationEnvironment;
+    GenerationEnvironment = new StringBuilder();
+
+    foreach (var ns in usings.Distinct().OrderBy(x => x, new NamespaceComparer()))
+    {
+#>
+using <#= ns #>;
+<#
+    }
+
+    WriteLine("");
+
+    GenerationEnvironment.Append(previousOutput);
+#>
