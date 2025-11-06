@@ -1,5 +1,5 @@
 ﻿namespace Mermaid;
 public class Data
 {
-    public string MermaidCode { get; set; }="mermaid.html"
+    public string MermaidCode { get; set; } = "mermaid.html";
     }
