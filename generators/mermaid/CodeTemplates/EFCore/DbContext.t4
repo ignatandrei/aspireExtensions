@@ -19,6 +19,11 @@ import Mermaid from '@theme/Mermaid';
     {
 #>
     <#= entityType.Name #> {
+<#
+foreach (var property in entityType.GetProperties()){
+#>
+<#= property.Name #> <#= property.GetColumnType().Replace(",","_") #> 
+<#}#>
     }
 <#
         foreach (var foreignKey in entityType.GetForeignKeys())

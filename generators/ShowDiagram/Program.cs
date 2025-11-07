@@ -96,10 +96,10 @@ static async Task CreateDocumentation(string file, string nameDB, string folder,
     string partialExampleFile = $"_markdown-{nameDB}-database.mdx";
     File.Copy(file, Path.Combine(docsFolder, partialExampleFile), true);
     string partialExampleFileUser = $"_markdown-{nameDB}-database-user.mdx";
-    await File.WriteAllTextAsync(Path.Combine(docsFolder, partialExampleFileUser), $"Your own details about {nameDB}");
+    await File.WriteAllTextAsync(Path.Combine(docsFolder, partialExampleFileUser), $"Here you can add your own details about {nameDB}");
     
     using (var writer = new StreamWriter(markdownFile))
-    {
+    { 
         var str = $$"""
 
 import {{nameDB}}Database from './{{partialExampleFile}}';
