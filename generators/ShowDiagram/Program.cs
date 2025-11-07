@@ -66,8 +66,57 @@ ef dbcontext scaffold "{{connectionString}}" Microsoft.EntityFrameworkCore.SqlSe
     {
         return 40;
     }
+    string endContext = "Context.generated.mdx";
+    var contextFile = Directory.GetFiles(mermaidProjectFolder, $"*{endContext}", SearchOption.AllDirectories);
+    foreach (var file in contextFile)
+    {
+        string nameDB = Path.GetFileName(file).Replace($"{endContext}", "");
+        logger.LogInformation($"Found database {nameDB} from context file: {file}");
+        CreateDocumentation(file, nameDB, folder, logger);
+    }
     return 42;
 }
+
+static async Task CreateDocumentation(string file, string nameDB, string folder, ILogger<Program> logger)
+{
+    nameDB = nameDB.ToUpper();
+    var pathDocusaurus = Path.Combine(folder, "..", "DocumentDocusaurus");
+    if (!Directory.Exists(pathDocusaurus))
+    {
+        logger.LogError($"Docusaurus folder not found: {pathDocusaurus}");
+        return; 
+    }
+    var docsFolder = Path.Combine(pathDocusaurus, "docs", "database");
+    if (!Directory.Exists(docsFolder))
+    {
+        Directory.CreateDirectory(docsFolder);
+    }
+    var markdownFile = Path.Combine(docsFolder, $"{nameDB}.mdx");
+    
+    string partialExampleFile = $"_markdown-{nameDB}-database.mdx";
+    File.Copy(file, Path.Combine(docsFolder, partialExampleFile), true);
+    string partialExampleFileUser = $"_markdown-{nameDB}-database-user.mdx";
+    await File.WriteAllTextAsync(Path.Combine(docsFolder, partialExampleFileUser), $"Your own details about {nameDB}");
+    
+    using (var writer = new StreamWriter(markdownFile))
+    {
+        var str = $$"""
+
+import {{nameDB}}Database from './{{partialExampleFile}}';
+import {{nameDB}}DatabaseUser from './{{partialExampleFileUser}}';
+
+# Database: {{nameDB}}
+
+<{{nameDB}}Database />
+
+<{{nameDB}}DatabaseUser />
+
+""";
+await writer.WriteAsync(str);
+    } 
+
+}
+
 
 static async Task<bool> LaunchProgram(string folder, string exe, string args, ILogger logger)
 {

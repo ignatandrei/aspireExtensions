@@ -1,5 +1,5 @@
 <#@ template hostSpecific="true" debug="true" #>
-<#@ output extension=".generated.md" #>
+<#@ output extension=".generated.mdx" #>
 <#@ assembly name="Microsoft.EntityFrameworkCore" #>
 <#@ assembly name="Microsoft.EntityFrameworkCore.Relational" #>
 <#@ assembly name="Microsoft.EntityFrameworkCore.Design" #>
@@ -7,10 +7,12 @@
 <#@ parameter name="Options" type="Microsoft.EntityFrameworkCore.Scaffolding.ModelCodeGenerationOptions" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="Microsoft.EntityFrameworkCore" #>
-# <#= Options.ContextName #>
 
-```mermaid
-erDiagram
+import Mermaid from '@theme/Mermaid';
+
+
+<Mermaid
+  value={`erDiagram
 <#
 
     foreach (var entityType in Model.GetEntityTypes())
@@ -34,4 +36,8 @@ erDiagram
         }
     }
 #>
-```
+`
+}
+/>
+
+

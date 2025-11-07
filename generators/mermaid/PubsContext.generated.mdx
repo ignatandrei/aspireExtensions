@@ -1,0 +1,45 @@
+﻿
+import Mermaid from '@theme/Mermaid';
+
+
+<Mermaid
+  value={`erDiagram
+    Author {
+    }
+    Discount {
+    }
+    Discount }o--o| Store : "FK__discounts__stor___4F7CD00D"
+    Employee {
+    }
+    Employee }o--|| Job : "FK__employee__job_id__5BE2A6F2"
+    Employee }o--|| Publisher : "FK__employee__pub_id__5EBF139D"
+    Job {
+    }
+    PubInfo {
+    }
+    PubInfo |o--|| Publisher : "FK__pub_info__pub_id__571DF1D5"
+    Publisher {
+    }
+    Roysched {
+    }
+    Roysched }o--|| Title : "FK__roysched__title___4D94879B"
+    Sale {
+    }
+    Sale }o--|| Store : "FK__sales__stor_id__4AB81AF0"
+    Sale }o--|| Title : "FK__sales__title_id__4BAC3F29"
+    Store {
+    }
+    Title {
+    }
+    Title }o--o| Publisher : "FK__titles__pub_id__412EB0B6"
+    Titleauthor {
+    }
+    Titleauthor }o--|| Author : "FK__titleauth__au_id__44FF419A"
+    Titleauthor }o--|| Title : "FK__titleauth__title__45F365D3"
+    Titleview {
+    }
+`
+}
+/>
+
+
