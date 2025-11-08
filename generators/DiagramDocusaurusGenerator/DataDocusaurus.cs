@@ -28,7 +28,7 @@ public class DataDocusaurus(string folderDocusaurus)
         logger.LogInformation($"Creating mermaid file for database {nameDB} in {newFile} from {fileCopy}");
         File.Move(fileCopy, newFile, true);
         newFile= Path.Combine(docsDatabase, "index.mdx");
-        var docDatabase = new DatabaseFull(databaseModelReact);
+        DatabaseFull docDatabase = new (databaseModelReact);
         await File.WriteAllTextAsync(newFile, await docDatabase.RenderAsync());
         
         var tablesfolder = Path.Combine(docsDatabase, "Tables");
@@ -42,11 +42,24 @@ public class DataDocusaurus(string folderDocusaurus)
        foreach (var tableFile in tableFiles)
        {
            var tableName = Path.GetFileName(tableFile).Replace(extensionTableFile,"");
-           logger.LogInformation($"Found table {tableName} in {tableFile}");
+           tableName=tableName.ToUpper();
+            logger.LogInformation($"Found table {tableName} in {tableFile}");
            newFile= Path.Combine(tablesfolder, $"_markdown-{nameDB}-{tableName}-database.mdx");
            fileCopy = tableFile;
            logger.LogInformation($"Creating table file for table {tableName} in {newFile} from {fileCopy}");
            File.Move(fileCopy, newFile, true);
+           TableModelReact tableModelReact = new(tableName, databaseModelReact);
+           
+           TableFull tableFull = new(tableModelReact);
+           newFile= Path.Combine(tablesfolder, tableModelReact.partialDocumentFileUser);
+           TableUser tableUser = new (tableModelReact);
+           await File.WriteAllTextAsync(newFile, await tableUser.RenderAsync());
+
+           newFile = Path.Combine(tablesfolder, $"{tableName}.mdx");
+           await File.WriteAllTextAsync(newFile, await tableFull.RenderAsync());
+
+
+
         }
     }
 }

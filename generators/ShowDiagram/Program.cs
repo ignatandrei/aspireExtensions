@@ -63,7 +63,7 @@ ef dbcontext scaffold "{{connectionString}}" Microsoft.EntityFrameworkCore.SqlSe
     logger.LogInformation($"scaffold {scaffold}");
     ok = await LaunchProgram(mermaidProjectFolder, "dotnet", scaffold, logger);
     logger.LogInformation($"scaffold {ok}");
-    if (!ok)
+    if (!ok) 
     {
         return 40;
     }
