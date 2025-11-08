@@ -21,10 +21,16 @@ static async Task<int> DoWork(ILogger<Program> logger)
 {
     string? connectionString = null;
     var envs = Environment.GetEnvironmentVariables();
+    string docuSaurusFolder = string.Empty;
     foreach (var key in envs.Keys)
     {
         if (key is string k && envs[key] is string v)
         {
+            if(k == "DocusaurusFolder")
+            {
+                docuSaurusFolder = v;
+                logger.LogInformation($"Docusaurus folder from env var: {docuSaurusFolder}");
+            }
             if (k.StartsWith("ConnectionStrings"))
             {
                 logger.LogInformation($"Env var: {k}={v}");
@@ -74,21 +80,21 @@ ef dbcontext scaffold "{{connectionString}}" Microsoft.EntityFrameworkCore.SqlSe
     {
         string nameDB = Path.GetFileName(file).Replace($"{endContext}", "");
         logger.LogInformation($"Found database {nameDB} from context file: {file}");
-        await CreateDocumentation(file, nameDB, logger);
+        await CreateDocumentation(file, nameDB,docuSaurusFolder, logger);
     }
     return 42;
 }
 
-static async Task CreateDocumentation(string file, string nameDB, ILogger<Program> logger)
+static async Task CreateDocumentation(string file, string nameDB,string pathDocusaurus , ILogger<Program> logger)
 {
     nameDB = nameDB.ToUpper();
     var folder = Path.GetDirectoryName(file);
-    var pathDocusaurus = Path.Combine(folder,  "..", "..", "..", "docudb");
+    //var pathDocusaurus = Path.Combine(folder,  "..", "..", "..", "docudb");
     pathDocusaurus = Path.GetFullPath(pathDocusaurus);
     if (!Directory.Exists(pathDocusaurus))
     {
         logger.LogError($"Docusaurus folder not found: {pathDocusaurus}");
-        return; 
+        return;
     }
     DataDocusaurus dataDocusaurus = new(pathDocusaurus);
 
