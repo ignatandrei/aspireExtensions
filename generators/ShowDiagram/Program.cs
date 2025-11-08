@@ -9,7 +9,17 @@ builder.Services.AddDirectoryBrowser();
 var app = builder.Build();
 app.UseStaticFiles();
 app.UseFileServer(enableDirectoryBrowsing: true);
-
+var docusaurusPath = Environment.GetEnvironmentVariable("DocusaurusFolder") ?? string.Empty;
+if(docusaurusPath != string.Empty)
+{
+    app.UseFileServer(new FileServerOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+            Path.Combine(docusaurusPath,"build")),
+        RequestPath = "/docudb",
+        EnableDirectoryBrowsing = true
+    });
+}
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 await foreach (var item in Task.WhenEach(app.RunAsync(), DoWork(logger)))

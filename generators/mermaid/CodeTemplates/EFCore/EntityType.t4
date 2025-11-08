@@ -78,7 +78,7 @@ foreach (var property in EntityType.GetProperties()){
 
 <# foreach (var nameNavigation in namesNav){#>
 
-###  [<#= nameNavigation #>](./<#= nameNavigation #>) 
+###  [<#= nameNavigation #>](./<#= nameNavigation.ToUpper() #>) 
 
 <#}#>
 
