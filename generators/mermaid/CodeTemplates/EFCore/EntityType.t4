@@ -19,7 +19,13 @@
     var services = (IServiceProvider)Host;
     var annotationCodeGenerator = services.GetRequiredService<IAnnotationCodeGenerator>();
     var code = services.GetRequiredService<ICSharpHelper>();
-
+    var key = EntityType.FindPrimaryKey();
+    var namesPKS= new HashSet<string>();
+    if(key != null)
+    {
+        namesPKS = new HashSet<string>(key.Properties.Select(p => p.Name));
+    }
+    
 #>
 
 # <#= EntityType.Name #>
@@ -34,7 +40,11 @@ import Mermaid from '@theme/Mermaid';
 <#
 foreach (var property in EntityType.GetProperties()){
 #>
-<#= property.Name #> <#= property.GetColumnType().Replace(",","_") #> 
+<#
+    bool isPK = namesPKS.Contains(property.Name);
+    string PKMark = isPK ? "PK" : "";
+#>
+<#= property.Name #> <#= property.GetColumnType().Replace(",","_") #> <#=PKMark #> 
 <#}#>
     }
 `
