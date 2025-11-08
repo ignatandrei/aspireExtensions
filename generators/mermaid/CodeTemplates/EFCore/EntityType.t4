@@ -25,13 +25,20 @@
     {
         namesPKS = new HashSet<string>(key.Properties.Select(p => p.Name));
     }
-    //var namesFK= new HashSet<string>();
-    //var fks=EntityType.GetForeignKeys();
-    //if(fks != null)
-    {
-      //  namesFK = new HashSet<string>(fks.SelectMany(fk => fk.Properties).Select(p => p.Name));
-    }
+    
+    var namesNav = new HashSet<string>();
 
+    var nav = EntityType.GetNavigations();
+    if(nav != null)
+    {
+        namesNav = new HashSet<string>(nav.Select(n => n.TargetEntityType.Name));
+    }
+    var namesFKTables= new HashSet<string>();
+    var fks=EntityType.GetSkipNavigations();
+    if(fks != null)
+    {
+        namesFKTables = new HashSet<string>(fks.Select(fk => fk.TargetEntityType.Name));
+    }
 #>
 
 # <#= EntityType.Name #>
@@ -67,4 +74,11 @@ foreach (var property in EntityType.GetProperties()){
 }
 />
 
+## Related Tables
+
+<# foreach (var nameNavigation in namesNav){#>
+
+###  [<#= nameNavigation #>](./<#= nameNavigation #>) 
+
+<#}#>
 
