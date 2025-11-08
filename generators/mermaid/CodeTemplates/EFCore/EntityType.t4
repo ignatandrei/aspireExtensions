@@ -25,7 +25,13 @@
     {
         namesPKS = new HashSet<string>(key.Properties.Select(p => p.Name));
     }
-    
+    //var namesFK= new HashSet<string>();
+    //var fks=EntityType.GetForeignKeys();
+    //if(fks != null)
+    {
+      //  namesFK = new HashSet<string>(fks.SelectMany(fk => fk.Properties).Select(p => p.Name));
+    }
+
 #>
 
 # <#= EntityType.Name #>
@@ -46,7 +52,17 @@ foreach (var property in EntityType.GetProperties()){
 #>
 <#= property.Name #> <#= property.GetColumnType().Replace(",","_") #> <#=PKMark #> 
 <#}#>
+
+
     }
+    <#
+        foreach (var foreignKey in EntityType.GetForeignKeys())
+        {
+#>
+    <#= EntityType.Name #> <#= foreignKey.IsUnique ? "|" : "}" #>o--<#= foreignKey.IsRequired ? "|" : "o" #>| <#= foreignKey.PrincipalEntityType.Name #> : "<#= foreignKey.GetConstraintName() #>"
+<#
+        }
+#>
 `
 }
 />
