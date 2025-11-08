@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mermaid", "mermaid\Mermaid.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowDiagram", "ShowDiagram\ShowDiagram.csproj", "{80BAEA2A-A941-46F1-85C1-BFCA68989A54}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagramDocusaurusGenerator", "DiagramDocusaurusGenerator\DiagramDocusaurusGenerator.csproj", "{5FFCE348-D654-406F-B613-F6CEB39BC881}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{80BAEA2A-A941-46F1-85C1-BFCA68989A54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80BAEA2A-A941-46F1-85C1-BFCA68989A54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80BAEA2A-A941-46F1-85C1-BFCA68989A54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FFCE348-D654-406F-B613-F6CEB39BC881}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FFCE348-D654-406F-B613-F6CEB39BC881}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FFCE348-D654-406F-B613-F6CEB39BC881}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FFCE348-D654-406F-B613-F6CEB39BC881}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
