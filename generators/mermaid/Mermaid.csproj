@@ -18,14 +18,8 @@
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="RSCG_Templating" Version="2024.720.1603" OutputItemType="Analyzer" />
-		<PackageReference Include="RSCG_TemplatingCommon" Version="2024.720.1603" />
-		<PackageReference Include="RSCG_TimeBombComment" Version="2023.12.19.1802" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
-		<PackageReference Include="EntityLengths.Generator" Version="1.0.3" />
-		<PackageReference Include="rscg_Interface_to_null_object" Version="2025.519.1000" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-		<PackageReference Include="rscg_Interface_to_null_object_common" Version="2025.519.1000" />
-
+		
 		<!--
 //dotnet ef dbcontext scaffold "Data Source=127.0.0.1;Initial Catalog=XpertContract;UID=sa;PWD=P@ssw0rd;TrustServerCertificate=true" Microsoft.EntityFrameworkCore.SqlServer 
 add two minus force

@@ -83,7 +83,7 @@ static async Task CreateDocumentation(string file, string nameDB, ILogger<Progra
 {
     nameDB = nameDB.ToUpper();
     var folder = Path.GetDirectoryName(file);
-    var pathDocusaurus = Path.Combine(folder,  "..", "..", "..", "DocuDb");
+    var pathDocusaurus = Path.Combine(folder,  "..", "..", "..", "docudb");
     pathDocusaurus = Path.GetFullPath(pathDocusaurus);
     if (!Directory.Exists(pathDocusaurus))
     {
