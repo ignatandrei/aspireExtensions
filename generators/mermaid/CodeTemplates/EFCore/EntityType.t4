@@ -1,7 +1,5 @@
-<#@ template hostSpecific="true" debug="true" #>
-<#
-   // System.Diagnostics.Debugger.Launch();
-#>
+<#@ template hostSpecific="true" #>
+<#@ output extension=".table.generated.mdx" #>
 <#@ assembly name="Microsoft.EntityFrameworkCore" #>
 <#@ assembly name="Microsoft.EntityFrameworkCore.Design" #>
 <#@ assembly name="Microsoft.EntityFrameworkCore.Relational" #>
@@ -17,7 +15,11 @@
 <#@ import namespace="Microsoft.EntityFrameworkCore.Design" #>
 <#@ import namespace="Microsoft.Extensions.DependencyInjection" #>
 <#
-        // Don't scaffold these
-        return "";
+
+    var services = (IServiceProvider)Host;
+    var annotationCodeGenerator = services.GetRequiredService<IAnnotationCodeGenerator>();
+    var code = services.GetRequiredService<ICSharpHelper>();
+
 #>
 
+# <#= EntityType.Name #>

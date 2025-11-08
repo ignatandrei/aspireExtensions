@@ -67,7 +67,7 @@ ef dbcontext scaffold "{{connectionString}}" Microsoft.EntityFrameworkCore.SqlSe
     {
         return 40;
     }
-    string endContext = "Context.generated.mdx";
+    string endContext = "Context.database.generated.mdx";
     var contextFiles = Directory.GetFiles(mermaidProjectFolder, $"*{endContext}", SearchOption.AllDirectories);
     
     foreach (var file in contextFiles)

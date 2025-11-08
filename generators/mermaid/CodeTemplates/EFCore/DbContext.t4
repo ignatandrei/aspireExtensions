@@ -1,5 +1,5 @@
 <#@ template hostSpecific="true" debug="true" #>
-<#@ output extension=".generated.mdx" #>
+<#@ output extension=".database.generated.mdx" #>
 <#@ assembly name="Microsoft.EntityFrameworkCore" #>
 <#@ assembly name="Microsoft.EntityFrameworkCore.Relational" #>
 <#@ assembly name="Microsoft.EntityFrameworkCore.Design" #>
