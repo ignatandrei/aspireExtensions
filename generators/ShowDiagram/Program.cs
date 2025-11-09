@@ -92,6 +92,11 @@ ef dbcontext scaffold "{{connectionString}}" Microsoft.EntityFrameworkCore.SqlSe
         logger.LogInformation($"Found database {nameDB} from context file: {file}");
         await CreateDocumentation(file, nameDB,docuSaurusFolder, logger);
     }
+    logger.LogInformation($"Installing Docusaurus dependencies in {docuSaurusFolder}");
+    await LaunchProgram(docuSaurusFolder,"npm","install", logger);
+    logger.LogInformation($"Building Docusaurus site in {docuSaurusFolder}");
+    await LaunchProgram(docuSaurusFolder, "npm", "run build", logger);
+    logger.LogInformation($"DONE documentation");
     return 42;
 }
 
@@ -131,40 +136,85 @@ static async Task CreateDocumentation(string file, string nameDB,string pathDocu
 
 static async Task<bool> LaunchProgram(string folder, string exe, string args, ILogger logger)
 {
-    ProcessStartInfo psi = new()
+    try
     {
-        FileName = exe,
-        Arguments = args,
-        WorkingDirectory = folder,
-        RedirectStandardOutput = true,
-        RedirectStandardError = true,
-        UseShellExecute = false,
-        CreateNoWindow = true
-    };
-    Process p = new Process();
-    p.StartInfo = psi;
-    StringBuilder output = new();
-    StringBuilder error = new();
+        var resolvedExe = ResolveExecutable(exe, logger);
 
-    p.OutputDataReceived += LogData(output, "OUTPUT");
+        ProcessStartInfo psi = new()
+        {
+            FileName = resolvedExe,
+            Arguments = args,
+            WorkingDirectory = folder,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        Process p = new Process();
+        p.StartInfo = psi;
+        StringBuilder output = new();
+        StringBuilder error = new();
 
-    p.ErrorDataReceived += LogData(error, "ERROR");
+        p.OutputDataReceived += LogData(output, "OUTPUT");
+
+        p.ErrorDataReceived += LogData(error, "ERROR");
 
 
-    p.Start();
-    p.BeginOutputReadLine(); 
-    p.BeginErrorReadLine(); 
-    await p.WaitForExitAsync();
-    var ok = (p.ExitCode == 0);
-    if (!ok)
-    {
-        logger.LogError("OUTPUT:" + output.ToString());
-        logger.LogError("----------------");
-        logger.LogError("ERROR:" + error.ToString());
-        logger.LogError("----------------");
+        p.Start();
+        p.BeginOutputReadLine();
+        p.BeginErrorReadLine();
+        await p.WaitForExitAsync();
+        var ok = (p.ExitCode == 0) || (string.IsNullOrWhiteSpace(error.ToString()));
+        if (!ok)
+        {
+            logger.LogError("OUTPUT:" + output.ToString());
+            logger.LogError("----------------");
+            logger.LogError("ERROR:" + error.ToString());
+            logger.LogError("----------------");
+        }
+        return ok;
     }
-    return ok; 
+    catch (Exception ex)
+    {
+        logger.LogError($"Error launching program {exe} {args} in folder {folder}: {ex.Message}");
+        return false;
+    }
 }
+static string? ResolveExecutable(string exe, ILogger logger)
+{
+    // Normalize for npm on Windows
+    if (OperatingSystem.IsWindows())
+    {
+        if (exe.Equals("npm", StringComparison.OrdinalIgnoreCase))
+        {
+            exe = "npm.cmd";
+        }
+        if (exe.Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+        {
+            exe = "dotnet.exe";
+        }
+    }
+    // If already an absolute path and exists
+    if (Path.IsPathRooted(exe) && File.Exists(exe))
+        return exe;
+
+    // Search PATH
+    var pathEnv = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+    foreach (var segment in pathEnv.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    {
+        try
+        {
+            var candidate = Path.Combine(segment, exe);
+            if (File.Exists(candidate))
+                return candidate;
+        }
+        catch { /* ignore invalid path segments */ }
+    }
+
+    logger.LogWarning($"Could not resolve full path for executable '{exe}'.");
+    return exe;
+}
+
 static DataReceivedEventHandler LogData(StringBuilder output, string type)
 {
     return (sender, e) =>
