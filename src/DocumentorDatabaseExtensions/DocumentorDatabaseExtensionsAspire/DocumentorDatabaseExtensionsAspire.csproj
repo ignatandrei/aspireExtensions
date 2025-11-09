@@ -9,7 +9,14 @@
 	<PackageReference Include="Aspire.Hosting.SqlServer" Version="9.5.2" />
 	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
 	<PackageReference Include="Dutchskull.Aspire.PolyRepo" Version="9.0.0" />
+	<PackageReference Include="NFH.FileEmbed" Version="0.1.0-beta" />
 
 </ItemGroup>
-
+	<PropertyGroup>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GX</CompilerGeneratedFilesOutputPath>
+	</PropertyGroup>
+	<ItemGroup>
+		<EmbeddedResource  Include="docudb.zip" />
+	</ItemGroup>
 </Project>

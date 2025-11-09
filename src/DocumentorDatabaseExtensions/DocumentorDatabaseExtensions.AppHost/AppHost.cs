@@ -25,7 +25,8 @@ var db = sqlserver.AddDatabase("pubs")
     .ExecuteSqlServerScriptsAtStartup(filePubs)
       .WithSqlPadViewerForDB(sqlserver);
 
-var res = db.AddDocumentationOnFolder("../../documentation");
+//accepts also relative paths
+var res = db.AddDocumentationOnFolder(@"D:\documentation");
 var aspire = builder.AddAspireResource();
 var app = builder.Build();
 //builder.Build().Run();
