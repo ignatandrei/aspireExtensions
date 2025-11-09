@@ -1,14 +1,40 @@
 using DiagramDocusaurusGenerator;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Diagnostics;
 using System.Text;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-
+bool healthCheck = false;
+builder.Services.AddHealthChecks()
+    // Add a default liveness check to ensure app is responsive
+    .AddCheck("ready", () =>
+    {
+        if (healthCheck)
+            return HealthCheckResult.Healthy();
+        else
+            return HealthCheckResult.Unhealthy();
+    }, 
+       ["ready"] )    
+    .AddCheck("live", () => 
+        {
+                return HealthCheckResult.Healthy();
+        }, ["live"]
+        );
+   
 builder.Services.AddDirectoryBrowser();
 var app = builder.Build();
 app.UseStaticFiles();
 app.UseFileServer(enableDirectoryBrowsing: true);
+app.MapHealthChecks("/health", new()
+{
+    Predicate = static r => r.Tags.Contains("ready")
+});
+app.MapHealthChecks("/alive", new()
+{
+    Predicate = static r => r.Tags.Contains("live")
+});
+
 var docusaurusPath = Environment.GetEnvironmentVariable("DocusaurusFolder") ?? string.Empty;
 if(docusaurusPath != string.Empty)
 {
@@ -25,6 +51,7 @@ var logger = app.Services.GetRequiredService<ILogger<Program>>();
 await foreach (var item in Task.WhenEach(app.RunAsync(), DoWork(logger)))
 {
     logger.LogInformation($"Task completed with result: {item}");
+    healthCheck=true;
 }
 
 static async Task<int> DoWork(ILogger<Program> logger)
