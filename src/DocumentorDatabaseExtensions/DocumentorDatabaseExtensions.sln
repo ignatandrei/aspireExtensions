@@ -1,0 +1,48 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36616.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentorDatabaseExtensions.AppHost", "DocumentorDatabaseExtensions.AppHost\DocumentorDatabaseExtensions.AppHost.csproj", "{E92F6128-17B2-4848-B3E3-BD7E44170BA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentorDatabaseExtensions.ServiceDefaults", "DocumentorDatabaseExtensions.ServiceDefaults\DocumentorDatabaseExtensions.ServiceDefaults.csproj", "{4FB7E2C9-CE9C-4BFE-34C3-A065296A84B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentorDatabaseExtensions.ApiService", "DocumentorDatabaseExtensions.ApiService\DocumentorDatabaseExtensions.ApiService.csproj", "{EDD794D4-93E1-A836-5C6D-B38FE9AAA0E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentorDatabaseExtensions.Web", "DocumentorDatabaseExtensions.Web\DocumentorDatabaseExtensions.Web.csproj", "{6083F0FC-0ABA-C57B-E1BF-5E7BCCFC74FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentorDatabaseExtensionsAspire", "DocumentorDatabaseExtensionsAspire\DocumentorDatabaseExtensionsAspire.csproj", "{09C99DB8-97B8-4120-A503-32C56AAFB51A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E92F6128-17B2-4848-B3E3-BD7E44170BA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E92F6128-17B2-4848-B3E3-BD7E44170BA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E92F6128-17B2-4848-B3E3-BD7E44170BA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E92F6128-17B2-4848-B3E3-BD7E44170BA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FB7E2C9-CE9C-4BFE-34C3-A065296A84B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FB7E2C9-CE9C-4BFE-34C3-A065296A84B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FB7E2C9-CE9C-4BFE-34C3-A065296A84B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FB7E2C9-CE9C-4BFE-34C3-A065296A84B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDD794D4-93E1-A836-5C6D-B38FE9AAA0E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDD794D4-93E1-A836-5C6D-B38FE9AAA0E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDD794D4-93E1-A836-5C6D-B38FE9AAA0E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDD794D4-93E1-A836-5C6D-B38FE9AAA0E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6083F0FC-0ABA-C57B-E1BF-5E7BCCFC74FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6083F0FC-0ABA-C57B-E1BF-5E7BCCFC74FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6083F0FC-0ABA-C57B-E1BF-5E7BCCFC74FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6083F0FC-0ABA-C57B-E1BF-5E7BCCFC74FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09C99DB8-97B8-4120-A503-32C56AAFB51A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09C99DB8-97B8-4120-A503-32C56AAFB51A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09C99DB8-97B8-4120-A503-32C56AAFB51A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09C99DB8-97B8-4120-A503-32C56AAFB51A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C2AA4BBA-7334-4C40-A10B-CECAF520A4F6}
+	EndGlobalSection
+EndGlobal
