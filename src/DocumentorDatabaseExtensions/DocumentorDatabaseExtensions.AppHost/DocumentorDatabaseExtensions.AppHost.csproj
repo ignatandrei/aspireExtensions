@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.2" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>624ac5ab-f92b-496f-a7de-bc6dba37180f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="instpubs.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="instpubs.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DocumentorDatabaseExtensions.ApiService\DocumentorDatabaseExtensions.ApiService.csproj" />
+    <ProjectReference Include="..\DocumentorDatabaseExtensions.Web\DocumentorDatabaseExtensions.Web.csproj" />
+    <ProjectReference Include="..\DocumentorDatabaseExtensionsAspire\DocumentorDatabaseExtensionsAspire.csproj" IsAspireProjectResource="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.5.2" />
+    <PackageReference Include="AspireExtensionsResource" Version="95.2025.1030.2019" />
+    <PackageReference Include="SqlExtensionsAspire" Version="95.2025.1102.1042" />
+  </ItemGroup>
+
+</Project>

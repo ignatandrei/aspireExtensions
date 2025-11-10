@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+	  <!-- NuGet Package Properties -->
+	  <PackageId>DocumentorDatabaseExtensionsAspire</PackageId>
+	  <Version>95.2025.1110.1942</Version>
+	  <Authors>Ignat Andrei</Authors>
+	  <Product>Document Database Extensions for .NET Aspire</Product>
+	  <Description>Extension methods for .NET Aspire SQL Server hosting that add SQL command execution, script execution, and SQLPad integration capabilities.</Description>
+	  <Summary>Document Database extensions for .NET Aspire hosting.</Summary>
+	  <PackageTags>aspire;documentation;sqlserver;database;hosting;extensions;sqlpad;sql;netaspire</PackageTags>
+	  <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions</PackageProjectUrl>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <PackageReleaseNotes>Initial release with SQL command execution, script execution, and SQLPad integration for .NET Aspire.</PackageReleaseNotes>
+	  <Copyright>Copyright © 2025</Copyright>
+	  <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+	  <IncludeSymbols>true</IncludeSymbols>
+	  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	  <PublishRepositoryUrl>true</PublishRepositoryUrl>
+	  <EmbedUntrackedSources>true</EmbedUntrackedSources>
+	  <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+  </PropertyGroup>
+<ItemGroup>
+	<PackageReference Include="Aspire.Hosting.SqlServer" Version="9.5.2" />
+	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+	<PackageReference Include="Dutchskull.Aspire.PolyRepo" Version="9.0.0" />
+	<PackageReference Include="NFH.FileEmbed" Version="0.1.0-beta" />
+
+</ItemGroup>
+	<PropertyGroup>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GX</CompilerGeneratedFilesOutputPath>
+	</PropertyGroup>
+	<ItemGroup>
+		<EmbeddedResource  Include="docudb.zip" />
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+</Project>
