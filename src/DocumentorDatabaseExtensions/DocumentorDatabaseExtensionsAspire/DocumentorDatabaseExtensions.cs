@@ -62,7 +62,7 @@ public static partial class DocumentorDatabaseExtensions
     .AddProjectFromRepository("docuDB" + name, repository,
         "generators/ShowDiagram/ShowDiagram.csproj")
     .WithHttpHealthCheck("/health")    
-    .WaitFor(db)
+    .WaitFor(db)    
         //.WithUrl("/docudb","Documentation")        
         .WithReference(db)
         .WithEnvironment("DocusaurusFolder", docuDBFolder)

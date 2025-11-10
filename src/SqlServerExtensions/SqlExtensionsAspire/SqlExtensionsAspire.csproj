@@ -13,7 +13,7 @@
     <Product>SQL Extensions for .NET Aspire</Product>
     <Description>Extension methods for .NET Aspire SQL Server hosting that add SQL command execution, script execution, and SQLPad integration capabilities.</Description>
     <Summary>SQL Server extensions for .NET Aspire hosting with command execution and database management tools.</Summary>
-    <PackageTags>aspire;sqlserver;database;hosting;extensions;sqlpad;sql;netaspire</PackageTags>
+    <PackageTags>aspire;sqlserver;integration;database;hosting;extensions;netaspire</PackageTags>
     <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>Initial release with SQL command execution, script execution, and SQLPad integration for .NET Aspire.</PackageReleaseNotes>

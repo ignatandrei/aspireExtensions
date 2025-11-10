@@ -1,0 +1,18 @@
+{
+  "name": "generatetest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start2": "npx playwright test -g \"docuDBpubs logs are visible without connection errors\" --project chromium --headed",
+    "start": "npx playwright test --project chromium"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.10.0"
+  }
+}

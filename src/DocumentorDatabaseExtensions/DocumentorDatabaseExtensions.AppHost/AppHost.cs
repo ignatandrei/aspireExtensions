@@ -24,10 +24,19 @@ var filePubs=await File.ReadAllTextAsync("instpubs.sql");
 var db = sqlserver.AddDatabase("pubs")
     .ExecuteSqlServerScriptsAtStartup(filePubs)
       .WithSqlPadViewerForDB(sqlserver);
-
 //accepts also relative paths
 var res = db.AddDocumentationOnFolder(@"D:\documentation");
+
+
 var aspire = builder.AddAspireResource();
+var tests = builder
+    .AddNpmApp("tests", "../GenerateTest")
+    .WithExplicitStart()
+    .WaitFor(aspire!)
+    ;
+
+aspire!.Resource.AddEnvironmentVariablesTo(tests);
+
 var app = builder.Build();
 //builder.Build().Run();
 var result = aspire.Resource.StartParsing(app);
