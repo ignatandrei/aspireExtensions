@@ -3,7 +3,7 @@ Aspire Extensions
 
 ## Project Packages
 
-- [More about DocumentorDatabaseExtensions](src/BlazorExtensions/DocumentorDatabaseExtensions/README.md)  
+- [More about DocumentorDatabaseExtensions](src/DocumentorDatabaseExtensions/README.md)  
 
 - [More about BlazorExtensionsAspire](src/BlazorExtensions/BlazorExtensionsAspire/README.md)  
 
