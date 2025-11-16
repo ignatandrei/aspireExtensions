@@ -23,6 +23,7 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
     public string BaseUrl() => (_baseUrl ?? "");
     public async Task<string> StartParsing(DistributedApplication da)
     {
+        MyAppResource.
         var ret = await AddAspire.ViewData(da);
         if (ret != null)
         {

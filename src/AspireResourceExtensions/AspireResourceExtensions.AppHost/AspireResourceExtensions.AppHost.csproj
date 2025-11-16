@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.2" />
+  <Sdk Name="Aspire.AppHost.Sdk" Version="13.0.0" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -18,9 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.2" />
-    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.0" />
+    <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.0.0" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.0.0" />
     <PackageReference Include="TestExtensionsAspire" Version="94.2025.805.2239" />
   </ItemGroup>
 

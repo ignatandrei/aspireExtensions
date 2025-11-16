@@ -1,0 +1,21 @@
+@using AspireResourceExtensionsAspire
+@inherits RazorBlade.PlainTextTemplate<MyAppResource>
+
+erDiagram
+
+@foreach (var resource in Model.resources.Keys)
+{
+    <text>
+    @{resource}
+    {
+        Name @resource
+    }
+    </text>
+}
+
+// Output relationships
+@foreach (var relation in Model.relationResources)
+{
+    // Mermaid ER syntax: Entity1 ||--o{ Entity2 : "relation"
+@($"{relation.fromResource.Name} ||--o{{ {relation.toResource.Name} : \"{relation.relationName}\"");
+}

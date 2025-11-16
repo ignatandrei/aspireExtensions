@@ -29,7 +29,7 @@ var tests= builder.AddTestProject<Projects.AspireResourceExtensions_Tests>("MyTe
     .WithExplicitStart()
     ;
 
-var npmTests = builder.AddNpmApp("GenerateVideo", "../GenerateTest")
+var npmTests = builder.AddJavaScriptApp("GenerateVideo", "../GenerateTest","start")
     .WaitFor(aspire)
     .WithExplicitStart()
     ;
