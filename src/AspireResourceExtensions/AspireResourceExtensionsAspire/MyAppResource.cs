@@ -45,7 +45,7 @@ class MyResource(IResource resource)
 {
     public string Name => resource.Name;
 }
-record MyRelationResource(MyResource fromResource, MyResource toResource, string relation)
+record MyRelationResource(MyResource fromResource, MyResource toResource, string relationName)
 {
 
 }
