@@ -1,9 +1,10 @@
-﻿using AspireResourceExtensionsAspire.Templates;
+﻿using Aspire.Hosting.ApplicationModel;
+using AspireResourceExtensionsAspire.Templates;
 
 namespace AspireResourceExtensionsAspire;
 
 
-record MyAppResource(Dictionary<string, MyResource> resources, List<MyRelationResource> relationResources)
+record MyAppResource(Dictionary<string, MyResource> resources, Dictionary<string,MyRelationResource> relationResources)
 {
     public string ExportToMermaid()
     {
@@ -14,8 +15,9 @@ record MyAppResource(Dictionary<string, MyResource> resources, List<MyRelationRe
 
     public static MyAppResource Construct(DistributedApplication distributedApplication,IDistributedApplicationBuilder builder1)
     {
+        string currentfolder = Environment.CurrentDirectory;
         Dictionary<string, MyResource> resources = [];
-        List<MyRelationResource> relationResources = [];
+        Dictionary<string,MyRelationResource> relationResources = [];
 
         foreach (var res in builder1.Resources)
         {
@@ -23,18 +25,50 @@ record MyAppResource(Dictionary<string, MyResource> resources, List<MyRelationRe
         }
         foreach (var item in builder1.Resources)
         {
-
-            if (!item.TryGetAnnotationsOfType<ResourceRelationshipAnnotation>(out var resourceRelationshipAnnotations))
-                continue;
-
+            
             var myRes = resources[item.Name];
-            foreach (var relation in resourceRelationshipAnnotations)
+
+            if (item.TryGetAnnotationsOfType<ResourceRelationshipAnnotation>(out var resourceRelationshipAnnotations))
             {
+                foreach (var relation in resourceRelationshipAnnotations)
+                {
+                    var key = $"{myRes.Name}->{relation.Resource.Name}";
+                    if (!relationResources.ContainsKey(key))
+                    {
+                        relationResources.Add(key, new MyRelationResource(myRes, resources[relation.Resource.Name]));
+                    }
+                    relationResources[key].AddRelation(relation.Type);
+                    //    relationResources.Add(new MyRelationResource(myRes, resources[relation.Resource.Name], relation.Type));
 
-                relationResources.Add(new MyRelationResource(myRes, resources[relation.Resource.Name], relation.Type));
-
+                }
             }
+            if(item.TryGetAnnotationsOfType<ExecutableAnnotation>(out var executableAnnotations))
+            {
+                foreach(var exec in executableAnnotations)
+                {
+                    myRes.Properties.Add("ExecutablePath", exec.Command);
+                    
+                    myRes.Properties.Add("WorkingDir", Path.GetRelativePath(currentfolder, exec.WorkingDirectory));
 
+                }
+            }
+            if(item.TryGetAnnotationsOfType<IProjectMetadata>(out var projectMetadataAnnotations))
+            {
+                foreach(var projectMetadata in projectMetadataAnnotations)
+                {
+
+                    var name = Path.GetRelativePath(currentfolder, projectMetadata.ProjectPath);
+                    myRes.Properties.Add("ProjectFilePath", name);
+                }
+            }
+            if(item.TryGetAnnotationsOfType<EndpointAnnotation>(out var endpointAnnotations))
+            {
+                foreach(var endpoint in endpointAnnotations)
+                {
+                    if(endpoint.AllocatedEndpoint is not null)
+                    myRes.Properties.Add("Endpoint", endpoint.AllocatedEndpoint.Address);
+                }
+            }
         }
         return new(resources,relationResources);
     }
@@ -44,8 +78,18 @@ record MyAppResource(Dictionary<string, MyResource> resources, List<MyRelationRe
 class MyResource(IResource resource)
 {
     public string Name => resource.Name;
+
+    
+    public Dictionary<string,string> Properties { get; init; } = [];
+
 }
-record MyRelationResource(MyResource fromResource, MyResource toResource, string relationName)
+record MyRelationResource(MyResource fromResource, MyResource toResource)
 {
+    public HashSet<string> RelationTypes { get; init; } = [];
+
+    public void AddRelation(string type)
+    {
+            RelationTypes.Add(type);
+    }
 
 }

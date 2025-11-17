@@ -2,20 +2,26 @@
 @inherits RazorBlade.PlainTextTemplate<MyAppResource>
 
 erDiagram
-@foreach (var resource in Model.resources.Keys)
+@foreach (var resource in Model.resources)
 {
 <text>
-@(MermaidName(resource)){
-    Name @MermaidName(resource)
+@(MermaidName(resource.Key)){
+A1 Name "@MermaidName(resource.Key)"
+        @for(int i=0;i<resource.Value.Properties.Count;i++)
+        {
+            var prop = resource.Value.Properties.ElementAt(i);
+@($"A{i+2} {prop.Key} \"{prop.Value}\"")
+    }    
 }
 </text>
+
 }
 
-@foreach (var relation in Model.relationResources)
+@foreach (var relation in Model.relationResources.Values)
 {
 
 <text>
-        @($"{MermaidName(relation.fromResource.Name)} || --o{{ {MermaidName(relation.toResource.Name)} : {MermaidName(relation.relationName)}")
+@($"{MermaidName(relation.fromResource.Name)} ||--||{MermaidName(relation.toResource.Name)} : {MermaidName(string.Join("_", relation.RelationTypes))}")
 </text>
 
 }
