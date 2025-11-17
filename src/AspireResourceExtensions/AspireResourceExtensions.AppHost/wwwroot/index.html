@@ -1,0 +1,26 @@
+<!DOCTYPE html><html><body>
+    <h1>
+        <a href="/aspire/resources/export/mermaid">Mermaid</a>
+        !
+    </h1>
+    <pre class="someOtherClass"></pre>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+        mermaid.initialize({ startOnLoad: false });
+
+        async function renderMermaid() {
+            const pre = document.querySelector('.someOtherClass');
+            try {
+                const resp = await fetch('/aspire/resources/export/mermaid');
+                if (!resp.ok) throw new Error('Failed to fetch diagram');
+                const text = await resp.text();
+                pre.textContent = text;
+                await mermaid.run({ querySelector: '.someOtherClass' });
+            } catch (e) {
+                pre.textContent = 'Error loading diagram: ' + e;
+            }
+        }
+        renderMermaid();
+    </script>
+</body></html>

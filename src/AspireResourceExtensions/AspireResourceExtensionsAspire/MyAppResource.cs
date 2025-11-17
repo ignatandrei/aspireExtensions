@@ -3,16 +3,16 @@
 namespace AspireResourceExtensionsAspire;
 
 
-internal record MyAppResource(Dictionary<string, MyResource> resources, List<MyRelationResource> relationResources)
+record MyAppResource(Dictionary<string, MyResource> resources, List<MyRelationResource> relationResources)
 {
-    public string ExportToMermaind()
+    public string ExportToMermaid()
     {
         Mermaid m = new(this);
         return m.Render();
     }
     
 
-    public static MyAppResource ConstructMermaid(DistributedApplication distributedApplication,IDistributedApplicationBuilder builder1)
+    public static MyAppResource Construct(DistributedApplication distributedApplication,IDistributedApplicationBuilder builder1)
     {
         Dictionary<string, MyResource> resources = [];
         List<MyRelationResource> relationResources = [];

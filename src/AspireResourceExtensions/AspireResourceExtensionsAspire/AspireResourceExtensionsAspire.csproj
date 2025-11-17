@@ -34,7 +34,9 @@
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
    </ItemGroup>
-
+	<ItemGroup>
+		<Watch Include="**\Templates\*.cshtml" ></Watch>
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.9.0" />
@@ -47,5 +49,5 @@
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GX</CompilerGeneratedFilesOutputPath>
 	</PropertyGroup>
-
+	
 </Project>
