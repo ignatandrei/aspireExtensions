@@ -1,5 +1,4 @@
-﻿using Aspire.Hosting.ApplicationModel;
-using AspireResourceExtensionsAspire.Templates;
+﻿using AspireResourceExtensionsAspire.Templates;
 
 namespace AspireResourceExtensionsAspire;
 
@@ -11,7 +10,29 @@ record MyAppResource(Dictionary<string, MyResource> resources, Dictionary<string
         Mermaid m = new(this);
         return m.Render();
     }
-    
+    public string ExportToCSV()
+    {
+        CSV m = new(this);
+        return m.Render();
+    }
+    public string[] MyResources()
+    {
+        return resources.Keys.ToArray();
+    }
+    public bool ExistResource(string resourceName)
+    {
+        return resources.ContainsKey(resourceName); 
+    }
+    public KeyValuePair<string, string>[]? DetailsResource(string idResource)
+    {
+        if (!ExistResource(idResource))
+            return null;
+
+        var resource = resources[idResource];
+        var details = resource.Properties;
+        return [.. details];
+
+    }
 
     public static MyAppResource Construct(DistributedApplication distributedApplication,IDistributedApplicationBuilder builder1)
     {
@@ -65,8 +86,15 @@ record MyAppResource(Dictionary<string, MyResource> resources, Dictionary<string
             {
                 foreach(var endpoint in endpointAnnotations)
                 {
-                    if(endpoint.AllocatedEndpoint is not null)
-                    myRes.Properties.Add("Endpoint", endpoint.AllocatedEndpoint.Address);
+                    //TODO                    
+                }
+            }
+            if(item.TryGetAnnotationsOfType<ResourceCommandAnnotation>(out var resourceCommandAnnotations))
+            {
+
+                foreach(var resourceCommand in resourceCommandAnnotations)
+                {
+                    myRes.Properties.Add("CMD_" + resourceCommand.Name, resourceCommand.DisplayName);
                 }
             }
         }

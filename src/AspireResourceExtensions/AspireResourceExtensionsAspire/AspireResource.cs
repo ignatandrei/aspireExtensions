@@ -1,14 +1,7 @@
-﻿namespace AspireResourceExtensionsAspire;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.Hosting;
-using System.Collections.Immutable;
-using System.IO;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace AspireResourceExtensionsAspire;
 
 public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithEndpoints, IResourceWithServiceDiscovery
 {
@@ -36,7 +29,7 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
     {
         MyAppResource myApp = MyAppResource.Construct(da, builder);
         
-        var webServer = await StartWebServerAsync(myApp);
+        var webServer = await StartWebServerAsync(myApp,da.ResourceCommands);
 
         var ret = await AddAspire.ViewData(da);
         if (ret != null)
@@ -106,13 +99,14 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         return _loginUrl ?? "";
     }
 
-    internal async Task<string?> StartWebServerAsync(MyAppResource myApp)
+    internal async Task<string?> StartWebServerAsync(MyAppResource myApp, ResourceCommandService resourceCommands)
     {
         var builder = WebApplication.CreateBuilder();
         //builder.WebHost.UseUrls($"http://*:{port}");
 
         var app = builder.Build();
-        app.Urls.Add("http://127.0.0.1:0");
+        //app.Urls.Add("http://127.0.0.1:0");
+        app.Urls.Add("http://127.0.0.1:5024");
         // Serve static files from a "wwwroot" directory
         app.UseDefaultFiles();
         app.UseStaticFiles();
@@ -122,10 +116,35 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         var indexPath = Path.Combine(wwwroot, "index.html");
         if (!Directory.Exists(wwwroot))
             Directory.CreateDirectory(wwwroot);
+        //TODO: embedded resource
         if (!File.Exists(indexPath))
             await File.WriteAllTextAsync(indexPath, "<!DOCTYPE html><html><body><h1>Hello from AspireResource!</h1></body></html>");
 
-        app.MapGet("/aspire/resources/export/mermaid", ()=>myApp.ExportToMermaid());
+        app.MapGet("/api/aspire/resources/export/mermaid", ()=>myApp.ExportToMermaid());
+        app.MapGet("/api/aspire/resources/export/csv", () => myApp.ExportToMermaid());
+
+        app.MapGet("/api/aspire/resources/", () =>
+        {
+            return myApp.MyResources();
+        });
+        app.MapGet("/api/aspire/resources/{name}", (string name) =>
+        {
+            return myApp.DetailsResource(name);
+        });
+        foreach (var res in myApp.resources)
+        {            
+            
+            app.MapPost("/api/aspire/resources/{name}/execute/{command}", async Task<Results<Ok<ExecuteCommandResult>, NotFound<string>>> (string name,string command) =>
+            {
+                if (!myApp.ExistResource(name))
+                    return TypedResults.NotFound($"cannot found command {command} on {name}");
+
+                var res = await resourceCommands.ExecuteCommandAsync(name, command);  
+                return TypedResults.Ok(res);
+            });
+
+        }
+
         await app.StartAsync();
         var addresses = app.Services.GetRequiredService<IServer>().Features.GetRequiredFeature<IServerAddressesFeature>().Addresses;
 

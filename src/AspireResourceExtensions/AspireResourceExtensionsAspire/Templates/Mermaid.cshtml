@@ -10,7 +10,7 @@ A1 Name "@MermaidName(resource.Key)"
         @for(int i=0;i<resource.Value.Properties.Count;i++)
         {
             var prop = resource.Value.Properties.ElementAt(i);
-@($"A{i+2} {prop.Key} \"{prop.Value}\"")
+            @($"A{i + 2} {prop.Key} \"{replaceQuotes(prop.Value)}\"")
     }    
 }
 </text>
@@ -31,5 +31,9 @@ A1 Name "@MermaidName(resource.Key)"
     string MermaidName(string name)
     {
         return name.Replace("-", "");
+    }
+    string replaceQuotes(string input)
+    {
+        return input.Replace("\"", "'");
     }
 }
