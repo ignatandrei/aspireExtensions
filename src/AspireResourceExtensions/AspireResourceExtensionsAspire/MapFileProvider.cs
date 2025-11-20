@@ -1,12 +1,7 @@
-﻿using Microsoft.Extensions.FileProviders;
-using System;
-
-namespace AspireResourceExtensionsAspire;
+﻿namespace AspireResourceExtensionsAspire;
 class ReplaceFileProvider : IFileProvider
 {
     private readonly IFileProvider _innerProvider;
-    private readonly string _toReplace;
-    private readonly string _replaceWith;
     public ReplaceFileProvider(IFileProvider innerProvider)
     {
         _innerProvider = innerProvider;

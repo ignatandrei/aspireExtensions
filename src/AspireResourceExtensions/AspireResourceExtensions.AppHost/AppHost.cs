@@ -1,4 +1,5 @@
 using Aspire.Hosting;
+using AspireResourceExtensions.AppHost;
 using AspireResourceExtensionsAspire;
 using TestExtensionsAspire;
 
@@ -29,9 +30,11 @@ var tests= builder.AddTestProject<Projects.AspireResourceExtensions_Tests>("MyTe
     .WithExplicitStart()
     ;
 
-var npmTests = builder.AddJavaScriptApp("GenerateVideo", "../GenerateTest","start")
+var npmTests = builder
+    .AddJavaScriptApp("GenerateVideo", "../GenerateTest")
+   .AddCommandsFromPackage()
     .WaitFor(aspire)
-    .WithExplicitStart()
+    //.WithExplicitStart()
     ;
 
 aspire.Resource.AddEnvironmentVariablesTo(tests,npmTests);

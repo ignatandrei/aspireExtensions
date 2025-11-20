@@ -1,12 +1,6 @@
 @using AspireResourceExtensionsAspire
 @inherits RazorBlade.PlainTextTemplate<MyAppResource>
-@{
-    var csv = "Nr,Name,Type";
-    
-}
-
-@csv
-
+"Nr","Name","Type"
 @for(var i = 0; i < Model.resources.Count;i++)
 {
     var resource = Model.resources.ElementAt(i);

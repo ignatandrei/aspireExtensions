@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Reflection.PortableExecutable;
-
+﻿
 namespace AspireResourceExtensionsAspire;
 
 public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithEndpoints, IResourceWithServiceDiscovery
@@ -22,7 +19,7 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
     }
 
     private string? _loginUrl;
-    public string LoginUrl() => (_loginUrl ?? "");
+    public string LoginUrl() => (_loginUrl ?? "Notyet");
 
     private string? _baseUrl;
     public string BaseUrl() => (_baseUrl ?? "");
@@ -37,16 +34,8 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         {
             return _loginUrl;
         }
-        string webServer = "";
-        try
-        {
-            webServer = await StartWebServerAsync(myApp, da.ResourceCommands, ret);
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine($"Error starting web server: {ex.Message}");
-        }
-        var env = await this.GetEnvironmentVariableValuesAsync();
+        string webServer = await StartWebServerAsync(myApp, da.ResourceCommands, ret)??"";        
+        //var env = await this.GetEnvironmentVariableValuesAsync();
         await da.ResourceNotifications.PublishUpdateAsync(this, mainState =>
         {
             EnvironmentVariableSnapshot login = new("ASPIRE_LOGIN_URL", ret, true);
@@ -144,15 +133,7 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         app.UseDefaultFiles();
         app.UseStaticFiles();
         
-        // If wwwroot/index.html does not exist, create a simple one
-        var wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-        var indexPath = Path.Combine(wwwroot, "index.html");
-        if (!Directory.Exists(wwwroot))
-            Directory.CreateDirectory(wwwroot);
-        //TODO: embedded resource
-        if (!File.Exists(indexPath))
-            await File.WriteAllTextAsync(indexPath, "<!DOCTYPE html><html><body><h1>Hello from AspireResource!</h1></body></html>");
-
+        
         app.MapGet("/api/aspire/resources/export/mermaid", ()=>myApp.ExportToMermaid());
         app.MapGet("/api/aspire/resources/export/csv", () => myApp.ExportToCSV());
 
@@ -164,19 +145,16 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         {
             return myApp.DetailsResource(name);
         });
-        foreach (var res in myApp.resources)
-        {            
             
-            app.MapPost("/api/aspire/resources/{name}/execute/{command}", async Task<Results<Ok<ExecuteCommandResult>, NotFound<string>>> (string name,string command) =>
-            {
-                if (!myApp.ExistResource(name))
-                    return TypedResults.NotFound($"cannot found command {command} on {name}");
+        app.MapPost("/api/aspire/resources/{name}/execute/{command}", async Task<Results<Ok<ExecuteCommandResult>, NotFound<string>>> (string name,string command) =>
+        {
+            if (!myApp.ExistResource(name))
+                return TypedResults.NotFound($"cannot find command {command} on {name}");
 
-                var res = await resourceCommands.ExecuteCommandAsync(name, command);  
-                return TypedResults.Ok(res);
-            });
+            var res = await resourceCommands.ExecuteCommandAsync(name, command);  
+            return TypedResults.Ok(res);
+        });
 
-        }
 
         await app.StartAsync();
         var addresses = app.Services.GetRequiredService<IServer>().Features.GetRequiredFeature<IServerAddressesFeature>().Addresses;

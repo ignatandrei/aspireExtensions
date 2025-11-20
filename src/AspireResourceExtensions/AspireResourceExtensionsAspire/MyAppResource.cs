@@ -1,6 +1,4 @@
-﻿using AspireResourceExtensionsAspire.Templates;
-
-namespace AspireResourceExtensionsAspire;
+﻿namespace AspireResourceExtensionsAspire;
 
 
 record MyAppResource(Dictionary<string, MyResource> resources, Dictionary<string,MyRelationResource> relationResources)
@@ -34,19 +32,15 @@ record MyAppResource(Dictionary<string, MyResource> resources, Dictionary<string
 
     }
 
-    public static MyAppResource Construct(DistributedApplication distributedApplication,IDistributedApplicationBuilder builder1)
+    public static MyAppResource Construct(DistributedApplication distributedApplication,IDistributedApplicationBuilder builder)
     {
         string currentfolder = Environment.CurrentDirectory;
         Dictionary<string, MyResource> resources = [];
         Dictionary<string,MyRelationResource> relationResources = [];
+        resources = builder.Resources.ToDictionary(item => item.Name, item => new MyResource(item));
 
-        foreach (var res in builder1.Resources)
-        {
-            resources.Add(res.Name, new MyResource(res));
-        }
-        foreach (var item in builder1.Resources)
-        {
-            
+        foreach (var item in builder.Resources)
+        {            
             var myRes = resources[item.Name];
 
             if (item.TryGetAnnotationsOfType<ResourceRelationshipAnnotation>(out var resourceRelationshipAnnotations))
