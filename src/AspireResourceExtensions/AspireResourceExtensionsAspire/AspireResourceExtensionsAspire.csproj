@@ -35,15 +35,20 @@
 	  </Content>
    </ItemGroup>
 	<ItemGroup>
-		<Watch Include="**\Templates\*.cshtml" ></Watch>
+		<Watch Include="**\Templates\*.cshtml"></Watch>
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
 
 		<PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.9.0" />
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+		<PackageReference Include="MimeTypes" Version="2.5.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="RazorBlade" Version="0.11.0" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
 
 	</ItemGroup>
@@ -51,5 +56,14 @@
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GX</CompilerGeneratedFilesOutputPath>
 	</PropertyGroup>
-	
+	<PropertyGroup>
+		<GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+	</PropertyGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="wwwroot\**\*">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
+	</ItemGroup>
+
+
 </Project>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Reflection.PortableExecutable;
 
 namespace AspireResourceExtensionsAspire;
 
@@ -36,8 +37,15 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         {
             return _loginUrl;
         }
-        var webServer = await StartWebServerAsync(myApp, da.ResourceCommands,ret);
-     
+        string webServer = "";
+        try
+        {
+            webServer = await StartWebServerAsync(myApp, da.ResourceCommands, ret);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Error starting web server: {ex.Message}");
+        }
         var env = await this.GetEnvironmentVariableValuesAsync();
         await da.ResourceNotifications.PublishUpdateAsync(this, mainState =>
         {
@@ -107,11 +115,16 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
     {
         var port = new Uri(aspireUrl).Port;
         var newPort = port + 1;
+
         var builder = WebApplication.CreateBuilder();
         //builder.WebHost.UseUrls($"http://*:{port}");
         builder.Services.AddOpenApi();
         builder.Services.AddCors();
+
+        var p = builder.Environment.WebRootFileProvider;
+        builder.Environment.WebRootFileProvider= MapFileProvider.Manifest(builder);
         var app = builder.Build();
+        //MapFileProvider.mapFile("wwwroot", prov, app);
         //app.Urls.Add("http://127.0.0.1:0");
         app.UseCors(it =>
         {
@@ -121,14 +134,16 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
               .SetIsOriginAllowed(it => true)
               .AllowCredentials();
         });
+        
         app.MapOpenApi();
         app.MapOpenApi("/openapi/{documentName}.yaml");
 
         app.Urls.Add($"http://127.0.0.1:{newPort}");
         // Serve static files from a "wwwroot" directory
+        
         app.UseDefaultFiles();
         app.UseStaticFiles();
-
+        
         // If wwwroot/index.html does not exist, create a simple one
         var wwwroot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
         var indexPath = Path.Combine(wwwroot, "index.html");
