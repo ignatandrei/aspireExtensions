@@ -59,7 +59,7 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
             {
                 DisplayProperties = new("NewAspireUrl")
             };
-            var urls = mainState.Urls.AddRange(baseUrlSnap, urlSha, webServerSnap);
+            var urls = mainState.Urls.AddRange(urlSha, webServerSnap);
 
             EnvironmentVariableSnapshot baseEnv = new EnvironmentVariableSnapshot("ASPIRE_BASE_URL", _baseUrl, true);
             EnvironmentVariableSnapshot newAspire = new EnvironmentVariableSnapshot("ASPIRE_NEW_ASPIRE_URL", webServer ?? "", true);

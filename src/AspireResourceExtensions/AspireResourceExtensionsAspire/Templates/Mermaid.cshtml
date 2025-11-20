@@ -11,8 +11,10 @@ A2 Type "@MermaidName(resource.Value.Type)"
         @for(int i=0;i<resource.Value.Properties.Count;i++)
         {
             var prop = resource.Value.Properties.ElementAt(i);
-            @($"A{i + 3} {prop.Key} \"{replaceQuotes(prop.Value)}\"")
-    }    
+            
+            @($"A{i + 3} {MermaidName(prop.Key)} \"{replaceQuotes(prop.Value)}\"")
+            @Environment.NewLine
+        }    
 }
 </text>
 
@@ -34,7 +36,7 @@ classDef JavaScriptInstallerResource stroke:#00f
 @functions{
     string MermaidName(string name)
     {
-        return name.Replace("-", "");
+        return name.Replace("-", "").Replace(":","");
     }
     string replaceQuotes(string input)
     {

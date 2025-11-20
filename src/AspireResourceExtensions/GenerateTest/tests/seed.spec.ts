@@ -4,12 +4,20 @@
 
 
 import { expect } from '@playwright/test';
-import { endTest, flashAndClick, test } from './common';
+import { endTest, flashAndClick, sleep, test } from './common';
 
 const DEFAULT_BASE_URL = process.env.ASPIRE_BASE_URL ??"";
 const DEFAULT_LOGIN_URL = process.env.ASPIRE_LOGIN_URL??""; 
 const RESOURCE_URL = `${DEFAULT_BASE_URL}`;
-
+function incrementPortPreservingDefaults(url: string): string {
+  const u = new URL(url);
+  const baseDefault = (u.protocol === 'https:' ? 443 : u.protocol === 'http:' ? 80 : null);
+  const portNum = u.port ? Number(u.port) : baseDefault;
+  if (portNum == null) throw new Error('Unknown protocol');
+  if (portNum >= 65535) throw new Error('Port overflow');
+  u.port = String(portNum + 1);
+  return u.toString();
+}
 test.describe('Test group', () => {
   test.use({ ignoreHTTPSErrors: true });
 
@@ -28,6 +36,32 @@ test.describe('Test group', () => {
   // generate code here.
   });
 
+  test('Mermaid Diagram', async ({ page }) => {
+  
+    const actNewUrl = page.getByRole('link', { name: 'NewAspireUrl' });
+    await flashAndClick(actNewUrl);
+    const original = process.env.ASPIRE_BASE_URL!;
+    let bumped = incrementPortPreservingDefaults(original);
+    bumped=bumped.replace('https','http');
+    await page.goto(bumped);
+    await sleep(2); 
+    await page.goto(`${bumped}Mermaid.html`);
+    await page.waitForLoadState('networkidle');    
+    await sleep(2); 
+  });
+  test('swagger', async ({ page }) => {
+  
+    const actNewUrl = page.getByRole('link', { name: 'NewAspireUrl' });
+    await flashAndClick(actNewUrl);
+    const original = process.env.ASPIRE_BASE_URL!;
+    let bumped = incrementPortPreservingDefaults(original);
+    bumped=bumped.replace('https','http');
+    await page.goto(bumped);
+    await sleep(2); 
+    await page.goto(`${bumped}openapi/v1.json`);
+    await page.waitForLoadState('networkidle');    
+    await sleep(2); 
+  });
 
   test('Happy Path: View and Assert URL Table Values', async ({ page }) => {
     // 1. Locate the row in the resources table where the name is `AspireResource`.
@@ -50,7 +84,7 @@ test.describe('Test group', () => {
     urlTable.scrollIntoViewIfNeeded();
     await flashAndClick(urlTable);
     const rows = urlTable.locator('tbody tr');
-    await expect(rows).toHaveCount(2);
+    await expect(rows).toHaveCount(3);
 
     // First row assertions
     const firstRow = rows.nth(0);
