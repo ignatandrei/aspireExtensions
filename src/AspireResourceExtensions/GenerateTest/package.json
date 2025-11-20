@@ -8,7 +8,8 @@
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
     "test:ui": "npx playwright test --ui",
-    "start": "npx playwright test --project=chromium"
+    "start": "npx playwright test --project=chromium",
+    "dev":"echo Hello World "
   },
   "keywords": [],
   "author": "",

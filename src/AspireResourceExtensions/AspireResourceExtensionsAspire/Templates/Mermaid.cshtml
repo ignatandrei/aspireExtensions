@@ -1,0 +1,43 @@
+@using AspireResourceExtensionsAspire
+@inherits RazorBlade.PlainTextTemplate<MyAppResource>
+
+erDiagram
+@foreach (var resource in Model.resources)
+{
+<text>
+@(MermaidName(resource.Key)):::@(resource.Value.Type){
+A1 Name "@MermaidName(resource.Key)"
+A2 Type "@MermaidName(resource.Value.Type)"
+        @for(int i=0;i<resource.Value.Properties.Count;i++)
+        {
+            var prop = resource.Value.Properties.ElementAt(i);
+            @($"A{i + 3} {prop.Key} \"{replaceQuotes(prop.Value)}\"")
+    }    
+}
+</text>
+
+}
+
+@foreach (var relation in Model.relationResources.Values)
+{
+
+<text>
+@($"{MermaidName(relation.fromResource.Name)} ||--||{MermaidName(relation.toResource.Name)} : {MermaidName(string.Join("_", relation.RelationTypes))}")
+</text>
+
+}
+classDef ProjectResource stroke:#f00
+classDef JavaScriptAppResource stroke:#0f0
+classDef JavaScriptInstallerResource stroke:#00f
+
+
+@functions{
+    string MermaidName(string name)
+    {
+        return name.Replace("-", "");
+    }
+    string replaceQuotes(string input)
+    {
+        return input.Replace("\"", "'");
+    }
+}

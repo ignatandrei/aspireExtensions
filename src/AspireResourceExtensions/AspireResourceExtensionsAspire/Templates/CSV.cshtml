@@ -1,0 +1,13 @@
+@using AspireResourceExtensionsAspire
+@inherits RazorBlade.PlainTextTemplate<MyAppResource>
+"Nr","Name","Type"
+@for(var i = 0; i < Model.resources.Count;i++)
+{
+    var resource = Model.resources.ElementAt(i);
+
+<text>
+@(i+1),"@resource.Key","@resource.Value.Type"
+</text>
+
+}
+
