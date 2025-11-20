@@ -5,12 +5,13 @@ erDiagram
 @foreach (var resource in Model.resources)
 {
 <text>
-@(MermaidName(resource.Key)){
+@(MermaidName(resource.Key)):::@(resource.Value.Type){
 A1 Name "@MermaidName(resource.Key)"
+A2 Type "@MermaidName(resource.Value.Type)"
         @for(int i=0;i<resource.Value.Properties.Count;i++)
         {
             var prop = resource.Value.Properties.ElementAt(i);
-            @($"A{i + 2} {prop.Key} \"{replaceQuotes(prop.Value)}\"")
+            @($"A{i + 3} {prop.Key} \"{replaceQuotes(prop.Value)}\"")
     }    
 }
 </text>
@@ -25,6 +26,9 @@ A1 Name "@MermaidName(resource.Key)"
 </text>
 
 }
+classDef ProjectResource stroke:#f00
+classDef JavaScriptAppResource stroke:#0f0
+classDef JavaScriptInstallerResource stroke:#00f
 
 
 @functions{

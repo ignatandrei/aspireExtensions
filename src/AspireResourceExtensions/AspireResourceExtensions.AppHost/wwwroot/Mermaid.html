@@ -17,7 +17,7 @@
                 if (!resp.ok) throw new Error('Failed to fetch diagram');
                 const text = await resp.text();
                 pre.textContent = text;
-                await mermaid.run({ querySelector: '.someOtherClass' });
+                await mermaid.run({ querySelector: '.mermaidClass' });
             } catch (e) {
                 pre.textContent = 'Error loading diagram: ' + e;
             }

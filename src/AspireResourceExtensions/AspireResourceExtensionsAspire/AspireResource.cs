@@ -28,85 +28,91 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
     public async Task<string> StartParsing(DistributedApplication da, IDistributedApplicationBuilder builder)
     {
         MyAppResource myApp = MyAppResource.Construct(da, builder);
-        
-        var webServer = await StartWebServerAsync(myApp,da.ResourceCommands);
+
 
         var ret = await AddAspire.ViewData(da);
-        if (ret != null)
+        _loginUrl = ret??"";
+        if (ret == null)
         {
-            var env = await this.GetEnvironmentVariableValuesAsync();
-            await da.ResourceNotifications.PublishUpdateAsync(this, mainState => {
-                EnvironmentVariableSnapshot login = new("ASPIRE_LOGIN_URL", ret, true);
-
-                var urlSha = new UrlSnapshot("ASPIRE_LOGIN_URL", ret, false)
-                {
-                    DisplayProperties = new("LoginUrl")
-                };
-
-                _baseUrl = ret;
-                if (ret.IndexOf("login?") > 0)
-                {
-                    _baseUrl = ret.Substring(0, ret.IndexOf("login?"));
-                }
-
-                UrlSnapshot baseUrlSnap = new UrlSnapshot("ASPIRE_BASE_URL", _baseUrl, false)
-                {
-                    DisplayProperties = new("BaseUrl")
-                };
-                UrlSnapshot webServerSnap=new UrlSnapshot("ASPIRE_NEW_ASPIRE_URL", webServer ?? "", false)
-                {
-                    DisplayProperties = new("NewAspireUrl")
-                };
-                var urls = mainState.Urls.AddRange(baseUrlSnap, urlSha, webServerSnap);
-                
-                EnvironmentVariableSnapshot baseEnv = new EnvironmentVariableSnapshot("ASPIRE_BASE_URL", _baseUrl, true);
-                EnvironmentVariableSnapshot newAspire = new EnvironmentVariableSnapshot("ASPIRE_NEW_ASPIRE_URL", webServer ?? "", true);
-
-                var env = mainState.EnvironmentVariables.AddRange(login, baseEnv,newAspire);
-
-                foreach (var r in resources)
-                {
-                    da.ResourceNotifications.PublishUpdateAsync(r.Resource, s =>
-                    {
-
-                        var envRes = s.EnvironmentVariables.AddRange(
-
-                            new EnvironmentVariableSnapshot("ASPIRE_LOGIN_URL", ret, true),
-                            new EnvironmentVariableSnapshot("ASPIRE_BASE_URL", _baseUrl, true),
-                            new EnvironmentVariableSnapshot("ASPIRE_NEW_ASPIRE_URL", webServer ?? "", true)
-
-                            );
-                        return s with
-                        {
-                            EnvironmentVariables = envRes
-                        };
-
-                    });
-                }
-                ;
-
-
-
-                return mainState with
-                {
-                    State = KnownResourceStates.Running,
-                    EnvironmentVariables = env,
-                    Urls = urls,
-                };
-            });
+            return _loginUrl;
         }
-        _loginUrl = ret;
-        return _loginUrl ?? "";
+        var webServer = await StartWebServerAsync(myApp, da.ResourceCommands,ret);
+     
+        var env = await this.GetEnvironmentVariableValuesAsync();
+        await da.ResourceNotifications.PublishUpdateAsync(this, mainState =>
+        {
+            EnvironmentVariableSnapshot login = new("ASPIRE_LOGIN_URL", ret, true);
+
+            var urlSha = new UrlSnapshot("ASPIRE_LOGIN_URL", ret, false)
+            {
+                DisplayProperties = new("LoginUrl")
+            };
+
+            _baseUrl = ret;
+            if (ret.IndexOf("login?") > 0)
+            {
+                _baseUrl = ret.Substring(0, ret.IndexOf("login?"));
+            }
+
+            UrlSnapshot baseUrlSnap = new UrlSnapshot("ASPIRE_BASE_URL", _baseUrl, false)
+            {
+                DisplayProperties = new("BaseUrl")
+            };
+            UrlSnapshot webServerSnap = new UrlSnapshot("ASPIRE_NEW_ASPIRE_URL", webServer ?? "", false)
+            {
+                DisplayProperties = new("NewAspireUrl")
+            };
+            var urls = mainState.Urls.AddRange(baseUrlSnap, urlSha, webServerSnap);
+
+            EnvironmentVariableSnapshot baseEnv = new EnvironmentVariableSnapshot("ASPIRE_BASE_URL", _baseUrl, true);
+            EnvironmentVariableSnapshot newAspire = new EnvironmentVariableSnapshot("ASPIRE_NEW_ASPIRE_URL", webServer ?? "", true);
+
+            var env = mainState.EnvironmentVariables.AddRange(login, baseEnv, newAspire);
+
+            foreach (var r in resources)
+            {
+                da.ResourceNotifications.PublishUpdateAsync(r.Resource, s =>
+                {
+
+                    var envRes = s.EnvironmentVariables.AddRange(
+
+                        new EnvironmentVariableSnapshot("ASPIRE_LOGIN_URL", ret, true),
+                        new EnvironmentVariableSnapshot("ASPIRE_BASE_URL", _baseUrl, true),
+                        new EnvironmentVariableSnapshot("ASPIRE_NEW_ASPIRE_URL", webServer ?? "", true)
+
+                        );
+                    return s with
+                    {
+                        EnvironmentVariables = envRes
+                    };
+
+                });
+            }
+            ;
+
+
+
+            return mainState with
+            {
+                State = KnownResourceStates.Running,
+                EnvironmentVariables = env,
+                Urls = urls,
+            };
+        });
+
+        return ret;
     }
 
-    internal async Task<string?> StartWebServerAsync(MyAppResource myApp, ResourceCommandService resourceCommands)
+    internal async Task<string?> StartWebServerAsync(MyAppResource myApp, ResourceCommandService resourceCommands, string aspireUrl)
     {
+        var port = new Uri(aspireUrl).Port;
+        var newPort = port + 1;
         var builder = WebApplication.CreateBuilder();
         //builder.WebHost.UseUrls($"http://*:{port}");
 
         var app = builder.Build();
         //app.Urls.Add("http://127.0.0.1:0");
-        app.Urls.Add("http://127.0.0.1:5024");
+        app.Urls.Add($"http://127.0.0.1:{newPort}");
         // Serve static files from a "wwwroot" directory
         app.UseDefaultFiles();
         app.UseStaticFiles();
@@ -121,7 +127,7 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
             await File.WriteAllTextAsync(indexPath, "<!DOCTYPE html><html><body><h1>Hello from AspireResource!</h1></body></html>");
 
         app.MapGet("/api/aspire/resources/export/mermaid", ()=>myApp.ExportToMermaid());
-        app.MapGet("/api/aspire/resources/export/csv", () => myApp.ExportToMermaid());
+        app.MapGet("/api/aspire/resources/export/csv", () => myApp.ExportToCSV());
 
         app.MapGet("/api/aspire/resources/", () =>
         {

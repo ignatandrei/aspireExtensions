@@ -107,7 +107,18 @@ class MyResource(IResource resource)
 {
     public string Name => resource.Name;
 
-    
+    public string Type
+    {
+        get
+        {
+            if(field == null)
+            {
+                field = resource.GetType().Name;
+            }
+            return field;
+        }
+    }
+
     public Dictionary<string,string> Properties { get; init; } = [];
 
 }
