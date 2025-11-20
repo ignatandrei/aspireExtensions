@@ -1,7 +1,7 @@
 @using AspireResourceExtensionsAspire
 @inherits RazorBlade.PlainTextTemplate<MyAppResource>
 @{
-    var csv = "Nr,Name";
+    var csv = "Nr,Name,Type";
     
 }
 
@@ -12,7 +12,7 @@
     var resource = Model.resources.ElementAt(i);
 
 <text>
-@(i+1),"@resource.Key"
+@(i+1),"@resource.Key","@resource.Value.Type"
 </text>
 
 }

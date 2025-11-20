@@ -109,9 +109,21 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         var newPort = port + 1;
         var builder = WebApplication.CreateBuilder();
         //builder.WebHost.UseUrls($"http://*:{port}");
-
+        builder.Services.AddOpenApi();
+        builder.Services.AddCors();
         var app = builder.Build();
         //app.Urls.Add("http://127.0.0.1:0");
+        app.UseCors(it =>
+        {
+            it
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .SetIsOriginAllowed(it => true)
+              .AllowCredentials();
+        });
+        app.MapOpenApi();
+        app.MapOpenApi("/openapi/{documentName}.yaml");
+
         app.Urls.Add($"http://127.0.0.1:{newPort}");
         // Serve static files from a "wwwroot" directory
         app.UseDefaultFiles();
