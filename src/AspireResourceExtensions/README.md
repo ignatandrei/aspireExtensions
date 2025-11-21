@@ -143,6 +143,8 @@ Test code to obtain the screenshot of aspire
 
 This is the result
 
+https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/AspireResourceGraph.png
+
 ![Graph](https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/AspireResourceGraph.png)
 
 ### Video of Aspire Dashboard
