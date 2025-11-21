@@ -6,12 +6,12 @@
     <Nullable>enable</Nullable>
     <!-- NuGet package metadata -->
     <PackageId>AspireExtensionsResource</PackageId>
-    <Version>95.2025.1030.2019</Version>
+    <Version>130.2025.1121.547</Version>
 	<Authors>Ignat Andrei</Authors>
     <Company>AOM</Company>
 	  <RepositoryType>git</RepositoryType>
-    <Description>Adding Aspire to the dashboard as resource for easy of testing aspire dashboard</Description>
-    <PackageTags>aspire;extensions;distributed;resources;</PackageTags>
+    <Description>Adding Aspire to the dashboard as resource for easy of testing aspire dashboard;swagger for resources</Description>
+    <PackageTags>aspire;extensions;distributed;resources;swagger;</PackageTags>
     <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
     <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions/tree/main/src/AspireResourceExtensions</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

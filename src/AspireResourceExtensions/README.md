@@ -5,6 +5,17 @@
 This package provides Aspire as a Resource in the Aspire Host Dashboard , making it easier to test and manage Aspire dashboards.
 You can download the solution at https://github.com/ignatandrei/aspireExtensions/tree/main/src/AspireResourceExtensions in order to see the tests 
 
+## Features
+
+- Adds Aspire dashboard as a resource for testings
+- Exposes login and base URLs as environment variables
+- Exposes Resources as Mermaid graph 
+- Exposes Resources as CSV
+- Exposes Resources as Swagger API
+
+( see Examples below )
+
+
 ## Installation
 
 Install via NuGet:
@@ -42,12 +53,6 @@ write this:
 var result = aspire.Resource.StartParsing(app);
 await Task.WhenAll(app.RunAsync(), result);
 ```
-
-## Features
-
-- Adds Aspire dashboard as a resource for testing
-- Exposes login and base URLs as environment variables
-- Designed for .NET Aspire distributed applications
 
 
 ## Integrations
@@ -174,6 +179,27 @@ And this is the video generated
 https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/ShowUrl.gif
 
 ![ShowUrl](https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/ShowUrl.gif)
+
+
+### Mermaid graph of Aspire Resources
+
+You can browse to http://localhost:(aspirePort+1)/mermaid.html to see the mermaid graph of the Aspire resources.
+
+See the video generated
+
+https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/Mermaid.mp4
+
+![ShowUrl](https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/Mermaid.mp4)
+
+
+### Swagger API of Aspire Resources
+
+You can browse to http://localhost:(aspirePort+1)/openapi/v1/swagger to see the swagger API of the Aspire resources.
+See the video generated
+
+https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/Swagger.mp4
+
+![ShowUrl](https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/Swagger.mp4)
 
 
 ## License
