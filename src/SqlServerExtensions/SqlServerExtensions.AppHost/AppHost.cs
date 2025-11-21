@@ -29,12 +29,9 @@ var db = sqlserver.AddDatabase("DepEmp")
     .WithSqlCommand("deleteEmployee","delete from Employee", ExecCommandEnum.NonQuery)
     .WithSqlCommand("selectEmployeeCount", "select count(*) from Employee", ExecCommandEnum.Scalar)
     .ExecuteSqlServerScriptsAtStartup(DBFiles.FilesToCreate.ToArray())
-    //.DropCreateDBCommand()
-    //.ExecScripts(DBFiles.FilesToCreate)
-    //.RecreateWithScripts(DBFiles.FilesToCreate)
     ;
 
-var tests = builder.AddNpmApp("PlaywrightTests", "../GenerateTest")
+var tests = builder.AddJavaScriptApp("PlaywrightTests", "../GenerateTest")
     //.WithWorkingDirectory("SqlServerExtensions.Tests/WebTests")
     //.WithReference(db)
     .WaitFor(db)

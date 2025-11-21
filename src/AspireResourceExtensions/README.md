@@ -50,7 +50,8 @@ builder.Build().Run();
 
 write this:
 ```csharp
-var result = aspire.Resource.StartParsing(app);
+var app = builder.Build();
+var result = aspire!.Resource.StartParsing(app,builder);
 await Task.WhenAll(app.RunAsync(), result);
 ```
 
