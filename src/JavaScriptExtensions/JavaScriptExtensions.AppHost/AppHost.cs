@@ -19,12 +19,12 @@ builder.AddJavaScriptApp("JavaScriptAppWithCommands","../SampleJavaScript")
 
     
     ;
-builder.AddJavaScriptApp("Tests", "../GenerateTests")
+var jsTests = builder.AddJavaScriptApp("Tests", "../GenerateTests")
     .AddNpmCommandsFromPackage()
     ;
 
 var aspire = builder.AddAspireResource();
-
+aspire.Resource.AddEnvironmentVariablesTo(jsTests);
 var app = builder.Build();
 var result = aspire!.Resource.StartParsing(app,builder);
 await Task.WhenAll(app.RunAsync(), result);
