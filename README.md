@@ -1,5 +1,6 @@
 # aspireExtensions
-Aspire Extensions
+
+Aspire Extensions 
 
 ## Project Packages
 
@@ -16,3 +17,6 @@ Aspire Extensions
 - [More about WebAPIDocsExtensions ](src/WebAPIDocsExtensions//README.md)  
 
 - [More about AspireResourceExtensions](src/AspireResourceExtensions/README.md)
+
+- [More about JavaScriptExtensions](src/JavaScriptExtensions/README.md)
+
