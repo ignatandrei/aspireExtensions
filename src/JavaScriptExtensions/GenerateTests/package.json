@@ -1,0 +1,20 @@
+{
+  "name": "generatetests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo see other scripts",
+    "ui":"npx playwright test --ui",
+    "smokeTest": "echo not yet implemented",
+    "video":"echo not yet implemented"
+ },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.10.1"
+  }
+}

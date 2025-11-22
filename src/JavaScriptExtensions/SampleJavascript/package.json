@@ -1,0 +1,16 @@
+{
+  "name": "samplejavascript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" ",
+    "dev":"echo I am running dev",
+    "build":"echo I am building",
+    "start":"echo I am starting"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
