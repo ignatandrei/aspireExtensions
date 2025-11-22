@@ -4,10 +4,40 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-  </PropertyGroup>
+	  <!-- NuGet package metadata -->
+	  <PackageId>JavaScriptExtensionsAspire</PackageId>
+	  <Version>130.2025.1121.547</Version>
+	  <Authors>Ignat Andrei</Authors>
+	  <Company>AOM</Company>
+	  <RepositoryType>git</RepositoryType>
+	  <Description>Adding package json commands for Javascript Resource</Description>
+	  <PackageTags>aspire;extensions;distributed;package.json;javascript;integrations;hosting</PackageTags>
+	  <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
+	  <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions/tree/main/src/JavaScriptExtensionsAspire</PackageProjectUrl>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+	  <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+	  <IncludeSymbols>true</IncludeSymbols>
+	  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	  <IsPackable>true</IsPackable>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <PublishRepositoryUrl>true</PublishRepositoryUrl>
+	  <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
-  <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.0.0" />
+
+  </PropertyGroup>
+	<ItemGroup>
+		<Content Include="..\LICENSE" Link="LICENSE" PackagePath="/">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\README.md" Link="README.md" PackagePath="/">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+		<PackageReference Include="Aspire.Hosting.JavaScript" Version="13.0.0" />
   </ItemGroup>
 
 </Project>
