@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="JavaScriptExtensions.ApiService/JavaScriptExtensions.ApiService.csproj" />
+  <Project Path="JavaScriptExtensions.AppHost/JavaScriptExtensions.AppHost.csproj" />
+  <Project Path="JavaScriptExtensions.ServiceDefaults/JavaScriptExtensions.ServiceDefaults.csproj" />
+  <Project Path="JavaScriptExtensions.Web/JavaScriptExtensions.Web.csproj" />
+  <Project Path="JavaScriptExtensionsAspire/JavaScriptExtensionsAspire.csproj" />
+</Solution>

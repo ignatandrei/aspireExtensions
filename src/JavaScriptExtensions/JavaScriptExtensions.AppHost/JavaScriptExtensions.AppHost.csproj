@@ -1,0 +1,20 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.0.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>804eeb47-298f-42a4-a200-db76e9164ec4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JavaScriptExtensions.ApiService\JavaScriptExtensions.ApiService.csproj" />
+    <ProjectReference Include="..\JavaScriptExtensions.Web\JavaScriptExtensions.Web.csproj" />
+    <ProjectReference Include="..\JavaScriptExtensionsAspire\JavaScriptExtensionsAspire.csproj" IsAspireProjectResource="false" />
+  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Aspire.Hosting.JavaScript" Version="13.0.0" />
+		<PackageReference Include="AspireExtensionsResource" Version="130.2025.1121.547" />
+	</ItemGroup>
+</Project>
