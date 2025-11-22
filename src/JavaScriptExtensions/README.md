@@ -32,9 +32,7 @@ builder
 ```
 
 
-See the how it looks in the 
-
-https://ignatandrei.github.io/aspireExtensions/images/JavaScriptExtensions/packageJson.mp4
+See how it looks in the https://ignatandrei.github.io/aspireExtensions/images/JavaScriptExtensions/packageJson.mp4
 
 ![ShowUrl](https://ignatandrei.github.io/aspireExtensions/images/JavaScriptExtensions/packageJson.mp4)
 

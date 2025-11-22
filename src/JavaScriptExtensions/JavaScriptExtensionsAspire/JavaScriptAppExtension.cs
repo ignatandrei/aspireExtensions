@@ -15,7 +15,6 @@ public static class JavaScriptAppExtension
         {
             var builder = appResource.ApplicationBuilder;
             var wd = appResource.Resource.WorkingDirectory;
-            var npm = appResource.Resource.Command;
             var packageJsonPath = Path.Combine(wd, "package.json");
             if (!File.Exists(packageJsonPath))
             {
@@ -110,7 +109,7 @@ public static class JavaScriptAppExtension
     }
     private static async Task<ExecuteProcessResult> ExecuteProcess(ProcessStartInfo exportStartInfo)
     {
-        var exportProcess = new Process { StartInfo = exportStartInfo };
+        using Process exportProcess = new() { StartInfo = exportStartInfo };
 
         Task? stdOutTask = null;
         Task? stdErrTask = null;
@@ -132,7 +131,7 @@ public static class JavaScriptAppExtension
             }
 
             var timeout = TimeSpan.FromMinutes(5);
-            var exited = exportProcess.WaitForExit(timeout);
+            exportProcess.WaitForExit(timeout);
 
             if (exportProcess.HasExited && exportProcess.ExitCode == 0 && string.IsNullOrWhiteSpace(resultError))
             {
@@ -143,12 +142,12 @@ public static class JavaScriptAppExtension
                 exportProcess.Kill(true);
             }
             int nr = exportProcess.ExitCode;
-            if (nr == 0) nr = int.MinValue;
-            if (string.IsNullOrWhiteSpace(resultError))
+            
+            if (nr != 0 || string.IsNullOrWhiteSpace(resultError))
             {
-                resultError = "No error message provided.See previous messages";
+                resultError += "No error message provided. See previous messages";
 
-            }
+            } 
             return new ExecuteProcessResult(resultStandard, resultError, exportProcess.ExitCode);
         }
         finally
