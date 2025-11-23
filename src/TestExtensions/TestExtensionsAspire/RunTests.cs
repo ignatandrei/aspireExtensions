@@ -58,24 +58,30 @@ public static class RunTests
             displayName: testCommand,
             executeCommand: (async (ctx) =>
             {
-                var b= testProject.Resource.TryGetEnvironmentVariables(out var envCallback);
-                envCallback ??= [];
-                Dictionary<string, object> envDict = new();
-                EnvironmentCallbackContext environmentCallbackContext = new(builder.ExecutionContext, envDict);
-                foreach (var env in envCallback)
-                {
-                    await env.Callback(environmentCallbackContext);
-
-                }
-                var envs = environmentCallbackContext.EnvironmentVariables;
                 var loggerService = ctx.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
                 var logger = loggerService?.GetLogger(testProject.Resource);
-                
+
                 if (logger == null)
                 {
                     Console.WriteLine($"Logger not found for {testProject.Resource.Name}");
                     return new ExecuteCommandResult() { Success = false, ErrorMessage = "Logger not found" };
                 }
+                var b = testProject.Resource.TryGetEnvironmentVariables(out var envCallback);
+                envCallback ??= [];
+                Dictionary<string, object> envDict = new();
+                EnvironmentCallbackContext environmentCallbackContext = new(builder.ExecutionContext, envDict);
+                foreach (var env in envCallback)
+                {
+                    try
+                    {
+                        await env.Callback(environmentCallbackContext);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError($"Error executing environment callback  for {testProject.Resource.Name}: {ex.Message}");
+                    }
+                }
+                var envs = environmentCallbackContext.EnvironmentVariables;
                 logger.LogInformation($"Start Running {testCommand} for  {pathProject}");
                 var data = await RunTestsForProject(pathProject, filter,envs);
                 logger.LogInformation(data.Output);
