@@ -1,0 +1,15 @@
+@inherits RazorBlade.PlainTextTemplate<DatabaseModelReact>
+
+import @Model.NameReactPartialFileComponent from './@(Model.partialDocumentFile)';
+import @Model.NameReactPartialFileUserComponent from './@(Model.partialDocumentFileUser)';
+
+# Database: @Model.nameDB
+
+## Diagram
+
+@Model.ReactPartialFileComponent
+
+## Other details
+
+@Model.ReactPartialFileUserComponent
+

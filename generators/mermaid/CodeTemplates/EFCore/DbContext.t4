@@ -1,0 +1,48 @@
+<#@ template hostSpecific="true" debug="true" #>
+<#@ output extension=".database.generated.mdx" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore.Relational" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore.Design" #>
+<#@ parameter name="Model" type="Microsoft.EntityFrameworkCore.Metadata.IModel" #>
+<#@ parameter name="Options" type="Microsoft.EntityFrameworkCore.Scaffolding.ModelCodeGenerationOptions" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore" #>
+
+import Mermaid from '@theme/Mermaid';
+
+
+<Mermaid
+  value={`erDiagram
+<#
+
+    foreach (var entityType in Model.GetEntityTypes())
+    {
+#>
+    <#= entityType.Name #> {
+<#
+foreach (var property in entityType.GetProperties()){
+#>
+<#= property.Name #> <#= property.GetColumnType().Replace(",","_") #> 
+<#}#>
+    }
+<#
+        foreach (var foreignKey in entityType.GetForeignKeys())
+        {
+#>
+    <#= entityType.Name #> <#= foreignKey.IsUnique ? "|" : "}" #>o--<#= foreignKey.IsRequired ? "|" : "o" #>| <#= foreignKey.PrincipalEntityType.Name #> : "<#= foreignKey.GetConstraintName() #>"
+<#
+        }
+
+        foreach (var skipNavigation in entityType.GetSkipNavigations().Where(n => n.IsLeftNavigation()))
+        {
+#>
+    <#= entityType.Name #> }o--o{ <#= skipNavigation.TargetEntityType.Name #> : <#= skipNavigation.JoinEntityType.Name #>
+<#
+        }
+    }
+#>
+`
+}
+/>
+
+

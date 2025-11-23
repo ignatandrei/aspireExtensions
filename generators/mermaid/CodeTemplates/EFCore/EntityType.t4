@@ -1,0 +1,84 @@
+<#@ template hostSpecific="true" #>
+<#@ output extension=".table.generated.mdx" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore.Design" #>
+<#@ assembly name="Microsoft.EntityFrameworkCore.Relational" #>
+<#@ assembly name="Microsoft.Extensions.DependencyInjection.Abstractions" #>
+<#@ parameter name="EntityType" type="Microsoft.EntityFrameworkCore.Metadata.IEntityType" #>
+<#@ parameter name="Options" type="Microsoft.EntityFrameworkCore.Scaffolding.ModelCodeGenerationOptions" #>
+<#@ parameter name="NamespaceHint" type="System.String" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.ComponentModel.DataAnnotations" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore" #>
+<#@ import namespace="Microsoft.EntityFrameworkCore.Design" #>
+<#@ import namespace="Microsoft.Extensions.DependencyInjection" #>
+<#
+
+    var services = (IServiceProvider)Host;
+    var annotationCodeGenerator = services.GetRequiredService<IAnnotationCodeGenerator>();
+    var code = services.GetRequiredService<ICSharpHelper>();
+    var key = EntityType.FindPrimaryKey();
+    var namesPKS= new HashSet<string>();
+    if(key != null)
+    {
+        namesPKS = new HashSet<string>(key.Properties.Select(p => p.Name));
+    }
+    
+    var namesNav = new HashSet<string>();
+
+    var nav = EntityType.GetNavigations();
+    if(nav != null)
+    {
+        namesNav = new HashSet<string>(nav.Select(n => n.TargetEntityType.Name));
+    }
+    var namesFKTables= new HashSet<string>();
+    var fks=EntityType.GetSkipNavigations();
+    if(fks != null)
+    {
+        namesFKTables = new HashSet<string>(fks.Select(fk => fk.TargetEntityType.Name));
+    }
+#>
+
+# <#= EntityType.Name #>
+
+
+import Mermaid from '@theme/Mermaid';
+
+
+<Mermaid
+  value={`erDiagram
+    <#= EntityType.Name #> {
+<#
+foreach (var property in EntityType.GetProperties()){
+#>
+<#
+    bool isPK = namesPKS.Contains(property.Name);
+    string PKMark = isPK ? "PK" : "";
+#>
+<#= property.Name #> <#= property.GetColumnType().Replace(",","_") #> <#=PKMark #> 
+<#}#>
+
+
+    }
+    <#
+        foreach (var foreignKey in EntityType.GetForeignKeys())
+        {
+#>
+    <#= EntityType.Name #> <#= foreignKey.IsUnique ? "|" : "}" #>o--<#= foreignKey.IsRequired ? "|" : "o" #>| <#= foreignKey.PrincipalEntityType.Name #> : "<#= foreignKey.GetConstraintName() #>"
+<#
+        }
+#>
+`
+}
+/>
+
+## Related Tables
+
+<# foreach (var nameNavigation in namesNav){#>
+
+###  [<#= nameNavigation #>](./<#= nameNavigation.ToUpper() #>) 
+
+<#}#>
+
