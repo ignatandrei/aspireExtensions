@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- NuGet package metadata -->
 	  
 	 <IsPackable>true</IsPackable>
     <PackageId>DotnetGlobalToolsExtensionAspire</PackageId>
-      <Version>940.2025.821.800</Version>
+      <Version>1300.2025.1123.800</Version>
       <Authors>Andrei Ignat</Authors>
     <Company>AOM</Company>
     <Description>Extension methods and helpers for integrating .NET global tools with Aspire distributed applications.</Description>
-    <PackageTags>aspire;global-tools;dotnet;extensions</PackageTags>
+    <PackageTags>aspire;global-tools;dotnet;hosting;integration;extensions</PackageTags>
     <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
     <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -23,11 +23,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0" />
-    <PackageReference Include="NetEscapades.EnumGenerators" Version="1.0.0-beta14" 
-					  PrivateAssets="all" ExcludeAssets="runtime"
-	/>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.0" />
+    <PackageReference Include="NetEscapades.EnumGenerators" Version="1.0.0-beta14" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <PropertyGroup>
