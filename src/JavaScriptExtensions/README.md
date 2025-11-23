@@ -5,6 +5,13 @@
 
 A .NET Aspire extension for integrating JavaScript resource management and package.json commands into your distributed applications.
 
+
+
+## Links
+
+- NuGet Package: https://www.nuget.org/packages/JavaScriptExtensionsAspire
+- GitHub Repository: https://github.com/ignatandrei/aspireExtensions
+
 ## Features
 - Integrates package.json commands for streamlined JavaScript workflows
 
