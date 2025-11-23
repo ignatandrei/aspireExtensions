@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <WarningsAsErrors>true</WarningsAsErrors>
 	  <IsPackable>true</IsPackable>
     <!-- NuGet Package Properties -->
     <PackageId>TestExtensionsAspire</PackageId>
-    <Version>94.2025.805.2239</Version>
+    <Version>130.2025.1123.2239</Version>
     <Title>Test Extensions for .NET Aspire</Title>
 	<Authors>Ignat Andrei</Authors>
 	<Description>Extension methods for .NET Aspire that add test project integration capabilities to your distributed applications. Provides easy integration of test projects as resources with command execution, logging, and explicit start control.</Description>
@@ -18,7 +18,7 @@
     <PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>aspire;dotnet;testing;distributed-applications;test-integration;aspire-extensions</PackageTags>
+    <PackageTags>aspire;dotnet;testing;distributed-applications;integration;hosting;test-integration;aspire-extensions</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>Initial release with test project integration for .NET Aspire applications.</PackageReleaseNotes>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -37,14 +37,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-	 <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.9.0" />
-	 <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
+	 <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="10.0.0" />
+	 <PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\"  />
+    <None Include="README.md" Pack="true" PackagePath="\" />
     <!--<None Include="LICENSE.txt" Pack="true" PackagePath="\" />
     <None Include="icon.png" Pack="true" PackagePath="\" Condition="Exists('icon.png')" />-->
   </ItemGroup>
