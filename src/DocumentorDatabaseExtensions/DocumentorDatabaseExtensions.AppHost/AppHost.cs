@@ -39,5 +39,5 @@ aspire!.Resource.AddEnvironmentVariablesTo(tests);
 
 var app = builder.Build();
 //builder.Build().Run();
-var result = aspire.Resource.StartParsing(app);
+var result = aspire.Resource.StartParsing(app,builder);
 await Task.WhenAll(app.RunAsync(), result);

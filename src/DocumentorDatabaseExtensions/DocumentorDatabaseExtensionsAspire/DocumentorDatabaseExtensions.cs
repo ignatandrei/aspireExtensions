@@ -49,7 +49,7 @@ public static partial class DocumentorDatabaseExtensions
                 .AddRepository(
             "repository" + name,
             "https://github.com/ignatandrei/aspireExtensions",
-            c => c.WithDefaultBranch("EFCore9.0.10")
+            c => c.WithDefaultBranch("EFCore10")
                 .WithTargetPath(folderRepo)
 
                 //.KeepUpToDate()
