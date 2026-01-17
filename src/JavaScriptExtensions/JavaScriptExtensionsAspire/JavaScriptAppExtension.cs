@@ -1,8 +1,11 @@
 ﻿using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.JavaScript;
+using Humanizer.Localisation;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Threading;
+using static Google.Protobuf.Reflection.GeneratedCodeInfo.Types;
 
 namespace JavaScriptExtensionsAspire;
 
@@ -13,6 +16,7 @@ public static class JavaScriptAppExtension
     {
         public IResourceBuilder<JavaScriptAppResource> AddNpmCommandsFromPackage()
         {
+            
             var builder = appResource.ApplicationBuilder;
             var wd = appResource.Resource.WorkingDirectory;
             var packageJsonPath = Path.Combine(wd, "package.json");
@@ -29,8 +33,11 @@ public static class JavaScriptAppExtension
             {
                 var commandName = script.Name;
                 var commandValue = script.Value.GetString() ?? "";
+                
+                //appResource.WithCommand<>
                 appResource = appResource.WithCommand(commandName, commandName, async (ecc) =>
                 {
+                    
                     var loggerService = ecc.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
                     var logger = loggerService?.GetLogger(appResource.Resource);
                     if (logger == null)
@@ -44,6 +51,14 @@ public static class JavaScriptAppExtension
                         npmPath = "npm.cmd";
                     npmPath = FullExeName(npmPath);
                     logger.LogInformation($"Exec {npmPath} run {commandName} in folder: {wd}");
+                    var res=appResource.Resource;
+                    //var res = builder.Resources.FirstOrDefault(it => it.Name == ecc.ResourceName);
+                    //if (res == null)
+                    //{
+                    //    res = builder.Resources.FirstOrDefault(it => ecc.ResourceName.Contains(it.Name));
+                    //}
+                    //res = res ?? appResource.Resource;
+
                     var exportStartInfo = new ProcessStartInfo
                     {
                         FileName = npmPath,
@@ -56,30 +71,42 @@ public static class JavaScriptAppExtension
                         WindowStyle = ProcessWindowStyle.Hidden,
                     };
 
-                    if (appResource.Resource.TryGetEnvironmentVariables(out var envCallback))
+                    var arr = res.Annotations.ToArray();
+
+                    ////resolvedConfiguration.EnvironmentVariables
+                    //if (res.TryGetEnvironmentVariables(out var envCallback))
+                    //{
+                    //    Dictionary<string, object> envDict = new();
+                    //    EnvironmentCallbackContext environmentCallbackContext = new(builder.ExecutionContext, envDict);
+                    //    foreach (var env in envCallback)
+                    //    {
+                    //        try
+                    //        {
+                    //            await env.Callback(environmentCallbackContext);
+                    //        }
+                    //        catch (Exception ex)
+                    //        {
+                    //            logger.LogWarning($"can ignore this: environment variable callback for {env.GetType().ToString()}: {ex.Message}");
+                    //        }
+                    //    }
+                    //    var envs = environmentCallbackContext.EnvironmentVariables;
+
+
+                    var resolvedConfiguration = await ExecutionConfigurationBuilder
+                        .Create(appResource.Resource)
+                        .WithArgumentsConfig()
+                        .WithEnvironmentVariablesConfig()
+                        .BuildAsync(builder.ExecutionContext)
+                        .ConfigureAwait(false);
+
+                    var envs = resolvedConfiguration.EnvironmentVariables.ToArray();
+
+                    foreach (var kvp in envs)
                     {
-                        Dictionary<string, object> envDict = new();
-                        EnvironmentCallbackContext environmentCallbackContext = new(builder.ExecutionContext, envDict);
-                        foreach (var env in envCallback)
-                        {
-                            try
-                            {
-                                await env.Callback(environmentCallbackContext);
-                            }
-                            catch(Exception ex)
-                            {
-                                logger.LogWarning($"can ignore this: environment variable callback for {env.GetType().ToString()}: {ex.Message}");
-                            }
-                        }
-                        var envs = environmentCallbackContext.EnvironmentVariables;
-
-
-                        foreach (var kvp in envs)
-                        {
-                            logger.LogDebug($"Setting environment variable for npm command: {kvp.Key}={kvp.Value}");
-                            exportStartInfo.Environment[kvp.Key] = kvp.Value?.ToString() ?? "";
-                        }
+                        logger.LogDebug($"Setting environment variable for npm command: {kvp.Key}={kvp.Value}");
+                        exportStartInfo.Environment[kvp.Key] = kvp.Value?.ToString() ?? "";
                     }
+                    
                     var result = await ExecuteProcess(exportStartInfo);
                     if (result.Success)
                     {
