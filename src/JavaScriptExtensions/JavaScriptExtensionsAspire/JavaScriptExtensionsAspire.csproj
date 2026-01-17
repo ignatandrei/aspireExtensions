@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 	  <!-- NuGet package metadata -->
 	  <PackageId>JavaScriptExtensionsAspire</PackageId>
-	  <Version>130.2025.1121.547</Version>
+	  <Version>131.2026.117.956</Version>
 	  <Authors>Ignat Andrei</Authors>
 	  <Company>AOM</Company>
 	  <RepositoryType>git</RepositoryType>
@@ -38,7 +38,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-		<PackageReference Include="Aspire.Hosting.JavaScript" Version="13.0.0" />
+		<PackageReference Include="Aspire.Hosting.JavaScript" Version="13.1.0" />
   </ItemGroup>
 
 </Project>

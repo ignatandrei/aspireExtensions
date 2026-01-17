@@ -62,14 +62,21 @@ public static class JavaScriptAppExtension
                         EnvironmentCallbackContext environmentCallbackContext = new(builder.ExecutionContext, envDict);
                         foreach (var env in envCallback)
                         {
-                            await env.Callback(environmentCallbackContext);
-
+                            try
+                            {
+                                await env.Callback(environmentCallbackContext);
+                            }
+                            catch(Exception ex)
+                            {
+                                logger.LogWarning($"can ignore this: environment variable callback for {env.GetType().ToString()}: {ex.Message}");
+                            }
                         }
                         var envs = environmentCallbackContext.EnvironmentVariables;
 
 
                         foreach (var kvp in envs)
                         {
+                            logger.LogDebug($"Setting environment variable for npm command: {kvp.Key}={kvp.Value}");
                             exportStartInfo.Environment[kvp.Key] = kvp.Value?.ToString() ?? "";
                         }
                     }

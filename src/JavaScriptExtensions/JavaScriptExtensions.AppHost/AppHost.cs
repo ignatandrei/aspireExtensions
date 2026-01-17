@@ -24,6 +24,7 @@ var jsTests = builder.AddJavaScriptApp("Tests", "../GenerateTests")
     ;
 
 var aspire = builder.AddAspireResource();
+ArgumentNullException.ThrowIfNull(aspire);
 aspire.Resource.AddEnvironmentVariablesTo(jsTests);
 var app = builder.Build();
 var result = aspire!.Resource.StartParsing(app,builder);
