@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.WebAssembly.Hosting
 
 <PageTitle>Home</PageTitle>
  
@@ -8,10 +9,15 @@
 <h1>Local Host</h1>
 @httpClientLocal?.BaseAddress
  
+<h1>Env</h1>
+@environment.Environment
 @code {
     [Inject(Key = "local_host")]
-    public HttpClient? httpClientLocal { get; set; }
+    public HttpClient httpClientLocal { get; set; } = default!;
 
     [Inject(Key = "api")]
-    public HttpClient? httpClientAPI { get; set; }
+    public HttpClient httpClientAPI { get; set; } = default!;
+
+    [Inject]
+    public IWebAssemblyHostEnvironment environment { get; set; } = default!;
 }

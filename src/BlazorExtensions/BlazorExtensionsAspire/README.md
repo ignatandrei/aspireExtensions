@@ -5,10 +5,9 @@
 Extension methods and helpers for integrating Blazor WebAssembly projects with .NET Aspire distributed applications.
 
 ## Features
-- Blazor WebAssembly project environment integration
+
+- Supports different environments (Development, Staging, Production, personal)
 - Automatic appsettings.json endpoint injection for API URLs
-- Utility methods for Aspire project resource management
-- Simplifies connecting Blazor WebAssembly frontends to backend APIs in Aspire distributed apps
 
 ## Installation
 
@@ -17,10 +16,41 @@ Install via NuGet:
 ```bash
 dotnet add package BlazorExtensionsAspire
 ```
+## How to use for different environments
 
-## Usage
+### 1. Modify index.html to load environment-specific appsettings
 
-### 1. Registering a Blazor WebAssembly Project in Aspire
+In your Blazor WebAssembly project, modify the `wwwroot/index.html` file to load the appropriate `appsettings.{environment}.json` file based on the current environment:
+
+```html
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>
+   Blazor.start({
+    environment: "does not matter"
+    });
+    </script>
+```
+### 2. Add commands for different environments in your Aspire AppHost project
+
+in your Aspire AppHost project, add commands to set the environment when running the Blazor WebAssembly project:
+
+```csharp
+builder
+    .AddWebAssemblyProject<Projects.BlazorWebAssProject>("webfrontend", apiService)
+    
+    .AddCommandsToModifyEnvName(new Projects.BlazorWebAssProject(),"andrei","test")
+    ;
+```
+
+### 3.  Execute commands to run in different environments
+
+Execute the following commands and the index.html will be modified to make the environment
+
+
+
+## How to use for dynamic API endpoint injection
+
+### 1. Registering a Blazor WebAssembly Project in Aspire and add API service in appSettings.json
 
 In your Aspire AppHost project, use the extension method to register your Blazor WebAssembly project and link it to your API service:
 
