@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>BlazorExtensionsAspire</PackageId>
-    <Version>130.2025.1123.1850</Version>
+    <Version>131.2026.123.2107</Version>
     <Authors>Andrei Ignat</Authors>
     <Company>AOM</Company>
     <Description>Extension methods and helpers for integrating Blazor WebAssembly projects with .NET Aspire distributed applications.</Description>
