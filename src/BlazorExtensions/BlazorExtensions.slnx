@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="BlazorExtensions.ApiService/BlazorExtensions.ApiService.csproj" />
+  <Project Path="BlazorExtensions.AppHost/BlazorExtensions.AppHost.csproj" />
+  <Project Path="BlazorExtensions.ServiceDefaults/BlazorExtensions.ServiceDefaults.csproj" />
+  <Project Path="BlazorExtensionsAspire/BlazorExtensionsAspire.csproj" />
+  <Project Path="BlazorWebAssProject/BlazorWebAssProject.csproj" />
+</Solution>
