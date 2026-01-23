@@ -18,29 +18,7 @@ public static class BlazorWebAssemblyProjectExtensions
     }
 
 
-    extension<TRes>(IResourceBuilder<TRes> builder)
-                where TRes : IResourceWithEnvironment, IProjectMetadata, new()
-    {
-        public IResourceBuilder<TRes> AddPathToEnvironmment<TProject>(
-                TProject p, string name)
-                where TProject : IProjectMetadata, new()
-        {
-            //var p = new TProject();        
-            string pathPrj = p.ProjectPath;
-            var fi = new FileInfo(pathPrj);
-            string dirName = fi?.DirectoryName ?? "";
-            var projectBuilder = builder
-                .WithEnvironment(ctx =>
-                {
-                    ctx.EnvironmentVariables[name] = dirName;
-                    ctx.EnvironmentVariables[$"{name}csproj"] = pathPrj;
-                });
-
-            return projectBuilder;
-        }
-    }
-
-
+    
     public static IResourceBuilder<P> AddCommandsToModifyEnvName<P, TProject>(
         this IResourceBuilder<P> builder,
             TProject prj, params string[] nameOfEnvName)
@@ -56,13 +34,13 @@ public static class BlazorWebAssemblyProjectExtensions
             builder = builder.WithCommand(name, name, async context =>
             {
                 var dist = context.ServiceProvider.GetService(typeof(DistributedApplicationModel)) as DistributedApplicationModel;
-                var res = dist!.Resources.First(r => r is P);
+                var res = builder.Resource;
                 var loggerRes = context.ServiceProvider.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
                 var logger = loggerRes?.GetLogger(context.ResourceName);
                 var commandService = context.ServiceProvider.GetService(typeof(ResourceCommandService)) as ResourceCommandService; logger?.LogDebug($"Modifying environment variable {name} for project {pathPrj}");
                 logger?.LogInformation($"Setting environment variable {name} to {pathPrj}");
                 await commandService!.ExecuteCommandAsync(res, KnownResourceCommands.StopCommand);
-                //AddWasmApplicationEnvironmentName(pathPrj, name);
+
                 var folder= Path.GetDirectoryName(pathPrj);
                 var wwwroot = Path.Combine(folder!, "wwwroot");
                 var file = Path.Combine(wwwroot, "index.html");
