@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <!-- NuGet package metadata -->
     <PackageId>AspireExtensionsResource</PackageId>
-    <Version>130.2025.1121.547</Version>
+    <Version>130.2026.316.547</Version>
 	<Authors>Ignat Andrei</Authors>
     <Company>AOM</Company>
 	  <RepositoryType>git</RepositoryType>
@@ -49,6 +49,7 @@
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="NetCore2Blockly" Version="10.2026.316.550" />
 		<PackageReference Include="RazorBlade" Version="0.11.0" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
 
 	</ItemGroup>

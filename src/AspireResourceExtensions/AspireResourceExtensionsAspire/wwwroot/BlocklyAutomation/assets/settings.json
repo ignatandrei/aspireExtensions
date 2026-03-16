@@ -1,0 +1,157 @@
+{
+    "title": "Automation",
+    "footer": "Please give us a star on https://github.com/ignatandrei/BlocklyAutomation",
+    "localAPI": "http://localhost:37283/",
+  "startBlocks": [
+    "<xml xmlns='https://developers.google.com/blockly/xml'>",
+    "<block type='metadisplay' x='0' y='0'>",
+    "    <field name='what'>4</field>",
+    "    <next>",
+    "      <block type='text_print'>",
+    "        <value name='TEXT'>",
+    "          <block type='HTMLheaders'>",
+    "            <field name='NAME'>H1</field>",
+    "            <value name='NAME'>",
+    "              <shadow type='text'>",
+    "                <field name='TEXT'></field>",
+    "              </shadow>",
+    "              <block type='text'>",
+    "                <field name='TEXT'>See 'swaggers' menu on left for how to run Start/ Stop in aspire </field>",
+    "              </block>",
+    "            </value>",
+    "          </block>",
+    "        </value>",
+    "        <next>",
+    "          <block type='text_print'>",
+    "            <value name='TEXT'>",
+    "              <block type='convertToTable'>",
+    "                <value name='ArrayToConvert'>",
+    "                  <block type='get__api_aspire_resources'></block>",
+    "                </value>",
+    "              </block>",
+    "            </value>",
+    "            <next>",
+    "              <block type='text_print'>",
+    "                <value name='TEXT'>",
+    "                  <block type='post__api_aspire_resources___name_stop'>",
+    "                    <value name='val_name'>",
+    "                      <block type='text'>",
+    "                        <field name='TEXT'>apiservice</field>",
+    "                      </block>",
+    "                    </value>",
+    "                  </block>",
+    "                </value>",
+    "                <next>",
+    "                  <block type='wait_seconds'>",
+    "                    <field name='SECONDS'>10</field>",
+    "                    <next>",
+    "                      <block type='text_print'>",
+    "                        <value name='TEXT'>",
+    "                          <block type='convertToTable'>",
+    "                            <value name='ArrayToConvert'>",
+    "                              <block type='get__api_aspire_resources'></block>",
+    "                            </value>",
+    "                          </block>",
+    "                        </value>",
+    "                        <next>",
+    "                          <block type='text_print'>",
+    "                            <value name='TEXT'>",
+    "                              <block type='post__api_aspire_resources___name_start'>",
+    "                                <value name='val_name'>",
+    "                                  <block type='text'>",
+    "                                    <field name='TEXT'>apiservice</field>",
+    "                                  </block>",
+    "                                </value>",
+    "                              </block>",
+    "                            </value>",
+    "                            <next>",
+    "                              <block type='wait_seconds'>",
+    "                                <field name='SECONDS'>10</field>",
+    "                                <next>",
+    "                                  <block type='text_print'>",
+    "                                    <value name='TEXT'>",
+    "                                      <block type='convertToTable'>",
+    "                                        <value name='ArrayToConvert'>",
+    "                                          <block type='get__api_aspire_resources'></block>",
+    "                                        </value>",
+    "                                      </block>",
+    "                                    </value>",
+    "                                  </block>",
+    "                                </next>",
+    "                              </block>",
+    "                            </next>",
+    "                          </block>",
+    "                        </next>",
+    "                      </block>",
+    "                    </next>",
+    "                  </block>",
+    "                </next>",
+    "              </block>",
+    "            </next>",
+    "          </block>",
+    "        </next>",
+    "      </block>",
+    "    </next>",
+    "  </block>",
+    "</xml>"
+  ],
+    "hideMenu":false,
+  "tourSteps":
+    [
+      {
+          "text":"This is the  help tour",
+          "query":".blocklyWorkspace"          
+      },
+      {
+        "text": "You can start with help first",
+        "query":".btnHelp"
+      },
+      {
+        "text":"Here you can find blocks for VisualCode  API ! Expand to investigate and drag",
+        "query":".blocklyToolboxContents"
+      },
+      
+      {
+        "text":"Here you can find blocks for basic constructs : loops, text, bool, logic ...",
+        "query":".blocklyTreeLabel"
+      }
+      ,
+      
+      {
+        "text":"If you are a programmer, you can find your swagger at the left -we have package for Java, .NET , Node, PHP <a href='https://github.com/ignatandrei/Blocklyautomation' target='_blank'>VisualAPI</a>",
+        "query":""
+      },
+      
+      {
+        "text":"Drag here blocks to execute them",
+        "query":".blocklyBlockCanvas"
+      }
+      ,
+      {
+          "text":"Here you will find examples to get started",
+          "query":".stepTourDemos"
+      },
+      {
+          "text":"to reuse you can download / load  the blocks from here",
+          "query":".stepTourDownload"
+      },
+      {
+          "text":"Press the execute button to run ;-) ",
+          "query":".stepTourRunButton"
+      },
+      
+      {
+          "text":"Press the output button to see the result of blocks",
+          "query":".stepTourOutputButton"
+      }
+      ,{
+        "text":"Here you can find the output as text, html and json",
+        "query":".stepTourOutput"
+      },
+      {
+          "text":"Now press execute and see , via HTTP, a joke with Chuck Norris ",
+          "query":".stepTourRunButton"
+      }
+      
+  ]
+}

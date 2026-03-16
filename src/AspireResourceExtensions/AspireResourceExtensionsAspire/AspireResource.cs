@@ -1,4 +1,6 @@
 ﻿
+using NetCore2BlocklyNew;
+
 namespace AspireResourceExtensionsAspire;
 
 public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithEndpoints, IResourceWithServiceDiscovery
@@ -29,12 +31,15 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
 
 
         var ret = await AddAspire.ViewData(da);
-        _loginUrl = ret??"";
+        _loginUrl = ret ?? "";
         if (ret == null)
         {
             return _loginUrl;
         }
-        string webServer = await StartWebServerAsync(myApp, da.ResourceCommands, ret)??"";        
+        string webServer = await StartWebServerAsync(myApp, 
+            da.ResourceCommands, 
+            da.ResourceNotifications,
+            ret) ?? "";
         //var env = await this.GetEnvironmentVariableValuesAsync();
         await da.ResourceNotifications.PublishUpdateAsync(this, mainState =>
         {
@@ -99,8 +104,32 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
 
         return ret;
     }
+    //private static string ResolveStaticUiPath()
+    //{
+    //    foreach (var startingDirectory in GetSearchDirectories())
+    //    {
+    //        for (var directory = new DirectoryInfo(startingDirectory); directory is not null; directory = directory.Parent)
+    //        {
+    //            var candidate = Path.Combine(directory.FullName, "AspireResourceExtensionsAspire", "wwwroot");
+    //            if (File.Exists(Path.Combine(candidate, "index.html")))
+    //            {
+    //                return candidate;
+    //            }
+    //        }
+    //    }
 
-    internal async Task<string?> StartWebServerAsync(MyAppResource myApp, ResourceCommandService resourceCommands, string aspireUrl)
+    //    throw new DirectoryNotFoundException("Could not find AspireResourceCommand\\wwwroot containing index.html.");
+    //}
+    private static IEnumerable<string> GetSearchDirectories()
+    {
+        yield return Directory.GetCurrentDirectory();
+        yield return AppContext.BaseDirectory;
+    }
+
+    internal async Task<string?> StartWebServerAsync(
+        MyAppResource myApp, ResourceCommandService resourceCommands,
+        ResourceNotificationService resourceNotificationService,
+        string aspireUrl)
     {
         var port = new Uri(aspireUrl).Port;
         var newPort = port + 1;
@@ -110,9 +139,27 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         builder.Services.AddOpenApi();
         builder.Services.AddCors();
 
+
         var p = builder.Environment.WebRootFileProvider;
         builder.Environment.WebRootFileProvider= MapFileProvider.Manifest(builder);
         var app = builder.Build();
+
+        //var staticUiPath = ResolveStaticUiPath();
+        var fp = builder.Environment.WebRootFileProvider;
+        app.UseDefaultFiles(new DefaultFilesOptions
+        {
+            FileProvider = fp
+        });
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = fp
+        });
+
+        Extensions.FileProvider = fp;
+        app.UseBlocklyUI(app.Environment,registerStaticAndDefaultFiles:false);
+        //after app.MapControllers();
+        app.UseBlocklyAutomation();
+
         //MapFileProvider.mapFile("wwwroot", prov, app);
         //app.Urls.Add("http://127.0.0.1:0");
         app.UseCors(it =>
@@ -128,10 +175,10 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         app.MapOpenApi("/openapi/{documentName}.yaml");
 
         app.Urls.Add($"http://127.0.0.1:{newPort}");
-        // Serve static files from a "wwwroot" directory
+        //// Serve static files from a "wwwroot" directory
         
-        app.UseDefaultFiles();
-        app.UseStaticFiles();
+        //app.UseDefaultFiles();
+        //app.UseStaticFiles();
         
         
         app.MapGet("/api/aspire/resources/export/mermaid", ()=>myApp.ExportToMermaid());
@@ -139,7 +186,21 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
 
         app.MapGet("/api/aspire/resources/", () =>
         {
-            return myApp.MyResources();
+            Dictionary<string, string> state = new();
+        var resources = myApp.MyResources();
+            foreach (var resource in resources)
+            {
+                var stateRes ="Unknown";
+                if (resourceNotificationService.TryGetCurrentState(resource, out var currentState))
+                {
+                    stateRes = currentState?.Snapshot?.State?.Text ?? stateRes;
+                }
+                
+                state[resource] = stateRes;
+                
+            }
+            return state.ToArray();
+
         });
         app.MapGet("/api/aspire/resources/{name}", (string name) =>
         {
@@ -152,6 +213,24 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
                 return TypedResults.NotFound($"cannot find command {command} on {name}");
 
             var res = await resourceCommands.ExecuteCommandAsync(name, command);  
+            return TypedResults.Ok(res);
+        });
+        app.MapPost("/api/aspire/resources/{name}/start", async Task<Results<Ok<ExecuteCommandResult>, NotFound<string>>> (string name) =>
+        {
+            string command= KnownResourceCommands.StartCommand;
+            if (!myApp.ExistResource(name))
+                return TypedResults.NotFound($"cannot find command {command} on {name}");
+
+            var res = await resourceCommands.ExecuteCommandAsync(name, command);
+            return TypedResults.Ok(res);
+        });
+        app.MapPost("/api/aspire/resources/{name}/stop", async Task<Results<Ok<ExecuteCommandResult>, NotFound<string>>> (string name) =>
+        {
+            string command = KnownResourceCommands.StopCommand;
+            if (!myApp.ExistResource(name))
+                return TypedResults.NotFound($"cannot find command {command} on {name}");
+
+            var res = await resourceCommands.ExecuteCommandAsync(name, command);
             return TypedResults.Ok(res);
         });
 

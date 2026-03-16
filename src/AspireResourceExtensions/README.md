@@ -58,6 +58,10 @@ await Task.WhenAll(app.RunAsync(), result);
 
 ## Integrations
 
+### Poor Chaos Monkey
+
+Goto Aspire Resource URL/BlocklyAutomation and you can start and stop services 
+
 ### Playwright NodeJS 
 
 Suppose that you have a NodeJS playwright app that you want to test your ASPIRE dashboard. You can integrate this way : In AppHost.cs
