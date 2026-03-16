@@ -118,9 +118,7 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         builder.Services.AddOpenApi();
         builder.Services.AddCors();
 
-
-        var p = builder.Environment.WebRootFileProvider;
-        builder.Environment.WebRootFileProvider= MapFileProvider.Manifest(builder);
+        builder.Environment.WebRootFileProvider = MapFileProvider.Manifest(builder);
         var app = builder.Build();
 
         //var staticUiPath = ResolveStaticUiPath();
