@@ -104,27 +104,6 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
 
         return ret;
     }
-    //private static string ResolveStaticUiPath()
-    //{
-    //    foreach (var startingDirectory in GetSearchDirectories())
-    //    {
-    //        for (var directory = new DirectoryInfo(startingDirectory); directory is not null; directory = directory.Parent)
-    //        {
-    //            var candidate = Path.Combine(directory.FullName, "AspireResourceExtensionsAspire", "wwwroot");
-    //            if (File.Exists(Path.Combine(candidate, "index.html")))
-    //            {
-    //                return candidate;
-    //            }
-    //        }
-    //    }
-
-    //    throw new DirectoryNotFoundException("Could not find AspireResourceCommand\\wwwroot containing index.html.");
-    //}
-    private static IEnumerable<string> GetSearchDirectories()
-    {
-        yield return Directory.GetCurrentDirectory();
-        yield return AppContext.BaseDirectory;
-    }
 
     internal async Task<string?> StartWebServerAsync(
         MyAppResource myApp, ResourceCommandService resourceCommands,
