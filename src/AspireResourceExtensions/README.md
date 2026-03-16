@@ -60,7 +60,7 @@ await Task.WhenAll(app.RunAsync(), result);
 
 ### Poor Chaos Monkey
 
-Goto Aspire Resource URL/BlocklyAutomation and you can start and stop services 
+Go to the Aspire Resource URL at /BlocklyAutomation to start or stop services.
 
 ### Playwright NodeJS 
 
