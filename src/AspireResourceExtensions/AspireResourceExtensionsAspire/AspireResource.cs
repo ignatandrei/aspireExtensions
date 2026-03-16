@@ -187,7 +187,7 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         app.MapPost("/api/aspire/resources/{name}/execute/{command}", async Task<Results<Ok<ExecuteCommandResult>, NotFound<string>>> (string name,string command) =>
         {
             if (!myApp.ExistResource(name))
-                return TypedResults.NotFound($"cannot find command {command} on {name}");
+                return TypedResults.NotFound($"resource '{name}' was not found");
 
             var res = await resourceCommands.ExecuteCommandAsync(name, command);  
             return TypedResults.Ok(res);
@@ -196,7 +196,7 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         {
             string command= KnownResourceCommands.StartCommand;
             if (!myApp.ExistResource(name))
-                return TypedResults.NotFound($"cannot find command {command} on {name}");
+                return TypedResults.NotFound($"resource '{name}' was not found");
 
             var res = await resourceCommands.ExecuteCommandAsync(name, command);
             return TypedResults.Ok(res);
@@ -205,7 +205,7 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         {
             string command = KnownResourceCommands.StopCommand;
             if (!myApp.ExistResource(name))
-                return TypedResults.NotFound($"cannot find command {command} on {name}");
+                return TypedResults.NotFound($"resource '{name}' was not found");
 
             var res = await resourceCommands.ExecuteCommandAsync(name, command);
             return TypedResults.Ok(res);
