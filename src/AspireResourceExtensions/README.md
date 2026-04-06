@@ -209,6 +209,12 @@ https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/S
 ![ShowUrl](https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/Swagger.mp4)
 
 
+### Chaos Monkey 
+
+Exposing start / stop of resources as swaggers
+
+![ShowUrl](https://ignatandrei.github.io/aspireExtensions/images/AspireResourceExtensions/Chaos.png)
+
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
