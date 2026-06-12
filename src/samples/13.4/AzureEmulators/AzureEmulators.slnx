@@ -1,0 +1,12 @@
+<Solution>
+  <Project Path="AppConfigurationClient/AppConfigurationClient.csproj" Id="a44afa4b-467f-44ea-9ed2-9c6324a8c2e9" />
+  <Project Path="AzureEmulators/AzureEmulators.csproj" />
+  <Project Path="AzureManagedClient/AzureManagedRedisClient.csproj" Id="a5b5127c-b642-41f4-ba36-19648a2a44d7" />
+  <Project Path="AzureStorageClient/AzureStorageClient.csproj" Id="1ad0a1fd-9937-480e-a15d-bddb4f79a658" />
+  <Project Path="CosmosClient/CosmosClient.csproj" />
+  <Project Path="EventHubsClient/EventHubsClient.csproj" Id="6a5aa874-4fa6-445a-b29f-64e4e8d03c35" />
+  <Project Path="FoundryClient/FoundryClient.csproj" Id="532d7661-5df5-4fe6-bbd1-0852b608515a" />
+  <Project Path="PostgresClient/PostgresClient.csproj" Id="5b9bd1cb-7907-4880-a841-3d6c012d0a69" />
+  <Project Path="ServiceBusClient/ServiceBusClient.csproj" Id="7c14246d-dd1d-48b7-b73f-46fae7870b8b" />
+  <Project Path="SqlAzureClient/SqlAzureClient.csproj" />
+</Solution>
