@@ -14,7 +14,7 @@ foreach (var item in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>
 }
 if (string.IsNullOrWhiteSpace(connectionStringSqlAzure))
 {
-    Console.WriteLine("Cosmos connection string is not set in environment variables.");
+    Console.WriteLine("Azure SQL connection string is not set in environment variables.");
     return;
 }
 Console.WriteLine($"Connection string for Azure SQL: {connectionStringSqlAzure}");
