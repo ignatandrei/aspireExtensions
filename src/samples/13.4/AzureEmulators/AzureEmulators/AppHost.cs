@@ -3,6 +3,8 @@
   */
 
 
+using Projects;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 
@@ -59,7 +61,7 @@ var builder = DistributedApplication.CreateBuilder(args);
         ;
 
 
-    var azureStorage = builder.AddAzureStorage("AzureStorage1")
+    var azureStorage = builder.AddAzureStorage("AzureStorageForBlobs")
           .RunAsEmulator()
          .AddBlobs("AzureStorageBlobs1")
          ;
@@ -70,8 +72,31 @@ var builder = DistributedApplication.CreateBuilder(args);
         .WaitFor(azureStorage)
         ;
 
+var azureStorageTables = builder.AddAzureStorage("AzureStorageForTables")
+          .RunAsEmulator()
+         .AddTables("AzureStorageTables1")
+         ;
+var azureStorageTablesProj = builder
+    .AddProject<Projects.AzureStorageTables>("azureStorageTablesClient1")
+    .WithReference(azureStorageTables)
+    .WaitFor(azureStorageTables)
+    ;
 
-    var appConfig = builder.AddAzureAppConfiguration("azureAppConfig1")
+
+var azureStorageQueues = builder.AddAzureStorage("AzureStorageForQueues")
+          .RunAsEmulator()
+         .AddQueues("AzureStorageQueues1")
+         ;
+
+var azureStorageQueuesProj = builder
+    .AddProject<Projects.AzureStorageQueuesClient>("azureStorageQueuesClient1")
+    .WithReference(azureStorageQueues)
+    .WaitFor(azureStorageQueues)
+    ;
+
+
+
+var appConfig = builder.AddAzureAppConfiguration("azureAppConfig1")
         .RunAsEmulator()
         .ConfigureInfrastructure(appConfig =>
         {
