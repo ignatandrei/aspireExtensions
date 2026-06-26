@@ -27,6 +27,7 @@
     <ProjectReference Include="..\AppConfigurationClient\AppConfigurationClient.csproj" />
     <ProjectReference Include="..\AzureManagedClient\AzureManagedRedisClient.csproj" />
     <ProjectReference Include="..\AzureStorageClient\AzureStorageClient.csproj" />
+    <ProjectReference Include="..\AzureStorageQueuesClient\AzureStorageQueuesClient.csproj" />
     <ProjectReference Include="..\AzureStorageTables\AzureStorageTables.csproj" />
     <ProjectReference Include="..\CosmosClient\CosmosClient.csproj" />
     <ProjectReference Include="..\EventHubsClient\EventHubsClient.csproj" />

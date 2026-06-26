@@ -4,7 +4,7 @@ using Azure.Data.Tables;
 using System.Collections;
 using System.Collections.Concurrent;
 
-Console.WriteLine("Hello, AzureStorageClient!");
+Console.WriteLine("Hello, AzureStorageClient Tables!");
 string connectionStringAzurewStorage = "";
 foreach (var item in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>())
 {
