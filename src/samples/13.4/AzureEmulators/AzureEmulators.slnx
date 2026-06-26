@@ -3,6 +3,7 @@
   <Project Path="AzureEmulators/AzureEmulators.csproj" />
   <Project Path="AzureManagedClient/AzureManagedRedisClient.csproj" Id="a5b5127c-b642-41f4-ba36-19648a2a44d7" />
   <Project Path="AzureStorageClient/AzureStorageClient.csproj" Id="1ad0a1fd-9937-480e-a15d-bddb4f79a658" />
+  <Project Path="AzureStorageTables/AzureStorageTables.csproj" Id="c9b05009-a905-45b0-b34c-bb008eedb544" />
   <Project Path="CosmosClient/CosmosClient.csproj" />
   <Project Path="EventHubsClient/EventHubsClient.csproj" Id="6a5aa874-4fa6-445a-b29f-64e4e8d03c35" />
   <Project Path="FoundryClient/FoundryClient.csproj" Id="532d7661-5df5-4fe6-bbd1-0852b608515a" />
