@@ -25,11 +25,6 @@ public static class PortAppExtension
 
         };
         return builder.WithInitialState(state);
-        //return builder.WithEnvironment(ctx =>
-        //{
-        //    var port = builder.Resource.GetDeterministicPort(name);
-        //    ctx.EnvironmentVariables[$"PORT_{name}"] = port.ToString();
-        //});
     }
     public static IResourceBuilder<PortResource> WithDeterministicPortEnvironment(
         this IResourceBuilder<PortResource> builder, params string[] names)
@@ -51,7 +46,7 @@ public static class PortAppExtension
     /// registered on <paramref name="portResource"/> up to that point.
     /// </summary>
     public static IResourceBuilder<TDestination> WithPortReference<TDestination>(
-        this IResourceBuilder<TDestination> builder, IResourceBuilder<PortResource>? portResource)
+        this IResourceBuilder<TDestination> builder, IResourceBuilder<PortResource> portResource)
         where TDestination : IResourceWithEnvironment
     {
         return builder.WithEnvironment(ctx =>

@@ -25,6 +25,14 @@ class MSPC
             return hash1 + (hash2 * 1566083941);
         }
     }
+    /// <summary>
+    /// Computes a deterministic (repeatable) port for <paramref name="name"/> by hashing it and reducing
+    /// the result into the <see cref="UInt16"/> range.
+    /// WARNING: this only guarantees the same name always maps to the same port; it does NOT guarantee
+    /// uniqueness across different names. Two different names can hash to the same port (a collision),
+    /// which would assign the same port to two different resources. If that happens, choose a different
+    /// name/tag for one of the resources or override the port manually.
+    /// </summary>
     public UInt16 GetDeterministicPort(string name)
     {
         int hash = Math.Abs(GetDeterministicHashCode(name));
@@ -36,6 +44,11 @@ class MSPC
     }
 
 
+    /// <summary>
+    /// Computes a deterministic port for <paramref name="name"/> combined with <paramref name="tag"/>.
+    /// See <see cref="GetDeterministicPort(string)"/> for the same uniqueness caveat: collisions between
+    /// different name/tag combinations are possible and are not detected.
+    /// </summary>
     public UInt16 GetDeterministicPort(string name, string tag)
     {
         if (string.IsNullOrWhiteSpace(tag))
