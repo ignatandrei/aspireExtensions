@@ -15,8 +15,8 @@ public class AspireResource : Resource, IResourceWithEnvironment, IResourceWithE
         foreach (var resource in resources)
         {
             this.resources.Add(resource);
-            resource.WithEnvironment("ASPIRE_LOGIN_URL", LoginUrl);
-            resource.WithEnvironment("ASPIRE_BASE_URL", BaseUrl);
+            resource.WithEnvironment("ASPIRE_LOGIN_URL",()=> LoginUrl());
+            resource.WithEnvironment("ASPIRE_BASE_URL", ()=> BaseUrl());
         }
     }
 

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="PortExtension/PortExtension.csproj" />
+  <Project Path="PortExtensionAspire/PortExtensionAspire.csproj" />
+  <Project Path="ShowPort/ShowPort.csproj" Id="b46c1191-5487-4a58-ad51-31ab5e11dea4" />
+</Solution>
