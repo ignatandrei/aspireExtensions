@@ -1,5 +1,6 @@
 ﻿using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Microsoft.Extensions.Logging;
 
 namespace PortExtensionAspire;
 
@@ -10,12 +11,21 @@ public static class PortAppExtension
     {
 
         return builder.AddResource<PortResource>(instance);
-
+        
     }
     public static IResourceBuilder<PortResource> Construct(
         this IResourceBuilder<PortResource> builder)
     {
-
+        builder.OnResourceReady(async (pr, rre, ct) =>
+        {
+            var loggerService = rre.Services.GetService(typeof(ResourceLoggerService)) as ResourceLoggerService;
+            var logger = loggerService?.GetLogger(pr);
+            if (logger == null) return;
+            foreach (var item in pr.Parameters)
+            {
+                logger.LogInformation($"{item.Key} has port {item.Value}");
+            }
+        });
         var state = new CustomResourceSnapshot()
         {
             State = new(KnownResourceStates.Running, KnownResourceStateStyles.Success),

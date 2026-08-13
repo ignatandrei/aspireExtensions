@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.4.6">
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.4.6">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,7 +8,9 @@
     <UserSecretsId>28e2f112-ae0c-4d9d-9f5e-bf3c849d1703</UserSecretsId>
   </PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="AspireExtensionsResource" Version="130.2025.1121.547" />
 		<PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" Version="13.4.0" />
+		<PackageReference Include="JavaScriptExtensionsAspire" Version="131.2026.117.2000" />
 		<!-- Promoted transitive dependencies to resolve known vulnerabilities -->
 		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
 	</ItemGroup>
