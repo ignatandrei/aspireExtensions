@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev":"please run other scripts",
+    "dev":"npx playwright test",
     "runVideo":"npx playwright test"
   },
   "keywords": [],

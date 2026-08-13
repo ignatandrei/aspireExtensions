@@ -26,57 +26,85 @@ async function loginAndGotoResource(page: Page,url: string) {
   await page.waitForTimeout(200); // brief stabilizing delay to avoid racing hydration
 }
 
+async function flashAndClick(button:Locator ) {
+  await button.evaluate((el: HTMLElement) => {
+    let i = 0;
+    // enlarge and animate
+    el.style.transition = 'all 0.15s ease';
+    el.style.transform = 'scale(1.25)';
+    el.style.padding = '12px 18px';
+    el.style.fontSize = '1.05em';
+    el.style.borderWidth = '2px';
+    const colors = ['yellow', 'red', 'orange', 'white'];
+    const interval = setInterval(() => {
+      el.style.background = colors[i % colors.length];
+      i++;
+      if (i > 7) {
+        clearInterval(interval);
+        el.style.background = '';
+      }
+    }, 150);
+  });
+  await sleep(2);
+  await button.click();  
+  
+}
+async function sleep(seconds: number) {
+  return new Promise(resolve => setTimeout(resolve, seconds*1000));
+}
 
 
 
 test("makeVideo", async ({ page }) => {
 
-      await page.screencast.start({ path: 'video.webm' ,});
+       await page.screencast.start({ path: 'video.webm' ,});
 
-      await page.screencast.showActions({ position: 'top-right', duration: 1000, fontSize: 18 })
+       await page.screencast.showActions({ position: 'top-right', duration: 1000, fontSize: 18 })
 
-      await page.screencast.showOverlays();
+       await page.screencast.showOverlays();
 
-      await page.screencast.showChapter('A1ddin1g TODOs', {
-  description: 'Type and prhess enter for each TODO',
-  duration: 5000,
-});
+//       await page.screencast.showChapter('A1ddin1g TODOs', {
+//   description: 'Type and prhess enter for each TODO',
+//   duration: 5000,
+// });
 
-//var indic1 = await page.screencast.showOverlay('<div style="color: red">Recording</div>');
+var indic1 = await page.screencast.showOverlay('Recordin');
     console.log(`going to of ${DEFAULT_LOGIN_URL} page`);
   await page.goto(DEFAULT_LOGIN_URL, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(3000);
 //  await page.screenshot({ path: 'consolelogs1.png', fullPage: true });
 
-//indic1.dispose();
-  await page.screencast.showChapter('Adding3 TODOs', {
-  description: 'Type and press enjter for each TODO',
-  duration: 7000,
-});
-
+indic1.dispose();
+   await page.screencast.showChapter('Adding3 TODOs', {
+   description: 'Type and press enjter for each TODO',
+   duration: 7000,
+ });
+await flashAndClick(page.getByText('PortResource'))
 //var a1= await page.screencast.showOverlay('<div style="color: red">Recording</div>',{duration: 5000});
 
     //console.log(`Taking screenshot of ${RESOURCE_URL} page`);
   await page.goto(RESOURCE_URL, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(3000);
-  //await page.screenshot({ path: 'portresource-page.png', fullPage: true });
+  await flashAndClick(page.getByText('sqliteweb has port 54874'))
+//await page.screenshot({ path: 'portresource-page.png', fullPage: true });
 
-  await page.screencast.showChapter('Adding0 TODOs', {
-  description: 'Type and press enter for eacfh TODO',
-  duration: 8000,
-});
+//   await page.screencast.showChapter('Adding0 TODOs', {
+//   description: 'Type and press enter for eacfh TODO',
+//   duration: 8000,
+// });
 //a1.dispose();
 //var indic =await page.screencast.showOverlay('<div style="color: red">Recording</div>');
 console.log(`Going to full ${Console_URL} page`);
 await page.goto(Console_URL, { waitUntil: 'domcontentloaded' });
-  //await page.waitForTimeout(3000);
+  await page.waitForTimeout(3000);
+  await flashAndClick(page.getByText('PORT_sqliteweb 54874'));
   //await page.screenshot({ path: 'consolelogs-page.png', fullPage: true });
 
-  await page.screencast.showChapter('Aasadding0 TODOs', {
-  description: 'Type and press enter for eacfh TODO',
-  duration: 8000,
-});
+//   await page.screencast.showChapter('Aasadding0 TODOs', {
+//   description: 'Type and press enter for eacfh TODO',
+//   duration: 8000,
+// });
 //indic.dispose();
-await page.screencast.stop();
+ await page.screencast.stop();
 });
 // Happy path: open kebab menu and list items
