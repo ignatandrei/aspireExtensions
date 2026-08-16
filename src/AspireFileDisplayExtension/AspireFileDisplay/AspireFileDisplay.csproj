@@ -7,8 +7,11 @@
     <Nullable>enable</Nullable>
     <UserSecretsId>03f5fa7d-7407-4ff1-88bd-cfe688e57ee8</UserSecretsId>
   </PropertyGroup>
+	<ItemGroup>
+		<Watch Include="..\**\*.cshtml" Exclude="node_modules\**\*;**\*.js.map;obj\**\*;bin\**\*" />
+	</ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
     <ProjectReference Include="..\AspireFileDisplayExtension\AspireFileDisplayExtension.csproj" IsAspireProjectResource="false" />
   </ItemGroup>
 

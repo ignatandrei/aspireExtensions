@@ -36,16 +36,8 @@
 
 	</ItemGroup>
 	<ItemGroup>
-		<EmbeddedResource Include="vs\**">
-			<!-- Force the manifest resource name to be the literal relative path with
-				 '\' turned into '.', so EmbeddedFileProvider (which does the same
-				 transformation on the request path) can resolve every file, including
-				 ones under folders that contain '.' or '-' (which MSBuild would
-				 otherwise mangle into '_'). -->
-			<LogicalName>$([System.String]::Copy('%(RelativeDir)').Replace('\','.'))%(Filename)%(Extension)</LogicalName>
-		</EmbeddedResource>
+		<EmbeddedResource Include="vs\**" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Aspire.Hosting" Version="13.4.6" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
