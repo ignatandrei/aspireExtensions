@@ -1,0 +1,16 @@
+@inherits RazorBlade.PlainTextTemplate<AspireFileDisplayExtension.Templates.DisplayAllFiles>
+
+    <html>
+        <body>
+Those are the files to display:
+<br />
+<ol>
+@foreach (var file in Model.AllFiles)
+{
+    <li>
+    <a href="/files/@(file.NameFile())" target="_blank">@file.relativePath</a>
+    </li>
+}
+</ol>
+</body>
+</html>

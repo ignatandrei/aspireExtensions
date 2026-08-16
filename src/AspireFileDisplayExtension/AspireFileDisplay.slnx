@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="AspireFileDisplay/AspireFileDisplay.csproj" />
+  <Project Path="AspireFileDisplayExtension/AspireFileDisplayExtension.csproj" Id="ad515e4d-3abd-404d-bd84-b2be469a8ebb" />
+</Solution>
