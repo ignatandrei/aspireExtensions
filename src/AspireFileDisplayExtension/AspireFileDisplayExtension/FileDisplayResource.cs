@@ -46,8 +46,6 @@ record FileToDisplay
         }
         return contentsCache;
     }
-    public string ReadContent() =>
-        File.Exists(relativePath) ? File.ReadAllText(relativePath) : $"// File not found: {relativePath}";
 
     public string MonacoLanguageId()
     {

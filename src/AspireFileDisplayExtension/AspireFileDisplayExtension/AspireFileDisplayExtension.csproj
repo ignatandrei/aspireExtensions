@@ -6,14 +6,14 @@
 		<Nullable>enable</Nullable>
 		<!-- NuGet package metadata -->
 		<PackageId>AspireFileDisplayExtension</PackageId>
-		<Version>134.2026.809.1615</Version>
+		<Version>134.2026.816.1615</Version>
 		<Authors>Ignat Andrei</Authors>
 		<Company>AOM</Company>
 		<RepositoryType>git</RepositoryType>
 		<Description>Added resource for show files</Description>
 		<PackageTags>aspire;extensions;distributed;package.json;javascript;integrations;hosting</PackageTags>
 		<RepositoryUrl>https://github.com/ignatandrei/aspireExtensions</RepositoryUrl>
-		<PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions/tree/main/src/JavaScriptExtensionsAspire</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/ignatandrei/aspireExtensions/tree/main/src/AspireFileDisplayExtension</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
