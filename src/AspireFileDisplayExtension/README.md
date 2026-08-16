@@ -1,66 +1,52 @@
-# PortExtensionsAspire
+# AspireFileDisplayExtension
 
-[![NuGet](https://img.shields.io/nuget/v/PortExtensionsAspire.svg)](https://www.nuget.org/packages/PortExtensionsAspire)
+[![NuGet](https://img.shields.io/nuget/v/AspireFileDisplayExtension.svg)](https://www.nuget.org/packages/AspireFileDisplayExtension)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 
-A .NET Aspire extension that assigns deterministic (repeatable) ports to named resources and exposes them as `PORT_{name}` environment variables to other resources in your distributed application.
+An Aspire extension that hosts a small file viewer for your distributed application. Add files to the viewer, and it serves a browser UI with syntax highlighting for supported file types.
 
-## Links
+## What it does
 
-- NuGet Package: https://www.nuget.org/packages/PortExtensionsAspire
-- GitHub Repository: https://github.com/ignatandrei/aspireExtensions
-
-## Features
-- Computes a deterministic port for a given name (and optional tag) so the same name always maps to the same port across runs
-- Registers the computed ports on a dedicated `PortResource` so they are visible in the Aspire dashboard as environment variables
-- Injects the registered ports (`PORT_{name}`) into any other resource via `WithPortReference`
+- Registers a single Aspire resource for displaying files
+- Serves a web UI on a fixed port you choose
+- Renders individual files at `/files/{name}`
+- Supports Monaco-based syntax highlighting for many common extensions
+- Serves embedded assets from `/vs`
 
 ## Requirements
 
 - .NET 10.0 or later
-- Aspire 13.0 or later
+- Aspire 13.4 or later
 
 ## Installation
 
-Install via NuGet:
-
 ```shell
- dotnet add package PortExtensionsAspire
+dotnet add package AspireFileDisplayExtension
 ```
 
 ## Usage
 
 ```csharp
+using AspireFileDisplayExtension;
+
 var builder = DistributedApplication.CreateBuilder(args);
-var ports = builder.AddPort()
-    .WithDeterministicPortEnvironment("sqliteweb", "mongodb")
-    .Construct();
 
-builder.AddSqlite("sqlite")
-    .WithSqliteWeb(c =>
-    {
-        c.WithHttpEndpoint(targetPort: 8080, name: "http", port: ports.Resource.GetDeterministicPort("sqliteweb"));
-    });
-
-builder.AddProject<Projects.ShowPort>("ShowPort")
-    .WithPortReference(ports);
+var files = builder.CreateFileDisplay(port: 55987);
+files.AddFile(relativePath: "AppHost.cs", lines: ["CreateFileDisplay"]);
+files.AddFile(relativePath: "..\\README.md");
 
 builder.Build().Run();
 ```
 
-## ⚠️ Warning: ports are not guaranteed to be unique
+Open the configured port in a browser to see the file display UI. Each added file is available under `/files/{file-name}`.
 
-`GetDeterministicPort` derives a port by hashing the given name (optionally combined with a tag) and reducing it into the `UInt16` range. This makes the port **repeatable** across runs for the same name, but it does **not** guarantee **uniqueness** across different names: two different names can hash to the same port (a hash collision), which would result in two resources being assigned the same port. If you hit a collision, pick a different name/tag combination for one of the resources, or manually override the port.
+## Notes
 
-## Contributing
+- `AddFile` validates the file extension against the built-in Monaco language map
+- If you pass `lines`, the UI marks matching lines in the file view
+- The viewer is designed for local development and dashboard-style inspection
 
-Contributions are welcome! Please open issues or submit pull requests via [GitHub](https://github.com/ignatandrei/aspireExtensions).
+## Repository
 
-## License
+GitHub: https://github.com/ignatandrei/aspireExtensions
 
-This project is licensed under the [MIT License](../LICENSE).
-
-## Links
-
-- [NuGet Package](https://www.nuget.org/packages/PortExtensionsAspire)
-- [GitHub Repository](https://github.com/ignatandrei/aspireExtensions)
