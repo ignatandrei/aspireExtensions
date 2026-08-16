@@ -1,57 +1,30 @@
 @inherits RazorBlade.PlainTextTemplate<AspireFileDisplayExtension.FileToDisplay>
+@using System.Text.Json
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Monaco C# Viewer</title>
+<title>Monaco Viewer - @Model.NameFile()</title>
 <style>
   html, body { margin: 0; padding: 0; height: 100%; }
   #container { width: 100%; height: 100vh; }
-
-  /* Bigger font for specific decorated lines */
-  .big-line {
-    font-size: 22px !important;
-  }
-  .big-line-margin {
-    background: rgba(255, 215, 0, 0.15);
-  }
 </style>
 </head>
 <body>
-  This is the code from the C# file:
-<div id="container"></div>
+This is the file @Model.NameFile() with the language @Model.MonacoLanguageId()
+ <div id="container"></div>
 
 <script src="/vs/loader.js"></script>
 <script>
   require.config({ paths: { vs: '/vs' } });
 
-  const csharpCode = `using System;
+  const fileContent = @(JsonSerializer.Serialize(Model.ReadContent()));
+  const languageId  = @(JsonSerializer.Serialize(Model.MonacoLanguageId()));
 
-namespace HelloWorld
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            Console.WriteLine("Hello, World!");
-
-            var numbers = new[] { 1, 2, 3, 4, 5 };
-            int sum = 0;
-            foreach (var n in numbers)
-            {
-                sum += n;
-            }
-
-            Console.WriteLine($"Sum: {sum}");
-        }
-    }
-}
-`;
-
-  require(['/vs/editor/editor.main'], function () {
-    const editor = monaco.editor.create(document.getElementById('container'), {
-      value: csharpCode,
-      language: 'csharp',
+  require(['vs/editor/editor.main'], function () {
+    monaco.editor.create(document.getElementById('container'), {
+      value: fileContent,
+      language: languageId,
       theme: 'vs-dark',
       automaticLayout: true,
       readOnly: true,
@@ -61,26 +34,6 @@ namespace HelloWorld
       bracketPairColorization: { enabled: true },
       links: true
     });
-
-    // Increase font size on specific lines (e.g. line 8 and line 21)
-    editor.createDecorationsCollection([
-      {
-        range: new monaco.Range(9, 1, 9, 1),
-        options: {
-          isWholeLine: true,
-          inlineClassName: 'big-line',
-          marginClassName: 'big-line-margin'
-        }
-      },
-      {
-        range: new monaco.Range(21, 1, 21, 1),
-        options: {
-          isWholeLine: true,
-          inlineClassName: 'big-line',
-          marginClassName: 'big-line-margin'
-        }
-      }
-    ]);
   });
 </script>
 </body>

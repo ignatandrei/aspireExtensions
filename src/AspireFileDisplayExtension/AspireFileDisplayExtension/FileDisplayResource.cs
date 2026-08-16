@@ -19,6 +19,17 @@ namespace AspireFileDisplayExtension;
 record FileToDisplay(string relativePath)
 {
     public string NameFile() => Path.GetFileName(relativePath);
+
+    public string ReadContent() =>
+        File.Exists(relativePath) ? File.ReadAllText(relativePath) : $"// File not found: {relativePath}";
+
+    public string MonacoLanguageId()
+    {
+        var ext = Path.GetExtension(relativePath);
+        return Monaco.MonacoLanguageExtensions.TryGetFromExtension(ext, out var lang)
+            ? Monaco.MonacoLanguageExtensions.ToMonacoId(lang)
+            : "plaintext";
+    }
 }
 public class FileDisplayResource(string name):Resource(name),IResourceWithEndpoints
 {
