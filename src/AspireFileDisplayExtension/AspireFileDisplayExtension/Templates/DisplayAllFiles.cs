@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AspireFileDisplayExtension.Templates;
+﻿namespace AspireFileDisplayExtension.Templates;
 
 internal class DisplayAllFiles
 {
