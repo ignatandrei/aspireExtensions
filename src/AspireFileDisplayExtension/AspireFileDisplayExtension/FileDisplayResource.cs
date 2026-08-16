@@ -15,11 +15,37 @@ using System.Collections.Immutable;
 using System.Net.Mime;
 using System.Reflection;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 namespace AspireFileDisplayExtension;
-record FileToDisplay(string relativePath)
+record FileToDisplay
 {
+    public FileToDisplay(string relativePath, params string[] lines)
+    {
+        this.relativePath = relativePath;
+        this.lines = lines;
+    }
+    public readonly string relativePath;
+    private readonly string[] lines;
+    public int[] indexFound=Array.Empty<int>();
     public string NameFile() => Path.GetFileName(relativePath);
+    private string? contentsCache = null;
+    public async Task<string> Contents()
+    {
+        if (contentsCache != null) return contentsCache;
+        contentsCache = await File.ReadAllTextAsync(relativePath);
+        
+        if (lines.Length > 0)
+        {
+            var linesIndex = 
+                contentsCache.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None)
+                .Select((linex,index)=>new KeyValuePair<int,string>(index,linex))
+                .ToArray() ;
 
+            indexFound = lines.Select(it=> linesIndex.FirstOrDefault(li=>li.Value.Contains(it,StringComparison.InvariantCultureIgnoreCase)).Key ).ToArray();    
+
+        }
+        return contentsCache;
+    }
     public string ReadContent() =>
         File.Exists(relativePath) ? File.ReadAllText(relativePath) : $"// File not found: {relativePath}";
 
@@ -35,14 +61,14 @@ public class FileDisplayResource(string name):Resource(name),IResourceWithEndpoi
 {
     internal static List<FileToDisplay> files= new ();
     internal static int port;
-    public string AddFile(string relativePath)
+    public string AddFile(string relativePath, params string[] lines)
     {
         var extension = Path.GetExtension(relativePath);
         if (!Monaco.MonacoLanguageExtensions.TryGetFromExtension(extension, out _))
         {
             throw new ArgumentOutOfRangeException(relativePath,new object[] { extension },$"Cannot find extension {extension}");
         }
-        files.Add(new FileToDisplay(relativePath));
+        files.Add(new FileToDisplay(relativePath, lines));
         return relativePath;
         
     }

@@ -1,28 +1,44 @@
 @inherits RazorBlade.PlainTextTemplate<AspireFileDisplayExtension.FileToDisplay>
 @using System.Text.Json
+@{
+    var contents=await Model.Contents();
+    bool hasLines=Model.indexFound.Length > 0;
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Monaco Viewer - @Model.NameFile()</title>
+<title>@Model.NameFile()</title>
 <style>
   html, body { margin: 0; padding: 0; height: 100%; }
   #container { width: 100%; height: 100vh; }
+
+  /* Bigger font for specific decorated lines */
+  .big-line {
+    font-style: italic !important;
+    text-decoration: underline;
+    text-decoration-color: red;
+    text-decoration-thickness: 2px;
+  }
+  .big-line-margin {
+    background: rgba(255, 215, 0, 0.15);
+  }
 </style>
+
 </head>
 <body>
-This is the file @Model.NameFile() with the language @Model.MonacoLanguageId()
+This is the file @Model.NameFile() 
  <div id="container"></div>
 
 <script src="/vs/loader.js"></script>
 <script>
   require.config({ paths: { vs: '/vs' } });
 
-  const fileContent = @(JsonSerializer.Serialize(Model.ReadContent()));
+  const fileContent = @(JsonSerializer.Serialize(contents));
   const languageId  = @(JsonSerializer.Serialize(Model.MonacoLanguageId()));
 
   require(['vs/editor/editor.main'], function () {
-    monaco.editor.create(document.getElementById('container'), {
+    const editor = monaco.editor.create(document.getElementById('container'), {
       value: fileContent,
       language: languageId,
       theme: 'vs-dark',
@@ -34,7 +50,31 @@ This is the file @Model.NameFile() with the language @Model.MonacoLanguageId()
       bracketPairColorization: { enabled: true },
       links: true
     });
-  });
+@{
+    if(hasLines){
+    <text>
+        editor.createDecorationsCollection([
+    
+@foreach (var index in Model.indexFound){
+    <text>
+    {
+        range: new monaco.Range(@(index + 1), 1, @(index + 1), 100),
+        options: {
+          isWholeLine: true,
+          inlineClassName: 'big-line',
+          marginClassName: 'big-line-margin'
+        }//options
+      },
+    </text>
+}//end of foreach
+
+    ]);//editor.createDecorationsCollection
+    </text>
+    }//has lines
+}//end of code block
+  });//require
+
+
 </script>
 </body>
 </html>

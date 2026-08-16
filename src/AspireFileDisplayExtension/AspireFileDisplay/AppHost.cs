@@ -2,5 +2,5 @@ using AspireFileDisplayExtension;
 
 var builder = DistributedApplication.CreateBuilder(args);
 var resDisplayFiles = builder.CreateFileDisplay(port: 55987);
-resDisplayFiles.AddFile(relativePath: "AppHost.cs");
+resDisplayFiles.AddFile(relativePath: "AppHost.cs", lines: ["resDisplayFiles.AddFile"]);
 builder.Build().Run();
