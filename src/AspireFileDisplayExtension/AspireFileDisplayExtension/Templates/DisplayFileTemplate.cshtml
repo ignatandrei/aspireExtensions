@@ -21,9 +21,9 @@
   This is the code from the C# file:
 <div id="container"></div>
 
-<script src="/vs0.55.1/loader.js"></script>
+<script src="/vs/loader.js"></script>
 <script>
-  require.config({ paths: { vs: '/vs0.55.1/' } });
+  require.config({ paths: { vs: '/vs' } });
 
   const csharpCode = `using System;
 
@@ -48,7 +48,7 @@ namespace HelloWorld
 }
 `;
 
-  require(['vs/editor/editor.main'], function () {
+  require(['/vs/editor/editor.main'], function () {
     const editor = monaco.editor.create(document.getElementById('container'), {
       value: csharpCode,
       language: 'csharp',

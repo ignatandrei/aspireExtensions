@@ -95,8 +95,17 @@ public class AspireFileDisplaySubscriber : IDistributedApplicationEventingSubscr
             app.MapGet("/", () => new HtmlResult(result));
             app.UseStaticFiles(new StaticFileOptions
             {
-                FileProvider = new EmbeddedFileProvider(Assembly.GetCallingAssembly(), "vs0.55.1"),
-                RequestPath = "/vs0.55.1"
+                // Resource names are forced via <LogicalName> in the .csproj to be the
+                // exact relative path with '\' replaced by '.' (e.g. "vs.loader.js").
+                // EmbeddedFileProvider builds the lookup key as baseNamespace + subpath
+                // with '/' replaced by '.', so we pass an empty base namespace and let
+                // the RequestPath contribute the "vs" segment.
+                // NOTE: GetCallingAssembly() would return Aspire.Hosting here because
+                // this runs inside an eventing callback — use the extension assembly.
+                FileProvider = new EmbeddedFileProvider(
+                    typeof(FileDisplayResource).Assembly,
+                    baseNamespace: "vs"),
+                RequestPath = "/vs"
             });
             app.MapGet("/files/{nameFile}", async ([FromRoute]string nameFile) =>
             {
