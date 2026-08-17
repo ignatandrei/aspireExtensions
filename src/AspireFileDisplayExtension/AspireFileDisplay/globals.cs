@@ -1,0 +1,3 @@
+﻿global using AspireFileDisplayExtension;
+global using AspireResourceExtensionsAspire;
+global using JavaScriptExtensionsAspire;

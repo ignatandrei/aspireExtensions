@@ -417,3 +417,5 @@ FodyWeavers.xsd
 *.msm
 *.msp
 *.webm
+/src/AspireFileDisplayExtension/tests/playwright-report
+/src/AspireFileDisplayExtension/tests/test-results

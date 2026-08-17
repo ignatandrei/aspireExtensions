@@ -12,7 +12,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-    <ProjectReference Include="..\AspireFileDisplayExtension\AspireFileDisplayExtension.csproj" IsAspireProjectResource="false" />
-  </ItemGroup>
+		<PackageReference Include="AspireExtensionsResource" Version="130.2025.1121.547" />
+		<PackageReference Include="PortExtensionsAspire" Version="134.2026.809.1615" />
+
+		<ProjectReference Include="..\AspireFileDisplayExtension\AspireFileDisplayExtension.csproj" IsAspireProjectResource="false" />
+<PackageReference Include="JavaScriptExtensionsAspire" Version="131.2026.117.2000" />
+
+	</ItemGroup>
 
 </Project>
