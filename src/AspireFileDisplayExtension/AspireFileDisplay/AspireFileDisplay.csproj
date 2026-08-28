@@ -14,6 +14,12 @@
 	<ItemGroup>
 		<PackageReference Include="AspireExtensionsResource" Version="130.2025.1121.547" />
 		<PackageReference Include="PortExtensionsAspire" Version="134.2026.809.1615" />
+		<PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.4.6" />
+		<PackageReference Include="Aspire.Hosting.SqlServer" Version="13.4.6" />
+		<PackageReference Include="CommunityToolkit.Aspire.Hosting.SqlServer.Extensions" Version="13.4.1-beta.676" />
+		<PackageReference Include="Aspire.Hosting.MongoDB" Version="13.4.6" />
+		<PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" Version="13.4.0" />
+
 
 		<ProjectReference Include="..\AspireFileDisplayExtension\AspireFileDisplayExtension.csproj" IsAspireProjectResource="false" />
 <PackageReference Include="JavaScriptExtensionsAspire" Version="131.2026.117.2000" />

@@ -3,6 +3,7 @@
 @{
     var contents=await Model.Contents();
     bool hasLines=Model.indexFound.Length > 0;
+    var minLineNumber = Model.MinLine();
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -53,7 +54,8 @@ This is the file @Model.NameFile()
 @{
     if(hasLines){
     <text>
-        editor.createDecorationsCollection([
+    editor.revealLineInCenter(@(minLineNumber + 1));     
+   editor.createDecorationsCollection([
     
 @foreach (var index in Model.indexFound){
     <text>

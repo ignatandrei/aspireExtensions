@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<!-- NuGet package metadata -->
 		<PackageId>AspireFileDisplayExtension</PackageId>
-		<Version>134.2026.816.1615</Version>
+		<Version>134.2026.828.1615</Version>
 		<Authors>Ignat Andrei</Authors>
 		<Company>AOM</Company>
 		<RepositoryType>git</RepositoryType>

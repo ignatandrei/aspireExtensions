@@ -19,15 +19,17 @@ using static System.Net.Mime.MediaTypeNames;
 namespace AspireFileDisplayExtension;
 record FileToDisplay
 {
-    public FileToDisplay(string relativePath, params string[] lines)
+    public FileToDisplay(string relativePath,string name, params string[] lines)
     {
         this.relativePath = relativePath;
+        this.name = name;
         this.lines = lines;
     }
     public readonly string relativePath;
+    private readonly string name;
     private readonly string[] lines;
     public int[] indexFound=Array.Empty<int>();
-    public string NameFile() => Path.GetFileName(relativePath);
+    public string NameFile() => name;
     private string? contentsCache = null;
     public async Task<string> Contents()
     {
@@ -46,7 +48,8 @@ record FileToDisplay
         }
         return contentsCache;
     }
-
+    public int MinLine() => indexFound.Length > 0 ? indexFound.Min() : -1;
+    public int MaxLine() => indexFound.Length > 0 ? indexFound.Max() : -1;
     public string MonacoLanguageId()
     {
         var ext = Path.GetExtension(relativePath);
@@ -59,14 +62,18 @@ public class FileDisplayResource(string name):Resource(name),IResourceWithEndpoi
 {
     internal static List<FileToDisplay> files= new ();
     internal static int port;
-    public string AddFile(string relativePath, params string[] lines)
+    public string AddFile(string relativePath,string? name=null, params string[] lines)
     {
+        if(string.IsNullOrWhiteSpace(name))
+        {
+            name = Path.GetFileName(relativePath);
+        }
         var extension = Path.GetExtension(relativePath);
         if (!Monaco.MonacoLanguageExtensions.TryGetFromExtension(extension, out _))
         {
             throw new ArgumentOutOfRangeException(relativePath,new object[] { extension },$"Cannot find extension {extension}");
         }
-        files.Add(new FileToDisplay(relativePath, lines));
+        files.Add(new FileToDisplay(relativePath, name, lines));
         return relativePath;
         
     }

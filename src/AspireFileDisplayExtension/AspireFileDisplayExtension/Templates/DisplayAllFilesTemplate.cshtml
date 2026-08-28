@@ -8,7 +8,7 @@ Those are the files to display:
 @foreach (var file in Model.AllFiles)
 {
     <li>
-    <a href="/files/@(file.NameFile())" target="_blank">@file.relativePath</a>
+    <a href="/files/@(file.NameFile())" target="_blank">@file.NameFile()</a>
     </li>
 }
 </ol>
