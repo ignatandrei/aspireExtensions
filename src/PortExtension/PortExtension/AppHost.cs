@@ -5,6 +5,7 @@ using PortExtensionAspire;
 var builder = DistributedApplication.CreateBuilder(args);
 var ports = builder.AddPort()
     .WithDeterministicPortEnvironment("sqliteweb", "mongodb")
+    .WithDeterministicPortEnvironment("andrei", 12345)
     .Construct();
 
 

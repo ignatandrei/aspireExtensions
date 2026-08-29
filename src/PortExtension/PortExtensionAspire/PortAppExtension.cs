@@ -37,6 +37,12 @@ public static class PortAppExtension
         return builder.WithInitialState(state);
     }
     public static IResourceBuilder<PortResource> WithDeterministicPortEnvironment(
+        this IResourceBuilder<PortResource> builder, string name,UInt16 port)
+    {
+        builder.Resource.SetDeterministicPort(name, port);        
+        return builder;
+    }
+    public static IResourceBuilder<PortResource> WithDeterministicPortEnvironment(
         this IResourceBuilder<PortResource> builder, params string[] names)
     {
         foreach (var name in names)

@@ -21,8 +21,18 @@ public class PortResource() : Resource("PortResource")
             return (UInt16)existing!;
         }
         var deterministicPort = mSPC.GetDeterministicPort(name);
-        Parameters[name] = deterministicPort;
-        return deterministicPort;
+        return SetDeterministicPort(name, deterministicPort);
+    }
+    public UInt16 SetDeterministicPort(string name, UInt16 port)
+    {
+        if (Parameters.TryGetValue(name, out var existing))
+        {
+            
+            throw new InvalidOperationException($"Port for {name} is already set to {existing}, cannot set to {port}");
+        }
+
+        Parameters[name] = port;
+        return port;
     }
     internal EnvironmentVariableSnapshot[] environmentVariables()
     {

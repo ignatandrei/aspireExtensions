@@ -13,6 +13,7 @@ A .NET Aspire extension that assigns deterministic (repeatable) ports to named r
 ## Features
 - Computes a deterministic port for a given name (and optional tag) so the same name always maps to the same port across runs
 - Registers the computed ports on a dedicated `PortResource` so they are visible in the Aspire dashboard as environment variables
+- If you need, it just add a new deterministic port with a name and value, and it will be registered in the `PortResource` for you
 - Injects the registered ports (`PORT_{name}`) into any other resource via `WithPortReference`
 
 ## Requirements

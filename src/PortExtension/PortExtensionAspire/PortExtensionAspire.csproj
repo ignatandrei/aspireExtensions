@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<!-- NuGet package metadata -->
 		<PackageId>PortExtensionsAspire</PackageId>
-		<Version>134.2026.809.1615</Version>
+		<Version>134.2026.829.1515</Version>
 		<Authors>Ignat Andrei</Authors>
 		<Company>AOM</Company>
 		<RepositoryType>git</RepositoryType>
@@ -38,7 +38,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.301" PrivateAssets="All" />
-		<PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" Version="13.4.0" />
+		<PackageReference Include="Aspire.Hosting" Version="13.4.6" />
 	</ItemGroup>
 
 </Project>
